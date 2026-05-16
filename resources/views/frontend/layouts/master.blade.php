@@ -174,10 +174,12 @@
                 let form = $(this);
                 let formData = form.serialize();
                 
-                // If quantity exists in form as 'count', we might want to map it to 'qty'
-                // though the controller handles both or defaults.
-                
-                cartAjax(form.attr('action'), formData).done(updateMiniCart);
+                cartAjax(form.attr('action'), formData).done(function(res) {
+                    updateMiniCart(res);
+                    if (res.redirect) {
+                        window.location.href = res.redirect;
+                    }
+                });
             });
 
             // REMOVE ITEM

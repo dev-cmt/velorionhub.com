@@ -152,7 +152,7 @@ class CartController extends Controller
                 return response()->json(['success' => false, 'message' => 'Product ID is required'], 400);
             }
 
-            $product = Product::find($productId);
+            $product = Product::with('variants.variantItems.attribute', 'variants.variantItems.attributeItem')->find($productId);
             if (!$product) {
                 return response()->json(['success' => false, 'message' => 'Product not found'], 404);
             }
@@ -161,6 +161,26 @@ class CartController extends Controller
             $price = $request->price ?? $product->sale_price;
             $image = $request->image ?? ($product->main_image ? asset($product->main_image) : asset('images/no-image.jpg'));
             $url   = $request->url ?? route('product.show', $product->slug);
+            $variantId = null;
+
+            // Handle Variants if submitted via attributes array
+            if ($request->has('attributes') && is_array($request->attributes)) {
+                $selectedAttrIds = array_values($request->attributes);
+                sort($selectedAttrIds);
+                $selectedVariantKey = implode('-', $selectedAttrIds);
+
+                foreach ($product->variants as $variant) {
+                    $variantAttrIds = $variant->variantItems->pluck('attribute_item_id')->toArray();
+                    sort($variantAttrIds);
+                    if (implode('-', $variantAttrIds) === $selectedVariantKey) {
+                        $variantId = $variant->id;
+                        $price = $variant->sale_price;
+                        // Use variant sku as ID if needed for uniqueness in cart
+                        $productId = 'v' . $variant->id; 
+                        break;
+                    }
+                }
+            }
 
             $this->cart()->add([
                 'id' => $productId,
@@ -170,12 +190,18 @@ class CartController extends Controller
                 'attributes' => [
                     'image' => $image,
                     'url' => $url,
+                    'variant_id' => $variantId,
                 ]
             ]);
 
             $response = $this->mini()->getData(true);
             $response['success'] = true;
             $response['message'] = 'Product added to cart successfully!';
+            
+            if ($request->has('redirect')) {
+                $response['redirect'] = $request->redirect;
+            }
+
             return response()->json($response);
 
         } catch (\Exception $e) {
