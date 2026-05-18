@@ -1,453 +1,236 @@
 <!-- mobile-menu -->
-<div class="mobile-menu">
-    <div class="mobile-menu__backdrop"></div>
-    <div class="mobile-menu__body">
-        <button class="mobile-menu__close" type="button"><svg width="12" height="12">
-                <path d="M10.8,10.8L10.8,10.8c-0.4,0.4-1,0.4-1.4,0L6,7.4l-3.4,3.4c-0.4,0.4-1,0.4-1.4,0l0,0c-0.4-0.4-0.4-1,0-1.4L4.6,6L1.2,2.6
-c-0.4-0.4-0.4-1,0-1.4l0,0c0.4-0.4,1-0.4,1.4,0L6,4.6l3.4-3.4c0.4-0.4,1-0.4,1.4,0l0,0c0.4,0.4,0.4,1,0,1.4L7.4,6l3.4,3.4
-C11.2,9.8,11.2,10.4,10.8,10.8z" />
-            </svg>
-        </button>
-        <div class="mobile-menu__panel">
-            <div class="mobile-menu__panel-header">
-                <div class="mobile-menu__panel-title">Menu</div>
-            </div>
-            <div class="mobile-menu__panel-body">
-
-                <div class="mobile-menu__divider"></div>
-                <div class="mobile-menu__indicators">
-                    <a class="mobile-menu__indicator" href="#">
-                        <span class="mobile-menu__indicator-icon">
-                            <svg width="20" height="20">
-                                <path d="M14,3c2.2,0,4,1.8,4,4c0,4-5.2,10-8,10S2,11,2,7c0-2.2,1.8-4,4-4c1,0,1.9,0.4,2.7,1L10,5.2L11.3,4C12.1,3.4,13,3,14,3 M14,1
-c-1.5,0-2.9,0.6-4,1.5C8.9,1.6,7.5,1,6,1C2.7,1,0,3.7,0,7c0,5,6,12,10,12s10-7,10-12C20,3.7,17.3,1,14,1L14,1z" />
-                            </svg>
-                        </span>
-                        <span class="mobile-menu__indicator-title">Wishlist</span>
-                    </a>
-
-                    <a class="mobile-menu__indicator" href="#">
-                        <span class="mobile-menu__indicator-icon">
-                            <svg width="20" height="20">
-                                <circle cx="7" cy="17" r="2" />
-                                <circle cx="15" cy="17" r="2" />
-                                <path d="M20,4.4V5l-1.8,6.3c-0.1,0.4-0.5,0.7-1,0.7H6.7c-0.4,0-0.8-0.3-1-0.7L3.3,3.9C3.1,3.3,2.6,3,2.1,3H0.4C0.2,3,0,2.8,0,2.6
-V1.4C0,1.2,0.2,1,0.4,1h2.5c1,0,1.8,0.6,2.1,1.6L5.1,3l2.3,6.8c0,0.1,0.2,0.2,0.3,0.2h8.6c0.1,0,0.3-0.1,0.3-0.2l1.3-4.4
-C17.9,5.2,17.7,5,17.5,5H9.4C9.2,5,9,4.8,9,4.6V3.4C9,3.2,9.2,3,9.4,3h9.2C19.4,3,20,3.6,20,4.4z" />
-                            </svg>
-                            <span class="mobile-menu__indicator-counter ms2_total_count">0</span>
-                        </span>
-                        <span class="mobile-menu__indicator-title">Cart</span>
-
-                    </a>
-
-                </div>
-                <div class="mobile-menu__divider"></div>
-                <ul class="mobile-menu__links">
-                    <li data-mobile-menu-item>
-                        <a href="#" class="" data-mobile-menu-trigger>
-                            Home
-                        </a>
-                    </li>
-                    <li data-mobile-menu-item>
-                        <a href="#" class="" data-mobile-menu-trigger>
-                            Blog
-                            <svg width="7" height="11">
-                                <path d="M0.3,10.7L0.3,10.7c0.4,0.4,0.9,0.4,1.3,0L7,5.5L1.6,0.3C1.2-0.1,0.7,0,0.3,0.3l0,0c-0.4,0.4-0.4,1,0,1.3l4,3.9l-4,3.9
-    C-0.1,9.8-0.1,10.4,0.3,10.7z" />
-                            </svg>
-                        </a>
-                        <div class="mobile-menu__links-panel" data-mobile-menu-panel>
-                            <div class="mobile-menu__panel mobile-menu__panel--hidden">
-                                <div class="mobile-menu__panel-header">
-                                    <button class="mobile-menu__panel-back" type="button">
-                                        <svg width="7" height="11">
-                                            <path
-                                                d="M6.7,0.3L6.7,0.3c-0.4-0.4-0.9-0.4-1.3,0L0,5.5l5.4,5.2c0.4,0.4,0.9,0.3,1.3,0l0,0c0.4-0.4,0.4-1,0-1.3l-4-3.9l4-3.9C7.1,1.2,7.1,0.6,6.7,0.3z" />
-                                        </svg>
-                                    </button>
-                                    <div class="mobile-menu__panel-title">Home</div>
-                                </div>
-                                <div class="mobile-menu__panel-body">
-                                    <ul class="mobile-menu__links">
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Logic Is The Study Of Reasoning And Argument Part 2
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Some Philosophers Specialize In One Or More Historical Periods
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                A Variety Of Other Academic And Non-Academic Approaches Have Been
-                                                Explored
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Germany Was The First Country To Professionalize Philosophy
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Logic Is The Study Of Reasoning And Argument Part 1
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Many Inquiries Outside Of Academia Are Philosophical In The Broad
-                                                Sense
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                An Advantage Of Digital Circuits When Compared To Analog Circuits
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Engineers Use Many Methods To Minimize Logic Functions
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#"
-                                                class="" data-mobile-menu-trigger>
-                                                Philosophy That Addresses Topics Such As Goodness
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li data-mobile-menu-item>
-                        <a href="#" class="" data-mobile-menu-trigger>
-                            Catalog
-                            <svg width="7" height="11">
-                                <path d="M0.3,10.7L0.3,10.7c0.4,0.4,0.9,0.4,1.3,0L7,5.5L1.6,0.3C1.2-0.1,0.7,0,0.3,0.3l0,0c-0.4,0.4-0.4,1,0,1.3l4,3.9l-4,3.9
-    C-0.1,9.8-0.1,10.4,0.3,10.7z" />
-                            </svg>
-                        </a>
-                        <div class="mobile-menu__links-panel" data-mobile-menu-panel>
-                            <div class="mobile-menu__panel mobile-menu__panel--hidden">
-                                <div class="mobile-menu__panel-header">
-                                    <button class="mobile-menu__panel-back" type="button">
-                                        <svg width="7" height="11">
-                                            <path
-                                                d="M6.7,0.3L6.7,0.3c-0.4-0.4-0.9-0.4-1.3,0L0,5.5l5.4,5.2c0.4,0.4,0.9,0.3,1.3,0l0,0c0.4-0.4,0.4-1,0-1.3l-4-3.9l4-3.9C7.1,1.2,7.1,0.6,6.7,0.3z" />
-                                        </svg>
-                                    </button>
-                                    <div class="mobile-menu__panel-title">Home</div>
-                                </div>
-                                <div class="mobile-menu__panel-body">
-                                    <ul class="mobile-menu__links">
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class=""
-                                                data-mobile-menu-trigger>
-                                                Headlights & Lighting
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class=""
-                                                data-mobile-menu-trigger>
-                                                Fuel System & Filters
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Body Parts & Mirrors
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Interior Accessories
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Tires & Wheels
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Engine & Drivetrain
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Oils & Lubricants
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Tools & Garage
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li data-mobile-menu-item>
-                        <a href="#" class="" data-mobile-menu-trigger>
-                            Pages
-                            <svg width="7" height="11">
-                                <path d="M0.3,10.7L0.3,10.7c0.4,0.4,0.9,0.4,1.3,0L7,5.5L1.6,0.3C1.2-0.1,0.7,0,0.3,0.3l0,0c-0.4,0.4-0.4,1,0,1.3l4,3.9l-4,3.9
-    C-0.1,9.8-0.1,10.4,0.3,10.7z" />
-                            </svg>
-                        </a>
-                        <div class="mobile-menu__links-panel" data-mobile-menu-panel>
-                            <div class="mobile-menu__panel mobile-menu__panel--hidden">
-                                <div class="mobile-menu__panel-header">
-                                    <button class="mobile-menu__panel-back" type="button">
-                                        <svg width="7" height="11">
-                                            <path
-                                                d="M6.7,0.3L6.7,0.3c-0.4-0.4-0.9-0.4-1.3,0L0,5.5l5.4,5.2c0.4,0.4,0.9,0.3,1.3,0l0,0c0.4-0.4,0.4-1,0-1.3l-4-3.9l4-3.9C7.1,1.2,7.1,0.6,6.7,0.3z" />
-                                        </svg>
-                                    </button>
-                                    <div class="mobile-menu__panel-title">Home</div>
-                                </div>
-                                <div class="mobile-menu__panel-body">
-                                    <ul class="mobile-menu__links">
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Components
-                                            </a>
-                                        </li>
-                                        <li data-mobile-menu-item>
-                                            <a href="#" class="" data-mobile-menu-trigger>
-                                                Typography
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <div class="mobile-menu__spring"></div>
-                <div class="mobile-menu__divider"></div>
-                <a class="mobile-menu__contacts" href="#">
-                    <div class="mobile-menu__contacts-subtitle">Free call 24/7</div>
-                    <div class="mobile-menu__contacts-title">800 060-0730</div>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- mobile-menu / end -->
 <!-- quickview-modal -->
-<div id="quickview-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+<div id="quickview-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="quickview modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <button type="button" class="quickview__close" data-dismiss="modal" aria-label="Close">
+                <svg width="12" height="12">
+                    <path d="M10.8,10.8L10.8,10.8c-0.4,0.4-1,0.4-1.4,0L6,7.4l-3.4,3.4c-0.4,0.4-1,0.4-1.4,0l0,0c-0.4-0.4-0.4-1,0-1.4L4.6,6L1.2,2.6
+	c-0.4-0.4-0.4-1,0-1.4l0,0c0.4-0.4,1-0.4,1.4,0L6,4.6l3.4-3.4c0.4-0.4,1-0.4,1.4,0l0,0c0.4,0.4,0.4,1,0,1.4L7.4,6l3.4,3.4
+	C11.2,9.8,11.2,10.4,10.8,10.8z"></path>
+                </svg>
+            </button>
+            <div class="quickview__body-wrapper">
+                <div class="quickview__body">
+                    <div class="quickview-loading-spinner" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; gap: 18px; width: 100%; color: #6b7280;">
+                        <div style="width: 44px; height: 44px; border: 3.5px solid #f3f4f6; border-top: 3.5px solid var(--primary-green); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                        <span style="font-family: 'Outfit', sans-serif; font-size: 14.5px; font-weight: 550; letter-spacing: 0.3px;">Fetching product info...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('css')
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .quickview-loading-spinner {
+        display: flex !important;
+    }
+</style>
+@endpush
+
+@push('js')
+<script>
+    // AJAX Dynamic Quick View Scraper (Global)
+    function ajaxOpenQuickView(productUrl) {
+        const modal = $('#quickview-modal');
+        if (!modal.length) return;
+        
+        // Show loading spinner inside standard theme structure
+        modal.find('.quickview__body-wrapper').html(`
+            <div class="quickview__body">
+                <div class="quickview-loading-spinner" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; gap: 18px; width: 100%; color: #6b7280;">
+                    <div style="width: 44px; height: 44px; border: 3.5px solid #f3f4f6; border-top: 3.5px solid var(--primary-green); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                    <span style="font-family: 'Outfit', sans-serif; font-size: 14.5px; font-weight: 550; letter-spacing: 0.3px;">Fetching product info...</span>
+                </div>
+            </div>
+        `);
+        modal.modal('show');
+        
+        $.get(productUrl)
+        .done(function(html) {
+            const doc = $(html);
+            const title = doc.find('.product__title').text().trim();
+            const ratingHtml = doc.find('.product__rating').html() || '';
+            const description = doc.find('.product__excerpt').html() || doc.find('.product__description').html() || '';
+            const pricesHtml = doc.find('.product__prices').html();
+            const stockHtml = doc.find('.product__prices-stock .status-badge').prop('outerHTML') || '';
+            const metaHtml = doc.find('.product__meta table tbody').html() || '';
+            const formBodyHtml = doc.find('.product-form__body').html();
+            const productId = doc.find('input[name="id"]').val() || '';
+            const seeDetailsUrl = productUrl;
+            
+            // Gather gallery images
+            let galleryFeaturedHtml = '';
+            let galleryThumbnailsHtml = '';
+            
+            const galleryFeaturedItems = doc.find('.product-gallery__featured .owl-item a, .product-gallery__featured a');
+            if (galleryFeaturedItems.length > 0) {
+                galleryFeaturedItems.each(function() {
+                    const href = $(this).attr('href');
+                    const img = $(this).find('img');
+                    const src = img.attr('src') || href;
+                    
+                    galleryFeaturedHtml += `
+                        <a class="image image--type--product" href="${href}" target="_blank">
+                            <div class="image__body">
+                                <img class="image__tag" src="${src}" alt="${title}">
+                            </div>
+                        </a>
+                    `;
+                });
+                
+                const galleryThumbItems = doc.find('.product-gallery__thumbnails .owl-item .product-gallery__thumbnails-item, .product-gallery__thumbnails .product-gallery__thumbnails-item');
+                galleryThumbItems.each(function() {
+                    const img = $(this).find('img');
+                    const src = img.attr('src');
+                    const isActive = $(this).hasClass('product-gallery__thumbnails-item--active');
+                    
+                    galleryThumbnailsHtml += `
+                        <div class="product-gallery__thumbnails-item image image--type--product ${isActive ? 'product-gallery__thumbnails-item--active' : ''}">
+                            <div class="image__body">
+                                <img class="image__tag" src="${src}" alt="${title}">
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                const mainImg = doc.find('.product-image-link img, .primary-img').first().attr('src') || '{{ asset("images/no-image.jpg") }}';
+                galleryFeaturedHtml = `
+                    <a class="image image--type--product" href="${mainImg}" target="_blank">
+                        <div class="image__body">
+                            <img class="image__tag" src="${mainImg}" alt="${title}">
+                        </div>
+                    </a>
+                `;
+                
+                galleryThumbnailsHtml = `
+                    <div class="product-gallery__thumbnails-item image image--type--product product-gallery__thumbnails-item--active">
+                        <div class="image__body">
+                            <img class="image__tag" src="${mainImg}" alt="${title}">
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Construct dynamic split layout identical to theme markup
+            const newHtml = `
+                <div class="quickview__body">
+                    <!-- Left Gallery -->
+                    <div class="product-gallery product-gallery--layout--quickview quickview__gallery" data-layout="quickview">
+                        <div class="product-gallery__featured">
+                            <button type="button" class="product-gallery__zoom">
+                                <svg width="24" height="24">
+                                    <path d="M15,18c-2,0-3.8-0.6-5.2-1.7c-1,1.3-2.1,2.8-3.5,4.6c-2.2,2.8-3.4,1.9-3.4,1.9s-0.6-0.3-1.1-0.7c-0.4-0.4-0.7-1-0.7-1s-0.9-1.2,1.9-3.3c1.8-1.4,3.3-2.5,4.6-3.5C6.6,12.8,6,11,6,9c0-5,4-9,9-9s9,4,9,9S20,18,15,18z M15,2c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S18.9,2,15,2z M16,13h-2v-3h-3V8h3V5h2v3h3v2h-3V13z" />
+                                </svg>
+                            </button>
+                            <div class="owl-carousel">
+                                ${galleryFeaturedHtml}
+                            </div>
+                        </div>
+                        <div class="product-gallery__thumbnails">
+                            <div class="owl-carousel">
+                                ${galleryThumbnailsHtml}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Product Info -->
+                    <div class="quickview__product">
+                        <div class="quickview__product-name">${title}</div>
+                        <div class="quickview__product-rating" style="${ratingHtml ? '' : 'display: none;'}">
+                            <div class="quickview__product-rating-stars">
+                                <div class="rating">
+                                    <div class="rating__body">
+                                        ${ratingHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quickview__product-meta">
+                            <table>
+                                <tbody>
+                                    ${metaHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="quickview__product-description">
+                            ${description}
+                        </div>
+                        <div class="quickview__product-prices-stock">
+                            <div class="quickview__product-prices">
+                                ${pricesHtml}
+                            </div>
+                            ${stockHtml}
+                        </div>
+                        
+                        <!-- Form for variants -->
+                        <form class="product-form quickview__product-form ms2_form" action="{{ route('cart.add') }}" method="POST">
+                            <input type="hidden" name="id" value="${productId}"/>
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
+                            <div class="product-form__body">
+                                ${formBodyHtml || ''}
+                            </div>
+                        </form>
+                        
+                        <!-- Dynamic Actions -->
+                        <div class="quickview__product-actions">
+                            <div class="quickview__product-actions-item quickview__product-actions-item--quantity">
+                                <div class="input-number">
+                                    <input class="input-number__input form-control quantity" type="number" name="count" min="1" value="1">
+                                    <div class="input-number__add"></div>
+                                    <div class="input-number__sub"></div>
+                                </div>
+                            </div>
+                            <div class="quickview__product-actions-item quickview__product-actions-item--addtocart">
+                                <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="${seeDetailsUrl}" class="quickview__see-details">See full details</a>
+            `;
+            
+            // Inject rebuilt layout structure
+            modal.find('.quickview__body-wrapper').html(newHtml);
+            
+            // Re-bind quantity click buttons in injected container (using built-in helper if available)
+            if ($.fn.customNumber) {
+                modal.find('.input-number').customNumber();
+            } else {
+                modal.find('.input-number').each(function() {
+                    const container = $(this);
+                    const input = container.find('input');
+                    const add = container.find('.input-number__add');
+                    const sub = container.find('.input-number__sub');
+                    
+                    add.off('click').on('click', function() {
+                        input.val(parseInt(input.val() || 1) + 1).trigger('change');
+                    });
+                    sub.off('click').on('click', function() {
+                        const val = parseInt(input.val() || 1) - 1;
+                        if (val >= 1) input.val(val).trigger('change');
+                    });
+                });
+            }
+            
+            // Trigger the native shown.bs.modal event so the main.js closure script initializes the gallery and inputs perfectly!
+            modal.trigger('shown.bs.modal');
+        })
+        .fail(function() {
+            modal.find('.quickview__body-wrapper').html(`
+                <div class="quickview__body">
+                    <div style="text-align: center; color: #ef4444; font-weight: 600; padding: 40px 0; width: 100%;">Unable to open Quick View. Please try again.</div>
+                </div>
+            `);
+        });
+    }
+</script>
+@endpush
 <!-- quickview-modal / end -->
-<!-- add-vehicle-modal -->
-<div id="add-vehicle-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="vehicle-picker-modal modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <button type="button" class="vehicle-picker-modal__close"><svg width="12" height="12">
-                    <path d="M10.8,10.8L10.8,10.8c-0.4,0.4-1,0.4-1.4,0L6,7.4l-3.4,3.4c-0.4,0.4-1,0.4-1.4,0l0,0c-0.4-0.4-0.4-1,0-1.4L4.6,6L1.2,2.6
-c-0.4-0.4-0.4-1,0-1.4l0,0c0.4-0.4,1-0.4,1.4,0L6,4.6l3.4-3.4c0.4-0.4,1-0.4,1.4,0l0,0c0.4,0.4,0.4,1,0,1.4L7.4,6l3.4,3.4
-C11.2,9.8,11.2,10.4,10.8,10.8z" />
-                </svg>
-            </button>
-            <div class="vehicle-picker-modal__panel vehicle-picker-modal__panel--active">
-                <div class="vehicle-picker-modal__title card-title">Add A Vehicle</div>
-                <div class="vehicle-form vehicle-form--layout--modal">
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Year">
-                            <option value="none">Select Year</option>
-                            <option>2010</option>
-                            <option>2011</option>
-                            <option>2012</option>
-                            <option>2013</option>
-                            <option>2014</option>
-                            <option>2015</option>
-                            <option>2016</option>
-                            <option>2017</option>
-                            <option>2018</option>
-                            <option>2019</option>
-                            <option>2020</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Brand" disabled>
-                            <option value="none">Select Brand</option>
-                            <option>Audi</option>
-                            <option>BMW</option>
-                            <option>Ferrari</option>
-                            <option>Ford</option>
-                            <option>KIA</option>
-                            <option>Nissan</option>
-                            <option>Tesla</option>
-                            <option>Toyota</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Model" disabled>
-                            <option value="none">Select Model</option>
-                            <option>Explorer</option>
-                            <option>Focus S</option>
-                            <option>Fusion SE</option>
-                            <option>Mustang</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Engine" disabled>
-                            <option value="none">Select Engine</option>
-                            <option>Gas 1.6L 125 hp AT/L4</option>
-                            <option>Diesel 2.5L 200 hp AT/L5</option>
-                            <option>Diesel 3.0L 250 hp MT/L5</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__divider">Or</div>
-                    <div class="vehicle-form__item">
-                        <input type="text" class="form-control" placeholder="Enter VIN number"
-                            aria-label="VIN number">
-                    </div>
-                </div>
-                <div class="vehicle-picker-modal__actions">
-                    <button type="button"
-                        class="btn btn-sm btn-secondary vehicle-picker-modal__close-button">Cancel</button>
-                    <button type="button" class="btn btn-sm btn-primary">Add A Vehicle</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- add-vehicle-modal / end -->
-<!-- vehicle-picker-modal -->
-<div id="vehicle-picker-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="vehicle-picker-modal modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <button type="button" class="vehicle-picker-modal__close"><svg width="12" height="12">
-                    <path d="M10.8,10.8L10.8,10.8c-0.4,0.4-1,0.4-1.4,0L6,7.4l-3.4,3.4c-0.4,0.4-1,0.4-1.4,0l0,0c-0.4-0.4-0.4-1,0-1.4L4.6,6L1.2,2.6
-c-0.4-0.4-0.4-1,0-1.4l0,0c0.4-0.4,1-0.4,1.4,0L6,4.6l3.4-3.4c0.4-0.4,1-0.4,1.4,0l0,0c0.4,0.4,0.4,1,0,1.4L7.4,6l3.4,3.4
-C11.2,9.8,11.2,10.4,10.8,10.8z" />
-                </svg>
-            </button>
-            <div class="vehicle-picker-modal__panel vehicle-picker-modal__panel--active" data-panel="list">
-                <div class="vehicle-picker-modal__title card-title">Select Vehicle</div>
-                <div class="vehicle-picker-modal__text">
-                    Select a vehicle to find exact fit parts
-                </div>
-                <div class="vehicles-list">
-                    <div class="vehicles-list__body">
-                        <label class="vehicles-list__item">
-                            <span class="vehicles-list__item-radio input-radio">
-                                <span class="input-radio__body">
-                                    <input class="input-radio__input" name="header-vehicle" type="radio">
-                                    <span class="input-radio__circle"></span>
-                                </span>
-                            </span>
-                            <span class="vehicles-list__item-info">
-                                <span class="vehicles-list__item-name">2011 Ford Focus S</span>
-                                <span class="vehicles-list__item-details">Engine 2.0L 1742DA L4 FI Turbo</span>
-                            </span>
-                            <button type="button" class="vehicles-list__item-remove">
-                                <svg width="16" height="16">
-                                    <path
-                                        d="M2,4V2h3V1h6v1h3v2H2z M13,13c0,1.1-0.9,2-2,2H5c-1.1,0-2-0.9-2-2V5h10V13z" />
-                                </svg>
-                            </button>
-                        </label>
-                        <label class="vehicles-list__item">
-                            <span class="vehicles-list__item-radio input-radio">
-                                <span class="input-radio__body">
-                                    <input class="input-radio__input" name="header-vehicle" type="radio">
-                                    <span class="input-radio__circle"></span>
-                                </span>
-                            </span>
-                            <span class="vehicles-list__item-info">
-                                <span class="vehicles-list__item-name">2019 Audi Q7 Premium</span>
-                                <span class="vehicles-list__item-details">Engine 3.0L 5626CC L6 QK</span>
-                            </span>
-                            <button type="button" class="vehicles-list__item-remove">
-                                <svg width="16" height="16">
-                                    <path
-                                        d="M2,4V2h3V1h6v1h3v2H2z M13,13c0,1.1-0.9,2-2,2H5c-1.1,0-2-0.9-2-2V5h10V13z" />
-                                </svg>
-                            </button>
-                        </label>
-                    </div>
-                </div>
-                <div class="vehicle-picker-modal__actions">
-                    <button type="button"
-                        class="btn btn-sm btn-secondary vehicle-picker-modal__close-button">Cancel</button>
-                    <button type="button" class="btn btn-sm btn-primary" data-to-panel="form">Add A Vehicle</button>
-                </div>
-            </div>
-            <div class="vehicle-picker-modal__panel" data-panel="form">
-                <div class="vehicle-picker-modal__title card-title">Add A Vehicle</div>
-                <div class="vehicle-form vehicle-form--layout--modal">
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Year">
-                            <option value="none">Select Year</option>
-                            <option>2010</option>
-                            <option>2011</option>
-                            <option>2012</option>
-                            <option>2013</option>
-                            <option>2014</option>
-                            <option>2015</option>
-                            <option>2016</option>
-                            <option>2017</option>
-                            <option>2018</option>
-                            <option>2019</option>
-                            <option>2020</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Brand" disabled>
-                            <option value="none">Select Brand</option>
-                            <option>Audi</option>
-                            <option>BMW</option>
-                            <option>Ferrari</option>
-                            <option>Ford</option>
-                            <option>KIA</option>
-                            <option>Nissan</option>
-                            <option>Tesla</option>
-                            <option>Toyota</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Model" disabled>
-                            <option value="none">Select Model</option>
-                            <option>Explorer</option>
-                            <option>Focus S</option>
-                            <option>Fusion SE</option>
-                            <option>Mustang</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__item vehicle-form__item--select">
-                        <select class="form-control form-control-select2" aria-label="Engine" disabled>
-                            <option value="none">Select Engine</option>
-                            <option>Gas 1.6L 125 hp AT/L4</option>
-                            <option>Diesel 2.5L 200 hp AT/L5</option>
-                            <option>Diesel 3.0L 250 hp MT/L5</option>
-                        </select>
-                    </div>
-                    <div class="vehicle-form__divider">Or</div>
-                    <div class="vehicle-form__item">
-                        <input type="text" class="form-control" placeholder="Enter VIN number"
-                            aria-label="VIN number">
-                    </div>
-                </div>
-                <div class="vehicle-picker-modal__actions">
-                    <button type="button" class="btn btn-sm btn-secondary" data-to-panel="list">Back to
-                        list</button>
-                    <button type="button" class="btn btn-sm btn-primary">Add A Vehicle</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- vehicle-picker-modal / end -->

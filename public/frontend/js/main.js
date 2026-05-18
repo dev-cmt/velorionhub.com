@@ -658,7 +658,7 @@
     // Checkout payment methods
     */
     $(function () {
-        $('[class="input-radio__input"]').on('change', function () {
+        $('[name="checkout_payment_method"]').on('change', function () {
             const currentItem = $(this).closest('.payment-methods__item');
 
             $(this).closest('.payment-methods__list').find('.payment-methods__item').each(function (i, element) {
@@ -1269,7 +1269,6 @@
             media.addListener(updateTitleWidth);
         }
     })();
-    
 
     /*
     // select2

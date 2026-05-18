@@ -1,406 +1,758 @@
-<div class="product-card vh-product-card" id="vh-product-{{ $product->id }}">
-    @php
-        $attributes = [];
-        if($product->has_variant && $product->variants) {
-            foreach ($product->variants as $variant) {
-                foreach ($variant->variantItems as $item) {
-                    if ($item->attribute && $item->attributeItem) {
-                        $attributes[$item->attribute->name][$item->attributeItem->id] = $item->attributeItem->name;
-                    }
+@php
+    // Determine sale state
+    $isSale = floatval($product->sale_price) < floatval($product->regular_price);
+    $discountPercentage = 0;
+    if ($isSale && floatval($product->regular_price) > 0) {
+        $discountPercentage = round(((floatval($product->regular_price) - floatval($product->sale_price)) / floatval($product->regular_price)) * 100);
+    }
+    
+    // Get categories and brand list
+    $categoriesList = [];
+    if ($product->category) {
+        $categoriesList[] = '<a href="' . route('shop', ['category' => $product->category->slug]) . '">' . $product->category->name . '</a>';
+    }
+    if ($product->brand) {
+        $categoriesList[] = '<a href="' . route('shop', ['brand' => $product->brand->slug]) . '">' . $product->brand->name . '</a>';
+    }
+    $categoriesHtml = count($categoriesList) > 0 ? implode(', ', $categoriesList) : '<a href="#">Jersey</a>';
+    
+    // Fallback images
+    $mainImage = $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
+    $hoverImage = $product->hover_image ? asset($product->hover_image) : null;
+
+    // Get sizes/attributes if present
+    $variantAttributes = [];
+    if ($product->has_variant && $product->variants && $product->variants->count() > 0) {
+        foreach ($product->variants as $variant) {
+            foreach ($variant->variantItems as $item) {
+                if ($item->attribute && $item->attributeItem) {
+                    $variantAttributes[$item->attribute->name][$item->attributeItem->id] = $item->attributeItem->name;
                 }
             }
         }
-        $hasSale = $product->sale_price < $product->regular_price;
-        $discountPercentage = $hasSale ? round(100 - ($product->sale_price / $product->regular_price * 100)) : 0;
-    @endphp
+    }
+    
+    // Determine Wishlist state
+    $inWishlist = false;
+    try {
+        $wishlistCart = \Cart::session((Auth::id() ?? session()->getId()) . '_wishlist');
+        if ($wishlistCart && $wishlistCart->get($product->id)) {
+            $inWishlist = true;
+        }
+    } catch (\Exception $e) {}
 
-    <div class="product-card__image-section">
-        <!-- Badges -->
-        <div class="vh-product-badges">
-            @if($hasSale)
-                <span class="vh-badge vh-badge--sale">-{{ $discountPercentage }}%</span>
+    // Determine Compare state
+    $inCompare = false;
+    try {
+        $compareCart = \Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+        if ($compareCart && $compareCart->get($product->id)) {
+            $inCompare = true;
+        }
+    } catch (\Exception $e) {}
+@endphp
+
+<div class="wd-product-card text-center" 
+     data-id="{{ $product->id }}"
+     data-variants='{!! json_encode($product->variants->map(function($v) {
+         return [
+             'id' => $v->id,
+             'sku' => $v->variant_sku,
+             'price' => $v->final_price ?? $v->variant_price,
+             'stock' => $v->variant_stock,
+             'attributes' => $v->variantItems->pluck('attribute_item_id')->toArray()
+         ];
+     })) !!}'>
+    
+    <div class="product-image-link">
+        <!-- Discount badge -->
+        @if($isSale)
+            <span class="badge-discount">-{{ $discountPercentage }}%</span>
+        @endif
+        @if($product->total_stock <= 0)
+            <span class="badge-discount" style="background-color: #374151; left: auto; right: 15px;">Out of Stock</span>
+        @endif
+
+        <!-- Image Link -->
+        <a href="{{ route('product.show', $product->slug) }}">
+            <img src="{{ $mainImage }}" class="primary-img" alt="{{ $product->name }}" loading="lazy">
+            @if($hoverImage)
+                <img src="{{ $hoverImage }}" class="hover-img" alt="{{ $product->name }}" loading="lazy">
             @endif
-            @if($product->views > 100 || $product->is_featured) {{-- Using views as a proxy for HOT if no specific field --}}
-                <span class="vh-badge vh-badge--hot">HOT</span>
-            @endif
-        </div>
-
-        <!-- Side Actions -->
-        <div class="vh-product-actions">
-            <button type="button" class="vh-action-btn" onclick="addToCompare({{ $product->id }})" title="Compare">
-                <svg width="16" height="16"><path d="M9,15H7c-0.6,0-1-0.4-1-1V2c0-0.6,0.4-1,1-1h2c0.6,0,1,0.4,1,1v12C10,14.6,9.6,15,9,15z M1,9h2c0.6,0,1,0.4,1,1v4c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1v-4C0,9.4,0.4,9,1,9z M15,5h-2c-0.6,0-1,0.4-1,1v8c0,0.6,0.4,1,1,1h2c0.6,0,1-0.4,1-1V6C16,5.4,15.6,5,15,5z" /></svg>
-            </button>
-            <button type="button" class="vh-action-btn" onclick="window.location.href='{{ route('product.show', $product->slug) }}'" title="Quick View">
-                <svg width="16" height="16"><path d="M15.9,8.2C15.7,8.1,13.2,4,8,4S0.3,8.1,0.1,8.2C0,8.3,0,8.4,0.1,8.5C0.3,8.6,2.8,12.7,8,12.7s7.7-4.1,7.9-4.2 C16,8.4,16,8.3,15.9,8.2z M8,11.3c-1.8,0-3.3-1.5-3.3-3.3S6.2,4.7,8,4.7s3.3,1.5,3.3,3.3S9.8,11.3,8,11.3z M8,6.2 C6.9,6.2,6,7.1,6,8.2s0.9,2,2,2s2-0.9,2-2S9.1,6.2,8,6.2z" /></svg>
-            </button>
-            <button type="button" class="vh-action-btn" onclick="addToWishlist({{ $product->id }})" title="Wishlist">
-                <svg width="16" height="16"><path d="M13.9,8.4l-5.4,5.4c-0.3,0.3-0.7,0.3-1,0L2.1,8.4c-1.5-1.5-1.5-3.8,0-5.3C2.8,2.4,3.8,2,4.8,2s1.9,0.4,2.6,1.1L8,3.7 l0.6-0.6C9.3,2.4,10.3,2,11.3,2c1,0,1.9,0.4,2.6,1.1C15.4,4.6,15.4,6.9,13.9,8.4z" /></svg>
-            </button>
-        </div>
-
-        <!-- Image -->
-        <a href="{{ route('product.show', $product->slug) }}" class="vh-product-image">
-            <img src="{{ $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg') }}" alt="{{ $product->name }}">
         </a>
 
-        <!-- Variant Overlay -->
-        @if($product->has_variant && count($attributes) > 0)
-        <div class="vh-variant-overlay" id="variant-overlay-{{ $product->id }}">
-            <button type="button" class="vh-close-overlay" onclick="toggleVariantOverlay({{ $product->id }})">✕ Close</button>
-            <form class="vh-variant-form ms2_form">
-                @csrf
-                <input type="hidden" name="id" value="{{ $product->id }}">
-                <input type="hidden" name="count" value="1">
-                
-                <div class="vh-overlay-content">
-                    @foreach($attributes as $attrName => $items)
-                        <div class="vh-attribute-group">
-                            <p class="vh-attribute-title">{{ $attrName }}:</p>
-                            <div class="vh-attribute-options">
+        <!-- Sizing attributes overlay covering the top of the image container -->
+        @if(count($variantAttributes) > 0)
+            <div class="wd-quick-shop-overlay" style="display: none;">
+                <button type="button" class="wd-quick-shop-close-btn">
+                    <i class="bi bi-x"></i> Close
+                </button>
+                <div class="wd-quick-shop-content">
+                    @foreach($variantAttributes as $attrName => $items)
+                        <div class="wd-attribute-group" data-attribute-name="{{ $attrName }}">
+                            <div class="wd-attribute-title">{{ $attrName }}:</div>
+                            <div class="wd-attribute-options">
                                 @foreach($items as $itemId => $itemName)
-                                    <label class="vh-option-label">
-                                        <input type="radio" name="attributes[{{ $attrName }}]" value="{{ $itemId }}" class="vh-variant-input" data-product-id="{{ $product->id }}" required>
-                                        <span>{{ $itemName }}</span>
-                                    </label>
+                                    <button type="button" class="wd-attribute-option-box" data-value="{{ $itemId }}">
+                                        {{ $itemName }}
+                                    </button>
                                 @endforeach
                             </div>
                         </div>
                     @endforeach
                 </div>
-                
-                <div class="vh-overlay-buttons">
-                    <button type="submit" class="vh-btn-add-cart-overlay">ADD TO CART</button>
-                    <button type="button" class="vh-btn-buy-now-overlay" onclick="buyNow({{ $product->id }})">BUY NOW</button>
-                </div>
-            </form>
-        </div>
+            </div>
         @endif
 
-        <!-- Footer Button -->
-        <div class="vh-image-footer">
-            @if($product->has_variant)
-                <button type="button" class="vh-btn-select" onclick="toggleVariantOverlay({{ $product->id }})">SELECT OPTIONS</button>
+        <!-- Side action buttons stack (Compare, Quick View, Wishlist) -->
+        <div class="wd-buttons">
+            <!-- Compare -->
+            <button type="button" class="wd-action-btn wd-compare-btn {{ $inCompare ? 'wd-action-btn--active' : '' }}" 
+                    title="Compare" 
+                    onclick="ajaxToggleCompare(this, {{ $product->id }})">
+                <i class="bi bi-arrow-left-right"></i>
+            </button>
+            
+            <!-- Quick View -->
+            <button type="button" class="wd-action-btn" 
+                    title="Quick View" 
+                    onclick="ajaxOpenQuickView('{{ route('product.show', $product->slug) }}')">
+                <i class="bi bi-search"></i>
+            </button>
+            
+            <!-- Wishlist -->
+            <button type="button" class="wd-action-btn wd-wishlist-btn {{ $inWishlist ? 'wd-action-btn--active' : '' }}" 
+                    title="{{ $inWishlist ? 'Browse Wishlist' : 'Add to Wishlist' }}" 
+                    onclick="ajaxToggleWishlist(this, {{ $product->id }})">
+                <i class="bi bi-heart{{ $inWishlist ? '-fill' : '' }}"></i>
+            </button>
+        </div>
+
+        <!-- Green add to cart / select options slide-up action bar -->
+        <div class="wd-add-btn">
+            @if($product->total_stock > 0)
+                @if(count($variantAttributes) > 0)
+                    <button type="button" class="btn btn-select-options wd-btn-select">
+                        Select Options
+                    </button>
+                @else
+                    <button type="button" class="btn btn-select-options btn-cart"
+                            data-id="{{ $product->id }}" 
+                            data-name="{{ $product->name }}" 
+                            data-price="{{ $product->sale_price }}" 
+                            data-image="{{ $mainImage }}" 
+                            data-url="{{ route('product.show', $product->slug) }}">
+                        Add to Cart
+                    </button>
+                @endif
             @else
-                <form method="post" action="{{ route('cart.add') }}" class="ms2_form">
-                    @csrf
-                    <input type="hidden" name="id" value="{{ $product->id }}">
-                    <input type="hidden" name="count" value="1">
-                    <div class="vh-footer-buttons">
-                        <button type="submit" class="vh-btn-select">ADD TO CART</button>
-                        <button type="button" class="vh-btn-buy-now" onclick="buyNow({{ $product->id }}, true)">BUY NOW</button>
-                    </div>
-                </form>
+                <button type="button" class="btn btn-select-options btn-select-options--out" disabled>
+                    Out of Stock
+                </button>
             @endif
         </div>
     </div>
 
-    <div class="vh-product-info">
-        <h3 class="vh-product-name">
+    <!-- Product Text Details (Title, Category, Price) -->
+    <div class="wd-product-content">
+        <h3 class="wd-entities-title">
             <a href="{{ route('product.show', $product->slug) }}">{{ $product->name }}</a>
         </h3>
-        <div class="vh-product-category">
-            {{ $product->category ? $product->category->name : '' }}
-            @if($product->brand)
-                , {{ $product->brand->name }}
-            @endif
+        <div class="wd-product-cats">
+            {!! $categoriesHtml !!}
         </div>
-        <div class="vh-product-rating">
-            <div class="rating">
-                <div class="rating__body">
-                    <div class="rating__best">
-                        <div class="rating__current" style="width: {{ ($product->reviews_avg_rating ?? 0) * 20 }}%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="vh-product-price">
-            @if($hasSale)
-                <span class="vh-price-old">TK {{ number_format($product->regular_price, 2) }}</span>
-                <span class="vh-price-new">TK {{ number_format($product->sale_price, 2) }}</span>
+        <div class="price" data-original-val="TK {{ number_format($product->sale_price, 2) }}">
+            @if($isSale)
+                <span class="woodmart-price-new">TK {{ number_format($product->sale_price, 2) }}</span>
+                <span class="woodmart-price-old">TK {{ number_format($product->regular_price, 2) }}</span>
             @else
-                <span class="vh-price-current">TK {{ number_format($product->sale_price, 2) }}</span>
+                <span class="woodmart-price-current">TK {{ number_format($product->sale_price, 2) }}</span>
             @endif
         </div>
     </div>
 </div>
 
-<style>
-    .vh-product-card {
-        position: relative;
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        margin-bottom: 20px;
-    }
-    .vh-product-card:hover {
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .product-card__image-section {
-        position: relative;
-        overflow: hidden;
-    }
-    .vh-product-image {
-        display: block;
-        aspect-ratio: 1/1;
-        background: #f8f8f8;
-    }
-    .vh-product-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-    }
-    .vh-product-card:hover .vh-product-image img {
-        transform: scale(1.05);
-    }
-    
-    /* Badges */
-    .vh-product-badges {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 2;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-    .vh-badge {
-        font-size: 11px;
-        font-weight: 700;
-        padding: 3px 10px;
-        border-radius: 15px;
-        text-transform: uppercase;
-        color: #fff;
-    }
-    .vh-badge--sale { background: #47bd71; }
-    .vh-badge--hot { background: #e52727; }
+@once
+    @push('css')
+        <style>
+            /* Loading Bootstrap Icons stylesheet dynamically */
+            @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css');
 
-    /* Actions */
-    .vh-product-actions {
-        position: absolute;
-        top: 10px;
-        right: -50px;
-        z-index: 2;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        transition: right 0.3s ease;
-        background: rgba(255,255,255,0.9);
-        border-radius: 4px;
-        padding: 5px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .vh-product-card:hover .vh-product-actions {
-        right: 10px;
-    }
-    .vh-action-btn {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        color: #333;
-        border-radius: 50%;
-        transition: background 0.2s;
-    }
-    .vh-action-btn:hover {
-        background: #47bd71;
-        color: #fff;
-    }
-    .vh-action-btn svg { fill: currentColor; }
-
-    /* Variant Overlay */
-    .vh-variant-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255,255,255,0.95);
-        z-index: 5;
-        display: none;
-        flex-direction: column;
-        padding: 15px;
-        box-sizing: border-box;
-    }
-    .vh-close-overlay {
-        align-self: flex-end;
-        background: none;
-        border: none;
-        font-size: 12px;
-        cursor: pointer;
-        color: #666;
-        margin-bottom: 20px;
-    }
-    .vh-close-overlay:hover { color: #000; }
-    
-    .vh-overlay-content {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-    }
-    .vh-attribute-group {
-        margin-bottom: 15px;
-        width: 100%;
-    }
-    .vh-attribute-title {
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 10px;
-        color: #333;
-    }
-    .vh-attribute-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        justify-content: center;
-    }
-    .vh-option-label {
-        cursor: pointer;
-    }
-    .vh-option-label input {
-        display: none;
-    }
-    .vh-option-label span {
-        display: block;
-        padding: 5px 12px;
-        border: 1px solid #ddd;
-        border-radius: 3px;
-        font-size: 13px;
-        transition: all 0.2s;
-    }
-    .vh-option-label input:checked + span {
-        border-color: #47bd71;
-        background: #47bd71;
-        color: #fff;
-    }
-
-    .vh-overlay-buttons {
-        display: flex;
-        gap: 10px;
-    }
-    .vh-btn-add-cart-overlay, .vh-btn-buy-now-overlay {
-        flex: 1;
-        color: #fff;
-        border: none;
-        padding: 12px;
-        font-weight: 700;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-    .vh-btn-add-cart-overlay { background: #47bd71; }
-    .vh-btn-add-cart-overlay:hover { background: #3aa862; }
-    .vh-btn-buy-now-overlay { background: #333; }
-    .vh-btn-buy-now-overlay:hover { background: #000; }
-
-    /* Image Footer Button */
-    .vh-image-footer {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        z-index: 3;
-    }
-    .vh-footer-buttons {
-        display: flex;
-    }
-    .vh-btn-select, .vh-btn-buy-now {
-        flex: 1;
-        border: none;
-        padding: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    .vh-btn-select { background: #47bd71; color: #fff; }
-    .vh-btn-select:hover { background: #3aa862; }
-    .vh-btn-buy-now { background: #fff; color: #333; border-top: 1px solid #eee; }
-    .vh-btn-buy-now:hover { background: #f8f8f8; }
-
-    /* Info Section */
-    .vh-product-info {
-        padding: 15px;
-        text-align: center;
-    }
-    .vh-product-name {
-        font-size: 15px;
-        margin: 0 0 5px;
-        font-weight: 500;
-    }
-    .vh-product-name a {
-        color: #333;
-        text-decoration: none;
-    }
-    .vh-product-category {
-        font-size: 12px;
-        color: #999;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-    }
-    .vh-product-rating {
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: center;
-    }
-    .vh-product-price {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-    .vh-price-new, .vh-price-current {
-        font-weight: 700;
-        color: #47bd71;
-        font-size: 16px;
-    }
-    .vh-price-old {
-        text-decoration: line-through;
-        color: #999;
-        font-size: 14px;
-    }
-</style>
-
-<script>
-    if (typeof toggleVariantOverlay !== 'function') {
-        window.toggleVariantOverlay = function(productId) {
-            const overlay = document.getElementById('variant-overlay-' + productId);
-            if (overlay.style.display === 'flex') {
-                overlay.style.display = 'none';
-            } else {
-                overlay.style.display = 'flex';
+            :root {
+                --primary-green: #439665; /* Theme green color */
             }
-        };
 
-        window.buyNow = function(productId, isDirect = false) {
-            let form;
-            if (isDirect) {
-                form = $('#vh-product-' + productId).find('.vh-image-footer form');
-            } else {
-                form = $('#variant-overlay-' + productId).find('form');
-                if (!form[0].checkValidity()) {
-                    form[0].reportValidity();
-                    return;
+            /* --- Main Card Wrapper --- */
+            .wd-product-card {
+                background: #ffffff;
+                transition: all 0.35s ease;
+                width: 100%;
+                margin: auto;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                box-sizing: border-box;
+            }
+
+            /* --- Image Container Aspect Ratio & Overlay Setup --- */
+            .product-image-link {
+                position: relative;
+                display: block;
+                overflow: hidden;
+                background-color: #f5f5f5;
+                width: 100%;
+                padding-top: 114.28%; /* Perfect 7:8 ratio */
+            }
+
+            .product-image-link a {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .primary-img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: opacity 0.5s ease, transform 0.5s ease;
+            }
+
+            .hover-img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                transition: opacity 0.5s ease, transform 0.5s ease;
+                object-fit: cover;
+            }
+
+            /* Image transitions on hover */
+            .product-image-link:hover .primary-img {
+                transform: scale(1.02);
+            }
+
+            .product-image-link:hover .hover-img {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+
+            /* --- Quick Shop Sizing Overlay --- */
+            .wd-quick-shop-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.96);
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                padding: 20px 15px;
+                transition: opacity 0.3s ease;
+            }
+
+            .wd-quick-shop-close-btn {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                background: transparent;
+                border: none;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #777777;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                z-index: 12;
+                outline: none !important;
+            }
+
+            .wd-quick-shop-close-btn:hover {
+                color: #111827;
+            }
+
+            .wd-quick-shop-content {
+                width: 100%;
+                text-align: center;
+            }
+
+            .wd-attribute-group {
+                margin-bottom: 10px;
+            }
+
+            .wd-attribute-title {
+                font-family: 'Outfit', 'Segoe UI', sans-serif;
+                font-size: 11.5px;
+                font-weight: 700;
+                color: #1f2937;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .wd-attribute-options {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 7px;
+            }
+
+            .wd-attribute-option-box {
+                background: #ffffff;
+                border: 1px solid rgba(0, 0, 0, 0.15);
+                color: #374151;
+                padding: 5px 12px;
+                font-size: 12px;
+                font-weight: 700;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                outline: none !important;
+            }
+
+            .wd-attribute-option-box:hover {
+                border-color: #111827;
+                color: #111827;
+            }
+
+            .wd-attribute-option-box.active {
+                background: #111827;
+                color: #ffffff;
+                border-color: #111827;
+            }
+
+            /* --- Side Action Floating overlay (Top-Right) --- */
+            .wd-buttons {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 5;
+                transform: translateX(50px);
+                transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                            opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+                opacity: 0;
+            }
+
+            .product-image-link:hover .wd-buttons {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            .wd-action-btn {
+                background: #ffffff;
+                color: #333333;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+                text-decoration: none !important;
+                transition: background 0.2s, color 0.2s, transform 0.2s;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+                outline: none !important;
+            }
+
+            .wd-action-btn:hover {
+                background: var(--primary-green);
+                color: #ffffff;
+                transform: scale(1.08);
+            }
+
+            .wd-action-btn--active {
+                color: var(--primary-green);
+            }
+
+            /* --- Sliding green button overlay --- */
+            .wd-add-btn {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+                z-index: 9;
+            }
+
+            .product-image-link:hover .wd-add-btn,
+            .product-image-link.overlay-active .wd-add-btn {
+                transform: translateY(0);
+            }
+
+            .btn-select-options {
+                background: var(--primary-green);
+                color: #ffffff;
+                text-transform: uppercase;
+                font-family: 'Outfit', 'Segoe UI', sans-serif;
+                font-size: 12.5px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                border-radius: 0;
+                padding: 12px;
+                width: 100%;
+                border: none;
+                cursor: pointer;
+                transition: background 0.25s, opacity 0.2s;
+                outline: none !important;
+            }
+
+            .btn-select-options:hover {
+                background: #357d54;
+                color: #ffffff;
+            }
+
+            .btn-select-options--out {
+                background: #6b7280;
+                cursor: not-allowed;
+            }
+
+            .btn-select-options--out:hover {
+                background: #6b7280;
+            }
+
+            /* --- Typography & Info Alignment --- */
+            .wd-product-content {
+                padding: 15px 10px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+            }
+
+            .wd-entities-title {
+                font-family: 'Outfit', 'Segoe UI', sans-serif;
+                font-size: 15.5px;
+                margin-top: 5px;
+                margin-bottom: 5px;
+                font-weight: 600;
+                line-height: 1.35;
+                height: 40px;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+
+            .wd-entities-title a {
+                color: #242424;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+
+            .wd-entities-title a:hover {
+                color: var(--primary-green);
+            }
+
+            .wd-product-cats {
+                font-family: 'Roboto', 'Segoe UI', sans-serif;
+                font-size: 12px;
+                color: #bbbbbb;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }
+
+            .wd-product-cats a {
+                color: #bbbbbb;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+
+            .wd-product-cats a:hover {
+                color: #888888;
+            }
+
+            .price {
+                color: var(--primary-green);
+                font-family: 'Outfit', 'Segoe UI', sans-serif;
+                font-weight: 700;
+                font-size: 16.5px;
+                margin-top: auto;
+            }
+
+            .woodmart-price-new {
+                color: var(--primary-green);
+            }
+
+            .woodmart-price-old {
+                color: #bbbbbb;
+                text-decoration: line-through;
+                font-size: 13px;
+                margin-left: 6px;
+                font-weight: 500;
+            }
+
+            /* --- Badges --- */
+            .badge-discount {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                background-color: var(--primary-green);
+                color: #ffffff;
+                padding: 4px 10px;
+                font-family: 'Outfit', 'Segoe UI', sans-serif;
+                font-size: 11px;
+                font-weight: 700;
+                border-radius: 50px;
+                z-index: 6;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                pointer-events: none;
+            }
+        </style>
+    @endpush
+
+    @push('js')
+        <script>
+            $(document).ready(function() {
+                // 1. Select Options button click triggers the overlay
+                $(document).on('click', '.wd-btn-select', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const btn = $(this);
+                    const card = btn.closest('.wd-product-card');
+                    const imgLink = card.find('.product-image-link');
+                    const overlay = card.find('.wd-quick-shop-overlay');
+                    
+                    // Show sizing overlay inside the image area
+                    imgLink.addClass('overlay-active');
+                    overlay.fadeIn(200);
+                    
+                    // Transform select options trigger to add to cart (initially disabled)
+                    btn.text('Add to Cart')
+                       .addClass('btn-add-cart-pending')
+                       .removeClass('wd-btn-select')
+                       .css('opacity', '0.6')
+                       .prop('disabled', true);
+                });
+
+                // 2. Size / Attribute options click selection logic
+                $(document).on('click', '.wd-attribute-option-box', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const optionBox = $(this);
+                    const attrGroup = optionBox.closest('.wd-attribute-group');
+                    const card = optionBox.closest('.wd-product-card');
+                    const overlay = card.find('.wd-quick-shop-overlay');
+                    const btn = card.find('.btn-select-options');
+                    
+                    // Highlight selected box
+                    attrGroup.find('.wd-attribute-option-box').removeClass('active');
+                    optionBox.addClass('active');
+                    
+                    // Collect selected options to match variant
+                    const allSelected = [];
+                    overlay.find('.wd-attribute-group').each(function() {
+                        const group = $(this);
+                        const activeOpt = group.find('.wd-attribute-option-box.active');
+                        if (activeOpt.length) {
+                            allSelected.push(parseInt(activeOpt.attr('data-value')));
+                        }
+                    });
+                    
+                    const totalGroups = overlay.find('.wd-attribute-group').length;
+                    if (allSelected.length === totalGroups) {
+                        const variants = JSON.parse(card.attr('data-variants') || '[]');
+                        const matchedVariant = variants.find(v => {
+                            return allSelected.every(attrId => v.attributes.includes(attrId)) &&
+                                   v.attributes.length === allSelected.length;
+                        });
+                        
+                        if (matchedVariant) {
+                            // Update price text on match
+                            card.find('.price').text('TK ' + parseFloat(matchedVariant.price).toFixed(2));
+                            
+                            // Enable action button payload parameters
+                            btn.removeClass('btn-add-cart-pending')
+                               .addClass('btn-cart')
+                               .attr('data-id', matchedVariant.id)
+                               .attr('data-price', matchedVariant.price)
+                               .css('opacity', '1')
+                               .prop('disabled', false);
+                        }
+                    }
+                });
+
+                // 3. Quick Shop overlay Close click
+                $(document).on('click', '.wd-quick-shop-close-btn', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const closeBtn = $(this);
+                    const card = closeBtn.closest('.wd-product-card');
+                    const imgLink = card.find('.product-image-link');
+                    const overlay = card.find('.wd-quick-shop-overlay');
+                    const btn = card.find('.btn-select-options');
+                    
+                    // Hide overlay
+                    overlay.fadeOut(200);
+                    imgLink.removeClass('overlay-active');
+                    
+                    // Restore original select button styling
+                    btn.text('Select Options')
+                       .removeClass('btn-cart btn-add-cart-pending')
+                       .addClass('wd-btn-select')
+                       .css('opacity', '1')
+                       .prop('disabled', false)
+                       .removeAttr('data-id')
+                       .removeAttr('data-price');
+                       
+                    // Clear option highlightings
+                    overlay.find('.wd-attribute-option-box').removeClass('active');
+                    
+                    // Restore primary catalog price element
+                    const originalPrice = card.find('.price').attr('data-original-val');
+                    if (originalPrice) {
+                        card.find('.price').text(originalPrice);
+                    }
+                });
+            });
+
+            // Unified AJAX Toggle Wishlist
+            function ajaxToggleWishlist(button, productId) {
+                const btn = $(button);
+                btn.prop('disabled', true);
+                
+                $.post("{{ route('wishlist.add') }}", {
+                    _token: "{{ csrf_token() }}",
+                    id: productId
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        btn.toggleClass('wd-action-btn--active');
+                        const isAdded = btn.hasClass('wd-action-btn--active');
+                        
+                        if (isAdded) {
+                            btn.attr('title', 'Remove from Wishlist');
+                            btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                            showPremiumToast('Product added to wishlist!', 'success');
+                        } else {
+                            btn.attr('title', 'Add to Wishlist');
+                            btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                            showPremiumToast('Product removed from wishlist.', 'success');
+                        }
+                        
+                        if (response.count !== undefined) {
+                            $('.wishlist-count strong, .wishlist-count').text(response.count);
+                        }
+                    } else {
+                        showPremiumToast('Something went wrong. Please try again.', 'error');
+                    }
+                })
+                .fail(function() {
+                    showPremiumToast('Unable to complete request. Please log in.', 'error');
+                })
+                .always(function() {
+                    btn.prop('disabled', false);
+                });
+            }
+
+            // Unified AJAX Toggle Compare
+            function ajaxToggleCompare(button, productId) {
+                const btn = $(button);
+                btn.prop('disabled', true);
+                
+                $.post("{{ route('compare.add') }}", {
+                    _token: "{{ csrf_token() }}",
+                    id: productId
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        btn.toggleClass('wd-action-btn--active');
+                        const isAdded = btn.hasClass('wd-action-btn--active');
+                        
+                        if (isAdded) {
+                            showPremiumToast('Product added to compare list!', 'success');
+                        } else {
+                            showPremiumToast('Product removed from compare list.', 'success');
+                        }
+                        
+                        if (response.count !== undefined) {
+                            $('.compare-count, #msCompare').text(response.count);
+                        }
+                    } else {
+                        showPremiumToast('Something went wrong. Please try again.', 'error');
+                    }
+                })
+                .fail(function() {
+                    showPremiumToast('Unable to complete request.', 'error');
+                })
+                .always(function() {
+                    btn.prop('disabled', false);
+                });
+            }
+
+
+
+            // Glassmorphic Notification Toast System
+            function showPremiumToast(message, type = 'success') {
+                let container = document.getElementById('premium-toast-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'premium-toast-container';
+                    container.style.cssText = 'position: fixed; top: 24px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; max-width: 360px; width: calc(100% - 48px); pointer-events: none;';
+                    document.body.appendChild(container);
                 }
+                
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    background: rgba(255, 255, 255, 0.98);
+                    backdrop-filter: blur(8px);
+                    border-left: 4px solid ${type === 'success' ? 'var(--primary-green)' : '#ef4444'};
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                    border-radius: 8px;
+                    padding: 15px 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    transform: translateY(-20px) scale(0.9);
+                    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+                    pointer-events: auto;
+                    opacity: 0;
+                `;
+                
+                const icon = type === 'success' 
+                    ? `<svg width="22" height="22" fill="none" stroke="var(--primary-green)" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                    : `<svg width="22" height="22" fill="none" stroke="#ef4444" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+                    
+                toast.innerHTML = `
+                    <span style="flex-shrink: 0; display: flex; align-items: center;">${icon}</span>
+                    <div style="flex-grow: 1; font-family: 'Outfit', 'Segoe UI', sans-serif; font-size: 13.5px; font-weight: 600; color: #1f2937; line-height: 1.4;">${message}</div>
+                    <button style="background: none; border: none; padding: 0; cursor: pointer; color: #9ca3af; display: flex; outline: none;" onclick="this.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.remove(),300)">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(0) scale(1)';
+                    toast.style.opacity = '1';
+                }, 20);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(-20px) scale(0.9)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 400);
+                }, 3800);
             }
-
-            // Add redirect param
-            if (form.find('input[name="redirect"]').length === 0) {
-                form.append('<input type="hidden" name="redirect" value="{{ route("checkout") }}">');
-            }
-
-            form.submit();
-        };
-    }
-</script>
-
+        </script>
+    @endpush
+@endonce
