@@ -25,8 +25,18 @@
             @php
                 $cart = \Cart::session(Auth::id() ?? session()->getId());
                 $items = $cart->getContent()->sortBy('id');
+
+                dd($items->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'attributes' => $item->attributes,
+                    ];
+                }));
             @endphp
-            
+
             @if($items->count() > 0)
                 <div class="row">
                     <!-- Cart Items Column -->
@@ -38,7 +48,7 @@
                                 <span style="width: 20%; text-align: center;">Quantity</span>
                                 <span style="width: 15%; text-align: right;">Total</span>
                             </div>
-                            
+
                             @foreach($items as $item)
                             <div class="cart-item-row" data-id="{{ $item->id }}">
                                 <div class="d-flex align-items-center" style="width: 100%; max-width: 50%;">
@@ -47,21 +57,70 @@
                                     </a>
                                     <div class="cart-item-info ml-4">
                                         <a href="{{ $item->attributes->url ?? '#' }}" class="cart-item-title">{{ $item->name }}</a>
-                                        <div class="text-muted small mt-1">Item ID: {{ $item->id }}</div>
-                                        @if(isset($item->attributes->attributes) && is_array($item->attributes->attributes))
-                                        <ul class="list-unstyled mt-2 small text-secondary">
-                                            @foreach($item->attributes->attributes as $key => $val)
-                                                <li><strong>{{ ucfirst($key) }}:</strong> {{ $val }}</li>
-                                            @endforeach
-                                        </ul>
+                                        @php
+                                            $variantAttributes = $item->attributes->variant_attributes
+                                                ?? $item->attributes->attributes
+                                                ?? [];
+
+                                            if (is_string($variantAttributes)) {
+                                                $decodedVariantAttributes = json_decode($variantAttributes, true);
+                                                $variantAttributes = is_array($decodedVariantAttributes) ? $decodedVariantAttributes : [];
+                                            }
+
+                                            $variantLabel = $item->attributes->variant_label ?? null;
+                                        @endphp
+
+                                        @if(is_array($variantAttributes) && count($variantAttributes) > 0)
+                                            @php
+                                                $pairs = [];
+
+                                                // Case A: numeric-indexed array of attribute_item IDs e.g. [12,34]
+                                                $isSequentialNumeric = array_values($variantAttributes) === $variantAttributes && collect($variantAttributes)->every(function($v){ return is_numeric($v); });
+
+                                                // Case B: associative array with numeric keys (attribute_item_id => label)
+                                                $hasNumericKeys = false;
+                                                foreach($variantAttributes as $k => $v) { if(is_numeric($k)) { $hasNumericKeys = true; break; } }
+
+                                                if ($isSequentialNumeric) {
+                                                    $ids = array_map('intval', $variantAttributes);
+                                                    $items = \App\Models\AttributeItem::with('attribute')->whereIn('id', $ids)->get();
+                                                    foreach ($items as $it) {
+                                                        $attrName = $it->attribute->name ?? 'Option';
+                                                        $pairs[] = ucfirst($attrName) . ': ' . $it->name;
+                                                    }
+                                                } elseif ($hasNumericKeys) {
+                                                    $ids = array_map('intval', array_keys($variantAttributes));
+                                                    $items = \App\Models\AttributeItem::with('attribute')->whereIn('id', $ids)->get()->keyBy('id');
+                                                    foreach ($variantAttributes as $k => $v) {
+                                                        $it = $items[(int)$k] ?? null;
+                                                        $attrName = $it && $it->attribute ? $it->attribute->name : $k;
+                                                        $valName = is_string($v) && $v !== '' ? $v : ($it ? $it->name : $v);
+                                                        $pairs[] = ucfirst($attrName) . ': ' . $valName;
+                                                    }
+                                                } else {
+                                                    // Case C: already attributeName => label
+                                                    foreach ($variantAttributes as $k => $v) {
+                                                        $pairs[] = ucfirst($k) . ': ' . $v;
+                                                    }
+                                                }
+
+                                                $variantLine = implode(', ', $pairs);
+                                            @endphp
+                                            <div class="mt-2 small text-secondary">
+                                                <strong>Variant:</strong> {{ $variantLine }}
+                                            </div>
+                                        @elseif($variantLabel)
+                                            <div class="mt-2 small text-secondary">
+                                                <strong>Variant:</strong> {{ $variantLabel }}
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
-                                
+
                                 <div class="cart-item-price d-none d-md-block" style="width: 15%; text-align: center;">
                                     TK {{ number_format($item->price, 2) }}
                                 </div>
-                                
+
                                 <div style="width: 20%; text-align: center;" class="d-flex justify-content-center">
                                     <div class="cart-qty-wrapper">
                                         <button type="button" class="btn btn-sm btn-light p-0 border-0 cart-qty-minus" data-id="{{ $item->id }}" style="background: transparent; color: #555;"><i class="fas fa-minus"></i></button>
@@ -69,50 +128,50 @@
                                         <button type="button" class="btn btn-sm btn-light p-0 border-0 cart-qty-plus" data-id="{{ $item->id }}" style="background: transparent; color: #555;"><i class="fas fa-plus"></i></button>
                                     </div>
                                 </div>
-                                
+
                                 <div class="cart-item-total d-none d-md-block" style="width: 15%;">
                                     TK {{ number_format($item->price * $item->quantity, 2) }}
                                 </div>
-                                
+
                                 <button type="button" class="btn-remove-item remove-cart ml-auto" data-id="{{ $item->id }}" title="Remove item">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             @endforeach
                         </div>
-                        
+
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <a href="{{ url('/') }}" class="btn-continue"><i class="fas fa-arrow-left mr-2"></i> Continue Shopping</a>
                         </div>
                     </div>
-                    
+
                     <!-- Summary Column -->
                     <div class="col-lg-4 mt-5 mt-lg-0">
                         <div class="summary-card">
                             <h3 class="summary-title">Order Summary</h3>
-                            
+
                             <div class="summary-row">
                                 <span>Subtotal</span>
                                 <span class="font-weight-bold" style="color: #1a1a1a;">TK {{ number_format($cart->getSubTotal(), 2) }}</span>
                             </div>
-                            
+
                             <div class="summary-row">
                                 <span>Shipping Estimate</span>
                                 <span class="text-success font-weight-bold">Free</span>
                             </div>
-                            
+
                             <div class="summary-row">
                                 <span>Tax</span>
                                 <span>Calculated at checkout</span>
                             </div>
-                            
+
                             <div class="summary-total">
                                 <span>Total</span>
                                 <span style="color: #e53935;">TK {{ number_format($cart->getTotal(), 2) }}</span>
                             </div>
-                            
+
                             <a href="{{ route('checkout') }}" class="btn-premium mt-4">Proceed to Checkout <i class="fas fa-arrow-right ml-2"></i></a>
-                            
+
                             <div class="mt-4 text-center text-muted small">
                                 <i class="fas fa-lock mr-1"></i> Secure checkout powered by Stripe
                             </div>
@@ -132,7 +191,7 @@
             @endif
         </div>
     </div>
-    
+
     @push('css')
     <style>
         /* Modern Cart UI */
@@ -365,7 +424,7 @@
         }
     </style>
     @endpush
-    
+
     @push('js')
     <script>
         $(document).ready(function() {
@@ -375,7 +434,7 @@
                 let val = parseInt(input.val()) + 1;
                 input.val(val).trigger('change');
             });
-            
+
             $('.cart-qty-minus').click(function() {
                 let input = $(this).siblings('.cart-qty-input');
                 let val = parseInt(input.val()) - 1;
@@ -383,7 +442,7 @@
                     input.val(val).trigger('change');
                 }
             });
-            
+
             $('.cart-qty-input').on('change', function() {
                 let id = $(this).data('id');
                 let qty = $(this).val();

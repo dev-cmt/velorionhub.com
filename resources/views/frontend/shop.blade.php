@@ -280,7 +280,7 @@
                                                     </form>
                                                 </div>
                                             </div>
-                                            <div class="products-view__list products-list products-list--grid--4"
+                                            <div class="products-view__list products-list products-list--grid--3"
                                                 data-layout="grid" data-with-features="false">
                                                 <div class="products-list__head">
                                                     <div class="products-list__column products-list__column--image">
@@ -375,7 +375,7 @@
                 url.searchParams.delete('page');
                 window.location.href = url.toString();
             });
-            
+
         });
     </script>
     @endpush

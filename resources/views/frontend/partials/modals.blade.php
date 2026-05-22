@@ -1,4 +1,3 @@
-<!-- mobile-menu -->
 <!-- quickview-modal -->
 <div id="quickview-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="quickview modal-dialog modal-dialog-centered">
@@ -28,7 +27,7 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-    
+
     .quickview-loading-spinner {
         display: flex !important;
     }
@@ -41,7 +40,7 @@
     function ajaxOpenQuickView(productUrl) {
         const modal = $('#quickview-modal');
         if (!modal.length) return;
-        
+
         // Show loading spinner inside standard theme structure
         modal.find('.quickview__body-wrapper').html(`
             <div class="quickview__body">
@@ -52,7 +51,7 @@
             </div>
         `);
         modal.modal('show');
-        
+
         $.get(productUrl)
         .done(function(html) {
             const doc = $(html);
@@ -65,18 +64,18 @@
             const formBodyHtml = doc.find('.product-form__body').html();
             const productId = doc.find('input[name="id"]').val() || '';
             const seeDetailsUrl = productUrl;
-            
+
             // Gather gallery images
             let galleryFeaturedHtml = '';
             let galleryThumbnailsHtml = '';
-            
+
             const galleryFeaturedItems = doc.find('.product-gallery__featured .owl-item a, .product-gallery__featured a');
             if (galleryFeaturedItems.length > 0) {
                 galleryFeaturedItems.each(function() {
                     const href = $(this).attr('href');
                     const img = $(this).find('img');
                     const src = img.attr('src') || href;
-                    
+
                     galleryFeaturedHtml += `
                         <a class="image image--type--product" href="${href}" target="_blank">
                             <div class="image__body">
@@ -85,13 +84,13 @@
                         </a>
                     `;
                 });
-                
+
                 const galleryThumbItems = doc.find('.product-gallery__thumbnails .owl-item .product-gallery__thumbnails-item, .product-gallery__thumbnails .product-gallery__thumbnails-item');
                 galleryThumbItems.each(function() {
                     const img = $(this).find('img');
                     const src = img.attr('src');
                     const isActive = $(this).hasClass('product-gallery__thumbnails-item--active');
-                    
+
                     galleryThumbnailsHtml += `
                         <div class="product-gallery__thumbnails-item image image--type--product ${isActive ? 'product-gallery__thumbnails-item--active' : ''}">
                             <div class="image__body">
@@ -109,7 +108,7 @@
                         </div>
                     </a>
                 `;
-                
+
                 galleryThumbnailsHtml = `
                     <div class="product-gallery__thumbnails-item image image--type--product product-gallery__thumbnails-item--active">
                         <div class="image__body">
@@ -118,7 +117,7 @@
                     </div>
                 `;
             }
-            
+
             // Construct dynamic split layout identical to theme markup
             const newHtml = `
                 <div class="quickview__body">
@@ -140,7 +139,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Right Product Info -->
                     <div class="quickview__product">
                         <div class="quickview__product-name">${title}</div>
@@ -169,7 +168,7 @@
                             </div>
                             ${stockHtml}
                         </div>
-                        
+
                         <!-- Form for variants -->
                         <form class="product-form quickview__product-form ms2_form" action="{{ route('cart.add') }}" method="POST">
                             <input type="hidden" name="id" value="${productId}"/>
@@ -178,7 +177,7 @@
                                 ${formBodyHtml || ''}
                             </div>
                         </form>
-                        
+
                         <!-- Dynamic Actions -->
                         <div class="quickview__product-actions">
                             <div class="quickview__product-actions-item quickview__product-actions-item--quantity">
@@ -196,10 +195,10 @@
                 </div>
                 <a href="${seeDetailsUrl}" class="quickview__see-details">See full details</a>
             `;
-            
+
             // Inject rebuilt layout structure
             modal.find('.quickview__body-wrapper').html(newHtml);
-            
+
             // Re-bind quantity click buttons in injected container (using built-in helper if available)
             if ($.fn.customNumber) {
                 modal.find('.input-number').customNumber();
@@ -209,7 +208,7 @@
                     const input = container.find('input');
                     const add = container.find('.input-number__add');
                     const sub = container.find('.input-number__sub');
-                    
+
                     add.off('click').on('click', function() {
                         input.val(parseInt(input.val() || 1) + 1).trigger('change');
                     });
@@ -219,7 +218,7 @@
                     });
                 });
             }
-            
+
             // Trigger the native shown.bs.modal event so the main.js closure script initializes the gallery and inputs perfectly!
             modal.trigger('shown.bs.modal');
         })
@@ -234,3 +233,40 @@
 </script>
 @endpush
 <!-- quickview-modal / end -->
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="pswp__bg"></div>
+    <div class="pswp__scroll-wrap">
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <!--<button class="pswp__button pswp__button--share" title="Share"></button>-->
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>

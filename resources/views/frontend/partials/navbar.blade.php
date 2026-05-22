@@ -95,7 +95,7 @@ c-1.5,0-2.9,0.6-4,1.5C8.9,1.6,7.5,1,6,1C2.7,1,0,3.7,0,7c0,5,6,12,10,12s10-7,10-1
 V1.4C0,1.2,0.2,1,0.4,1h2.5c1,0,1.8,0.6,2.1,1.6L5.1,3l2.3,6.8c0,0.1,0.2,0.2,0.3,0.2h8.6c0.1,0,0.3-0.1,0.3-0.2l1.3-4.4
 C17.9,5.2,17.7,5,17.5,5H9.4C9.2,5,9,4.8,9,4.6V3.4C9,3.2,9.2,3,9.4,3h9.2C19.4,3,20,3.6,20,4.4z" />
                                 </svg>
-                                <span class="mobile-menu__indicator-counter ms2_total_count">{{ Cart::getTotalQuantity() }}</span>
+                                <span class="mobile-menu__indicator-counter ms2_total_count">{{ Cart::getContent()->count() }}</span>
                             </span>
                         </a>
                     </div>
@@ -316,7 +316,7 @@ z" />
 l3.4,14.3c0.1,0.2,0.3,0.4,0.5,0.4h15.2c0.2,0,0.4-0.1,0.5-0.4l3.1-10c0.1-0.2,0-0.4-0.1-0.4C29.8,8.1,29.7,8,29.5,8H14
 c-0.6,0-1-0.4-1-1s0.4-1,1-1h15.5c0.8,0,1.5,0.4,2,1c0.5,0.6,0.6,1.5,0.4,2.2l-3.1,10C28.5,20.3,27.5,21,26.4,21z" />
                                 </svg>
-                                <span class="indicator__counter ms2_total_count">{{ Cart::getTotalQuantity() }}</span>
+                                <span class="indicator__counter ms2_total_count">{{ Cart::getContent()->count() }}</span>
                             </span>
                             <span class="indicator__title">Cart</span>
 

@@ -66,18 +66,18 @@ class HomeController extends Controller
 
         return view('frontend.index', compact(
             'seotags',
-            'breadcrumbs', 
+            'breadcrumbs',
             'breadcrumb_list',
-            'products', 
-            'hot_deals', 
-            'slides', 
-            'promotionBanners', 
-            'categories', 
-            'best_sellers', 
-            'new_arrivals', 
-            'top_rated', 
-            'special_offers', 
-            'column_bestsellers', 
+            'products',
+            'hot_deals',
+            'slides',
+            'promotionBanners',
+            'categories',
+            'best_sellers',
+            'new_arrivals',
+            'top_rated',
+            'special_offers',
+            'column_bestsellers',
             'brands',
             'latest_posts'
         ));
@@ -141,7 +141,7 @@ class HomeController extends Controller
         $brands = Brand::where('status', true)->get();
 
         // SEO
-        $page = Page::with('seo')->where('slug', 'shop')->first(); 
+        $page = Page::with('seo')->where('slug', 'shop')->first();
         $seotags = $this->applySeo($page, 'Shop - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -266,7 +266,7 @@ class HomeController extends Controller
         $blog = $query->paginate(10);
 
         // SEO
-        $page = Page::with('seo')->where('slug', 'blog')->first(); 
+        $page = Page::with('seo')->where('slug', 'blog')->first();
         $seotags = $this->applySeo($page, 'Blog - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -290,14 +290,14 @@ class HomeController extends Controller
         ]);
 
         // You can add logic to save the email here
-        
+
         return back()->with('success', 'Thank you for subscribing!');
     }
 
     public function blogShow($slug)
     {
         $post = BlogPost::with('author', 'category', 'tags')->where('slug', $slug)->firstOrFail();
-        
+
         // SEO
         $seotags = $this->applySeo($post);
         $jsonld = $this->generateArticleJsonLd($post);
@@ -428,7 +428,7 @@ class HomeController extends Controller
         foreach ($cart->getContent() as $item) {
             // Need product ID from associated model or attribute if available, fallback to 0
             $productId = $item->associatedModel->id ?? $item->id;
-            
+
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $productId,
@@ -449,9 +449,14 @@ class HomeController extends Controller
     public function orderConfirm($invoice)
     {
         $order = Order::where('invoice_no', $invoice)->with('items.product')->firstOrFail();
-        
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'Order Confirmation', 'url' => route('order.confirm', ['invoice' => $invoice])],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
         $theme = config('theme.frontend.views_path');
-        return view($theme . '.order-confirm', compact('order'));
+        return view($theme . '.order-confirm', compact('order', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function addWishlist(Request $request)

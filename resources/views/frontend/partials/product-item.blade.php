@@ -5,7 +5,7 @@
     if ($isSale && floatval($product->regular_price) > 0) {
         $discountPercentage = round(((floatval($product->regular_price) - floatval($product->sale_price)) / floatval($product->regular_price)) * 100);
     }
-    
+
     // Get categories and brand list
     $categoriesList = [];
     if ($product->category) {
@@ -15,7 +15,7 @@
         $categoriesList[] = '<a href="' . route('shop', ['brand' => $product->brand->slug]) . '">' . $product->brand->name . '</a>';
     }
     $categoriesHtml = count($categoriesList) > 0 ? implode(', ', $categoriesList) : '<a href="#">Jersey</a>';
-    
+
     // Fallback images
     $mainImage = $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
     $hoverImage = $product->hover_image ? asset($product->hover_image) : null;
@@ -31,7 +31,7 @@
             }
         }
     }
-    
+
     // Determine Wishlist state
     $inWishlist = false;
     try {
@@ -51,7 +51,7 @@
     } catch (\Exception $e) {}
 @endphp
 
-<div class="wd-product-card text-center" 
+<div class="wd-product-card text-center"
      data-id="{{ $product->id }}"
      data-variants='{!! json_encode($product->variants->map(function($v) {
          return [
@@ -62,7 +62,7 @@
              'attributes' => $v->variantItems->pluck('attribute_item_id')->toArray()
          ];
      })) !!}'>
-    
+
     <div class="product-image-link">
         <!-- Discount badge -->
         @if($isSale)
@@ -100,28 +100,38 @@
                         </div>
                     @endforeach
                 </div>
+                <div class="wd-quick-shop-footer">
+                    <button type="button" class="btn btn-select-options btn-cart"
+                            data-id="{{ $product->id }}"
+                            data-name="{{ $product->name }}"
+                            data-price="{{ $product->sale_price }}"
+                            data-image="{{ $mainImage }}"
+                            data-url="{{ route('product.show', $product->slug) }}">
+                        Add to Cart
+                    </button>
+                </div>
             </div>
         @endif
 
         <!-- Side action buttons stack (Compare, Quick View, Wishlist) -->
         <div class="wd-buttons">
             <!-- Compare -->
-            <button type="button" class="wd-action-btn wd-compare-btn {{ $inCompare ? 'wd-action-btn--active' : '' }}" 
-                    title="Compare" 
+            <button type="button" class="wd-action-btn wd-compare-btn {{ $inCompare ? 'wd-action-btn--active' : '' }}"
+                    title="Compare"
                     onclick="ajaxToggleCompare(this, {{ $product->id }})">
                 <i class="bi bi-arrow-left-right"></i>
             </button>
-            
+
             <!-- Quick View -->
-            <button type="button" class="wd-action-btn" 
-                    title="Quick View" 
+            <button type="button" class="wd-action-btn"
+                    title="Quick View"
                     onclick="ajaxOpenQuickView('{{ route('product.show', $product->slug) }}')">
                 <i class="bi bi-search"></i>
             </button>
-            
+
             <!-- Wishlist -->
-            <button type="button" class="wd-action-btn wd-wishlist-btn {{ $inWishlist ? 'wd-action-btn--active' : '' }}" 
-                    title="{{ $inWishlist ? 'Browse Wishlist' : 'Add to Wishlist' }}" 
+            <button type="button" class="wd-action-btn wd-wishlist-btn {{ $inWishlist ? 'wd-action-btn--active' : '' }}"
+                    title="{{ $inWishlist ? 'Browse Wishlist' : 'Add to Wishlist' }}"
                     onclick="ajaxToggleWishlist(this, {{ $product->id }})">
                 <i class="bi bi-heart{{ $inWishlist ? '-fill' : '' }}"></i>
             </button>
@@ -136,10 +146,10 @@
                     </button>
                 @else
                     <button type="button" class="btn btn-select-options btn-cart"
-                            data-id="{{ $product->id }}" 
-                            data-name="{{ $product->name }}" 
-                            data-price="{{ $product->sale_price }}" 
-                            data-image="{{ $mainImage }}" 
+                            data-id="{{ $product->id }}"
+                            data-name="{{ $product->name }}"
+                            data-price="{{ $product->sale_price }}"
+                            data-image="{{ $mainImage }}"
                             data-url="{{ route('product.show', $product->slug) }}">
                         Add to Cart
                     </button>
@@ -254,7 +264,7 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center;
+                justify-content: flex-start;
                 box-sizing: border-box;
                 padding: 20px 15px;
                 transition: opacity 0.3s ease;
@@ -285,6 +295,16 @@
             .wd-quick-shop-content {
                 width: 100%;
                 text-align: center;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .wd-quick-shop-footer {
+                width: 100%;
+                margin-top: auto;
+                padding-top: 14px;
             }
 
             .wd-attribute-group {
@@ -342,7 +362,7 @@
                 gap: 8px;
                 z-index: 5;
                 transform: translateX(50px);
-                transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
                             opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
                 opacity: 0;
             }
@@ -520,116 +540,127 @@
     @push('js')
         <script>
             $(document).ready(function() {
-                // 1. Select Options button click triggers the overlay
-                $(document).on('click', '.wd-btn-select', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const btn = $(this);
-                    const card = btn.closest('.wd-product-card');
-                    const imgLink = card.find('.product-image-link');
-                    const overlay = card.find('.wd-quick-shop-overlay');
-                    
-                    // Show sizing overlay inside the image area
-                    imgLink.addClass('overlay-active');
-                    overlay.fadeIn(200);
-                    
-                    // Transform select options trigger to add to cart (initially disabled)
-                    btn.text('Add to Cart')
-                       .addClass('btn-add-cart-pending')
-                       .removeClass('wd-btn-select')
-                       .css('opacity', '0.6')
-                       .prop('disabled', true);
-                });
+                    const buildBtnLabel = labels => 'Add to Cart' + (labels.length ? ' - ' + labels.join(' / ') : '');
 
-                // 2. Size / Attribute options click selection logic
-                $(document).on('click', '.wd-attribute-option-box', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const optionBox = $(this);
-                    const attrGroup = optionBox.closest('.wd-attribute-group');
-                    const card = optionBox.closest('.wd-product-card');
-                    const overlay = card.find('.wd-quick-shop-overlay');
-                    const btn = card.find('.btn-select-options');
-                    
-                    // Highlight selected box
-                    attrGroup.find('.wd-attribute-option-box').removeClass('active');
-                    optionBox.addClass('active');
-                    
-                    // Collect selected options to match variant
-                    const allSelected = [];
-                    overlay.find('.wd-attribute-group').each(function() {
-                        const group = $(this);
-                        const activeOpt = group.find('.wd-attribute-option-box.active');
-                        if (activeOpt.length) {
-                            allSelected.push(parseInt(activeOpt.attr('data-value')));
+                    const setSelectState = btn => btn
+                        .data('original-label', btn.data('original-label') || btn.text().trim())
+                        .text('Add to Cart')
+                        .addClass('btn-add-cart-pending')
+                        .removeClass('wd-btn-select')
+                        .css('opacity', '0.6')
+                        .prop('disabled', true);
+
+                    const setCartState = (btn, product, price, labels, attrs) => {
+                        try { console.log('quick-shop setCartState', { product, price, labels, attrs }); } catch(e) {}
+                        // also store a JSON string on attribute for debugging in HTML
+                        try { btn.attr('data-attributes-json', JSON.stringify(attrs)); } catch(e) {}
+                        return btn
+                        .removeClass('btn-add-cart-pending')
+                        .addClass('btn-cart')
+                        .attr('data-id', product.id)
+                        .attr('data-name', product.name)
+                        .attr('data-price', price)
+                        .attr('data-image', product.image)
+                        .attr('data-url', product.url)
+                        .text(buildBtnLabel(labels))
+                        .css('opacity', '1')
+                        .prop('disabled', false)
+                        .data('attributes', attrs);
+                    };
+
+                    const resetSelectState = (btn, overlay, card) => {
+                        btn.text(btn.data('original-label') || 'Select Options')
+                            .removeClass('btn-cart btn-add-cart-pending')
+                            .addClass('wd-btn-select')
+                            .css('opacity', '1')
+                            .prop('disabled', false)
+                            .removeAttr('data-id data-name data-price data-image data-url')
+                            .removeData('attributes original-label');
+
+                        overlay.find('.wd-attribute-option-box').removeClass('active');
+
+                        const originalPrice = card.find('.price').attr('data-original-val');
+                        if (originalPrice) {
+                            card.find('.price').text(originalPrice);
                         }
+                    };
+
+                    $(document).on('click', '.wd-btn-select', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const btn = $(this);
+                        const card = btn.closest('.wd-product-card');
+
+                        card.find('.product-image-link').addClass('overlay-active');
+                        card.find('.wd-quick-shop-overlay').fadeIn(200);
+                        setSelectState(btn);
                     });
-                    
-                    const totalGroups = overlay.find('.wd-attribute-group').length;
-                    if (allSelected.length === totalGroups) {
-                        const variants = JSON.parse(card.attr('data-variants') || '[]');
-                        const matchedVariant = variants.find(v => {
-                            return allSelected.every(attrId => v.attributes.includes(attrId)) &&
-                                   v.attributes.length === allSelected.length;
-                        });
-                        
-                        if (matchedVariant) {
-                            // Update price text on match
-                            card.find('.price').text('TK ' + parseFloat(matchedVariant.price).toFixed(2));
-                            
-                            // Enable action button payload parameters
-                            btn.removeClass('btn-add-cart-pending')
-                               .addClass('btn-cart')
-                               .attr('data-id', matchedVariant.id)
-                               .attr('data-price', matchedVariant.price)
-                               .css('opacity', '1')
-                               .prop('disabled', false);
-                        }
-                    }
-                });
 
-                // 3. Quick Shop overlay Close click
-                $(document).on('click', '.wd-quick-shop-close-btn', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const closeBtn = $(this);
-                    const card = closeBtn.closest('.wd-product-card');
-                    const imgLink = card.find('.product-image-link');
-                    const overlay = card.find('.wd-quick-shop-overlay');
-                    const btn = card.find('.btn-select-options');
-                    
-                    // Hide overlay
-                    overlay.fadeOut(200);
-                    imgLink.removeClass('overlay-active');
-                    
-                    // Restore original select button styling
-                    btn.text('Select Options')
-                       .removeClass('btn-cart btn-add-cart-pending')
-                       .addClass('wd-btn-select')
-                       .css('opacity', '1')
-                       .prop('disabled', false)
-                       .removeAttr('data-id')
-                       .removeAttr('data-price');
-                       
-                    // Clear option highlightings
-                    overlay.find('.wd-attribute-option-box').removeClass('active');
-                    
-                    // Restore primary catalog price element
-                    const originalPrice = card.find('.price').attr('data-original-val');
-                    if (originalPrice) {
-                        card.find('.price').text(originalPrice);
-                    }
-                });
+                    $(document).on('click', '.wd-attribute-option-box', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const optionBox = $(this);
+                        const card = optionBox.closest('.wd-product-card');
+                        const overlay = card.find('.wd-quick-shop-overlay');
+                        const btn = card.find('.btn-select-options');
+
+                        optionBox.closest('.wd-attribute-group').find('.wd-attribute-option-box').removeClass('active');
+                        optionBox.addClass('active');
+
+                        const selected = [];
+                        const labels = [];
+
+                        overlay.find('.wd-attribute-group').each(function() {
+                            const activeOpt = $(this).find('.wd-attribute-option-box.active');
+                            if (activeOpt.length) {
+                                selected.push(parseInt(activeOpt.attr('data-value')));
+                                labels.push($.trim(activeOpt.text()));
+                            }
+                        });
+
+                        if (selected.length !== overlay.find('.wd-attribute-group').length) {
+                            return;
+                        }
+
+                        const variants = JSON.parse(card.attr('data-variants') || '[]');
+                        const matchedVariant = variants.find(v =>
+                            selected.every(attrId => v.attributes.includes(attrId)) && v.attributes.length === selected.length
+                        );
+
+                        if (!matchedVariant) {
+                            return;
+                        }
+
+                        card.find('.price').text('TK ' + parseFloat(matchedVariant.price).toFixed(2));
+                        setCartState(btn, {
+                            id: {{ $product->id }},
+                            name: @json($product->name),
+                            image: @json($mainImage),
+                            url: @json(route('product.show', $product->slug))
+                        }, matchedVariant.price, labels, selected);
+                    });
+
+                    $(document).on('click', '.wd-quick-shop-close-btn', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const card = $(this).closest('.wd-product-card');
+                        const overlay = card.find('.wd-quick-shop-overlay');
+                        const btn = card.find('.btn-select-options');
+
+                        overlay.fadeOut(200);
+                        card.find('.product-image-link').removeClass('overlay-active');
+                        resetSelectState(btn, overlay, card);
+                    });
             });
 
             // Unified AJAX Toggle Wishlist
             function ajaxToggleWishlist(button, productId) {
                 const btn = $(button);
                 btn.prop('disabled', true);
-                
+
                 $.post("{{ route('wishlist.add') }}", {
                     _token: "{{ csrf_token() }}",
                     id: productId
@@ -638,26 +669,26 @@
                     if (response.success) {
                         btn.toggleClass('wd-action-btn--active');
                         const isAdded = btn.hasClass('wd-action-btn--active');
-                        
+
                         if (isAdded) {
                             btn.attr('title', 'Remove from Wishlist');
                             btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
-                            showPremiumToast('Product added to wishlist!', 'success');
+                            toastr.success('Product added to wishlist!');
                         } else {
                             btn.attr('title', 'Add to Wishlist');
                             btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
-                            showPremiumToast('Product removed from wishlist.', 'success');
+                            toastr.success('Product removed from wishlist.');
                         }
-                        
+
                         if (response.count !== undefined) {
                             $('.wishlist-count strong, .wishlist-count').text(response.count);
                         }
                     } else {
-                        showPremiumToast('Something went wrong. Please try again.', 'error');
+                        toastr.error('Something went wrong. Please try again.');
                     }
                 })
                 .fail(function() {
-                    showPremiumToast('Unable to complete request. Please log in.', 'error');
+                    toastr.error('Unable to complete request. Please log in.');
                 })
                 .always(function() {
                     btn.prop('disabled', false);
@@ -668,7 +699,7 @@
             function ajaxToggleCompare(button, productId) {
                 const btn = $(button);
                 btn.prop('disabled', true);
-                
+
                 $.post("{{ route('compare.add') }}", {
                     _token: "{{ csrf_token() }}",
                     id: productId
@@ -677,81 +708,26 @@
                     if (response.success) {
                         btn.toggleClass('wd-action-btn--active');
                         const isAdded = btn.hasClass('wd-action-btn--active');
-                        
+
                         if (isAdded) {
-                            showPremiumToast('Product added to compare list!', 'success');
+                            toastr.success('Product added to compare list!');
                         } else {
-                            showPremiumToast('Product removed from compare list.', 'success');
+                            toastr.success('Product removed from compare list.');
                         }
-                        
+
                         if (response.count !== undefined) {
                             $('.compare-count, #msCompare').text(response.count);
                         }
                     } else {
-                        showPremiumToast('Something went wrong. Please try again.', 'error');
+                        toastr.error('Something went wrong. Please try again.');
                     }
                 })
                 .fail(function() {
-                    showPremiumToast('Unable to complete request.', 'error');
+                    toastr.error('Unable to complete request.');
                 })
                 .always(function() {
                     btn.prop('disabled', false);
                 });
-            }
-
-
-
-            // Glassmorphic Notification Toast System
-            function showPremiumToast(message, type = 'success') {
-                let container = document.getElementById('premium-toast-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'premium-toast-container';
-                    container.style.cssText = 'position: fixed; top: 24px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; max-width: 360px; width: calc(100% - 48px); pointer-events: none;';
-                    document.body.appendChild(container);
-                }
-                
-                const toast = document.createElement('div');
-                toast.style.cssText = `
-                    background: rgba(255, 255, 255, 0.98);
-                    backdrop-filter: blur(8px);
-                    border-left: 4px solid ${type === 'success' ? 'var(--primary-green)' : '#ef4444'};
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-                    border-radius: 8px;
-                    padding: 15px 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 14px;
-                    transform: translateY(-20px) scale(0.9);
-                    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
-                    pointer-events: auto;
-                    opacity: 0;
-                `;
-                
-                const icon = type === 'success' 
-                    ? `<svg width="22" height="22" fill="none" stroke="var(--primary-green)" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
-                    : `<svg width="22" height="22" fill="none" stroke="#ef4444" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
-                    
-                toast.innerHTML = `
-                    <span style="flex-shrink: 0; display: flex; align-items: center;">${icon}</span>
-                    <div style="flex-grow: 1; font-family: 'Outfit', 'Segoe UI', sans-serif; font-size: 13.5px; font-weight: 600; color: #1f2937; line-height: 1.4;">${message}</div>
-                    <button style="background: none; border: none; padding: 0; cursor: pointer; color: #9ca3af; display: flex; outline: none;" onclick="this.parentElement.style.opacity='0'; setTimeout(()=>this.parentElement.remove(),300)">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                `;
-                
-                container.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.style.transform = 'translateY(0) scale(1)';
-                    toast.style.opacity = '1';
-                }, 20);
-                
-                setTimeout(() => {
-                    toast.style.transform = 'translateY(-20px) scale(0.9)';
-                    toast.style.opacity = '0';
-                    setTimeout(() => toast.remove(), 400);
-                }, 3800);
             }
         </script>
     @endpush

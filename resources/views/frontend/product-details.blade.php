@@ -87,7 +87,7 @@
                                                         <div class="rating__best">
                                                             <div class="rating__current" data-id="{{ $product->id }}" style="display: block; width: {{ ($product->reviews_avg_rating ?? 0) * 20 }}%;"></div>
                                                         </div>
-                                                    </div>                                      
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -112,9 +112,9 @@
                                     <div class="product__info-card">
                                         <div class="product__info-body">
                                             @if($product->sale_price < $product->regular_price)
-                                                <div class="tag-badge tag-badge--sale">Sale</div>                    
+                                                <div class="tag-badge tag-badge--sale">Sale</div>
                                             @endif
-                                            
+
                                             <div class="product__prices-stock">
                                                 <div class="product__prices">
                                                     @if($product->sale_price < $product->regular_price)
@@ -199,12 +199,12 @@
                                                     </div>
                                                 </div>
                                                 <div class="product__actions-item product__actions-item--addtocart">
-                                                    <button type="button" class="btn btn-primary btn-lg btn-block btn-cart" 
+                                                    <button type="button" class="btn btn-primary btn-lg btn-block btn-cart"
                                                         id="product-add-to-cart"
-                                                        data-id="{{ $product->id }}" 
-                                                        data-name="{{ $product->name }}" 
-                                                        data-price="{{ $product->sale_price }}" 
-                                                        data-image="{{ $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg') }}" 
+                                                        data-id="{{ $product->id }}"
+                                                        data-name="{{ $product->name }}"
+                                                        data-price="{{ $product->sale_price }}"
+                                                        data-image="{{ $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg') }}"
                                                         data-url="{{ route('product.show', $product->slug) }}">Add to cart</button>
                                                 </div>
                                                 <div class="product__actions-divider"></div>
@@ -383,7 +383,7 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
                                     </div>
                                 </div>
                             </div>
-                        </div>	
+                        </div>
                     </div>
                 </div>
             </div>
@@ -423,14 +423,14 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
 
                     // Find matching variant
                     const matchedVariant = variants.find(v => {
-                        return selectedAttributes.every(attrId => v.attributes.includes(attrId)) && 
+                        return selectedAttributes.every(attrId => v.attributes.includes(attrId)) &&
                                v.attributes.length === selectedAttributes.length;
                     });
 
                     if (matchedVariant) {
                         $('.product__price--current, .product__price--new').text('TK ' + parseFloat(matchedVariant.price).toFixed(2));
                         $('.product__meta table tr:first-child td').text(matchedVariant.sku);
-                        
+
                         // Update stock badge
                         const stockText = matchedVariant.stock > 0 ? 'In Stock' : 'Out of Stock';
                         const stockClass = matchedVariant.stock > 0 ? 'success' : 'danger';
@@ -440,14 +440,15 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
 
                         // Update Add to Cart button
                         $('#product-add-to-cart').data('price', matchedVariant.price);
-                        $('#product-add-to-cart').data('id', matchedVariant.sku); // Use sku or variant ID
+                        // Keep data-id as the parent product id so server can locate the product
+                        $('#product-add-to-cart').data('id', '{{ $product->id }}');
                     }
                 }
 
                 $('.variant-option').change(updateVariantDetails);
                 updateVariantDetails(); // Initial call
                 @endif
-                
+
                 // Add to cart click is handled by master.blade.php globally, but we must ensure it reads #product-quantity
                 $(document).on('click', '#product-add-to-cart', function(e) {
                     // Update global quantity field used by .btn-cart handler

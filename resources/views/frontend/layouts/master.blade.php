@@ -11,7 +11,7 @@
 	{!! $jsonld ?? '' !!}
 
     <link rel="icon" type="image/png" href="{{asset('frontend')}}/favicon.png">
-    
+
     <!-- fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i">
     <!-- css -->
@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="{{asset('frontend')}}/css/mobile-red.css" media="(max-width: 1199px)">
     <!-- font - fontawesome -->
     <link rel="stylesheet" href="{{asset('frontend')}}/vendor/fontawesome/css/all.min.css">
-    
+
     <!-- Toastr -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
@@ -63,7 +63,7 @@
     <script src="{{asset('frontend')}}/vendor/select2/js/select2.min.js"></script>
     <script src="{{asset('frontend')}}/js/number.js"></script>
     <script src="{{asset('frontend')}}/js/main.js"></script>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
@@ -113,7 +113,7 @@
                     res.items.forEach(item => {
                         let image = item.attributes && item.attributes.image ? item.attributes.image : '{{ asset("images/no-image.jpg") }}';
                         let url = item.attributes && item.attributes.url ? item.attributes.url : '#';
-                        
+
                         $('#mini-cart-products').append(`
                             <div class="product product-cart">
                                 <div class="product-detail">
@@ -141,7 +141,7 @@
                 }
 
                 $('#mini-cart-subtotal').text('TK ' + res.subtotal);
-                
+
                 if (res.message && res.success !== false) {
                     toastr.success(res.message);
                 } else if (res.message && res.success === false) {
@@ -156,8 +156,15 @@
             $(document).on('click', '.btn-cart', function () {
                 let btn = $(this);
                 let qty = $('.quantity').val() || 1;
+                let selectedAttributes = btn.data('attributes') || [];
 
-                cartAjax("{{ route('cart.add') }}", {
+                if ((!selectedAttributes || !selectedAttributes.length) && btn.closest('form').length) {
+                    selectedAttributes = btn.closest('form').find('.variant-option:checked').map(function() {
+                        return parseInt($(this).val());
+                    }).get();
+                }
+
+                let payload = {
                     _token: "{{ csrf_token() }}",
                     id: btn.data('id'),
                     name: btn.data('name'),
@@ -165,7 +172,15 @@
                     image: btn.data('image'),
                     url: btn.data('url'),
                     qty: qty
-                }).done(updateMiniCart);
+                };
+
+                try { console.log('cart payload before send', payload, 'btn.data(attributes)=', btn.data('attributes'), 'attr-json=', btn.attr && btn.attr('data-attributes-json')); } catch(e) {}
+
+                if (selectedAttributes && selectedAttributes.length) {
+                    payload.attributes = selectedAttributes;
+                }
+
+                cartAjax("{{ route('cart.add') }}", payload).done(updateMiniCart);
             });
 
             // ADD TO CART (Form Submission)
@@ -173,7 +188,7 @@
                 e.preventDefault();
                 let form = $(this);
                 let formData = form.serialize();
-                
+
                 cartAjax(form.attr('action'), formData).done(function(res) {
                     updateMiniCart(res);
                     if (res.redirect) {
@@ -268,43 +283,7 @@
 
         });
     </script>
-    
-    <!-- Root element of PhotoSwipe. Must have class pswp. -->
-    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="pswp__bg"></div>
-        <div class="pswp__scroll-wrap">
-            <div class="pswp__container">
-                <div class="pswp__item"></div>
-                <div class="pswp__item"></div>
-                <div class="pswp__item"></div>
-            </div>
-            <div class="pswp__ui pswp__ui--hidden">
-                <div class="pswp__top-bar">
-                    <div class="pswp__counter"></div>
-                    <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-                    <!--<button class="pswp__button pswp__button--share" title="Share"></button>-->
-                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-                    <div class="pswp__preloader">
-                        <div class="pswp__preloader__icn">
-                            <div class="pswp__preloader__cut">
-                                <div class="pswp__preloader__donut"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                    <div class="pswp__share-tooltip"></div>
-                </div>
-                <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-                <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
-                <div class="pswp__caption">
-                    <div class="pswp__caption__center"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+
     @stack('js')
 </body>
 </html>

@@ -16502,6 +16502,22 @@ select.form-control::-ms-expand {
 .product-card--layout--grid .product-card__name {
   padding: 0 16px;
   line-height: 1.1875;
+  min-height: 38px;
+  max-height: 38px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.product-card--layout--grid .product-card__name > div {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.product-card--layout--grid .product-card__name a {
+  display: block;
+  line-height: 1.1875;
 }
 
 .product-card--layout--grid .product-card__rating {

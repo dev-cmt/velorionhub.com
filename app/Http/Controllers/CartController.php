@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Darryldecode\Cart\Facades\CartFacade as Cart;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -42,6 +43,20 @@ class CartController extends Controller
         $sku   = $variant->sku ?? $product->sku;
         $name  = $variant->product->name ?? $product->name;
         $price = $variant ? $variant->sale_price : $product->sale_price;
+        $variantAttributes = [];
+        $variantLabel = null;
+
+        if ($variant) {
+            foreach ($variant->variantItems as $variantItem) {
+                if ($variantItem->attribute && $variantItem->attributeItem) {
+                    $variantAttributes[$variantItem->attribute->name] = $variantItem->attributeItem->name;
+                }
+            }
+
+            if (!empty($variantAttributes)) {
+                $variantLabel = implode(' / ', array_values($variantAttributes));
+            }
+        }
 
         // ---------- Cart logic ----------
         if (Cart::get($sku)) {
@@ -57,7 +72,12 @@ class CartController extends Controller
                 'name' => $name,
                 'price' => $price,
                 'quantity' => $quantity,
-                'attributes' => $variantKey ?? null,
+                'attributes' => [
+                    'variant_id' => $variant ? $variant->id : null,
+                    'variant_key' => $variantKey,
+                    'variant_attributes' => $variantAttributes,
+                    'variant_label' => $variantLabel,
+                ],
                 'associatedModel' => $product,
             ]);
         }
@@ -67,18 +87,13 @@ class CartController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product added to cart',
-                'count'   => Cart::getTotalQuantity()
+                'count'   => Cart::getContent()->count()
             ]);
-        }
-
-        // ---------- Normal fallback ----------
-        if ($request->order_now) {
-            return $theme->is_active
-                ? redirect()->route('checkout')
-                : redirect()->route('theme.checkout', ['path' => $theme->path]);
+        } else {
+            return back()->with('success', 'Product added to cart successfully.');
         }
     }
-    public function cartItemPlus(Request $request, Theme $theme, $id)
+    public function cartItemPlus(Request $request)
     {
         // Check cart item exists
         $item = Cart::get($request->id);
@@ -96,7 +111,7 @@ class CartController extends Controller
             return response()->json(['error' => 'error']);
         }
     }
-    public function cartItemMinus(Request $request, Theme $theme, $id)
+    public function cartItemMinus(Request $request)
     {
         $item = Cart::get($request->id);
         if (! $item) {
@@ -162,21 +177,66 @@ class CartController extends Controller
             $image = $request->image ?? ($product->main_image ? asset($product->main_image) : asset('images/no-image.jpg'));
             $url   = $request->url ?? route('product.show', $product->slug);
             $variantId = null;
+            $variantAttributes = [];
+            $variantLabel = null;
 
-            // Handle Variants if submitted via attributes array
-            if ($request->has('attributes') && is_array($request->attributes)) {
-                $selectedAttrIds = array_values($request->attributes);
-                sort($selectedAttrIds);
-                $selectedVariantKey = implode('-', $selectedAttrIds);
+            // Handle Variants: accept several shapes from the client
+            $selectedAttrIds = [];
+            if ($request->has('attributes')) {
+                $attrs = $request->attributes;
+                if (is_array($attrs)) {
+                    $selectedAttrIds = array_values($attrs);
+                } elseif (is_string($attrs)) {
+                    // Try JSON or CSV
+                    $decoded = json_decode($attrs, true);
+                    if (is_array($decoded)) {
+                        $selectedAttrIds = array_values($decoded);
+                    } else {
+                        $selectedAttrIds = array_filter(array_map('trim', explode(',', $attrs)));
+                    }
+                }
+            } elseif ($request->has('attribute_item_id')) {
+                // legacy form field name
+                $a = $request->attribute_item_id;
+                $selectedAttrIds = is_array($a) ? $a : [$a];
+            }
 
+            // Normalize to integers and sort for comparison
+            $selectedAttrIds = array_map('intval', $selectedAttrIds);
+            sort($selectedAttrIds);
+            $selectedVariantKey = implode('-', $selectedAttrIds);
+
+            // Log incoming attributes for debugging (no functional change)
+            try {
+                Log::info('cart.add request', [
+                    'product_id' => $product->id ?? $productId,
+                    'raw_attributes_input' => $request->input('attributes'),
+                    'normalized_selected_attr_ids' => $selectedAttrIds,
+                    'all_payload' => $request->all()
+                ]);
+            } catch (\Exception $e) {
+                // swallow logging errors to avoid breaking add flow
+            }
+
+            if (!empty($selectedAttrIds)) {
                 foreach ($product->variants as $variant) {
                     $variantAttrIds = $variant->variantItems->pluck('attribute_item_id')->toArray();
+                    $variantAttrIds = array_map('intval', $variantAttrIds);
                     sort($variantAttrIds);
                     if (implode('-', $variantAttrIds) === $selectedVariantKey) {
                         $variantId = $variant->id;
                         $price = $variant->sale_price;
-                        // Use variant sku as ID if needed for uniqueness in cart
-                        $productId = 'v' . $variant->id; 
+                        $productId = 'v' . $variant->id;
+
+                        foreach ($variant->variantItems as $variantItem) {
+                            if ($variantItem->attribute && $variantItem->attributeItem) {
+                                $variantAttributes[$variantItem->attribute->name] = $variantItem->attributeItem->name;
+                            }
+                        }
+
+                        if (!empty($variantAttributes)) {
+                            $variantLabel = implode(' / ', array_values($variantAttributes));
+                        }
                         break;
                     }
                 }
@@ -191,13 +251,17 @@ class CartController extends Controller
                     'image' => $image,
                     'url' => $url,
                     'variant_id' => $variantId,
+                    'variant_attributes' => $variantAttributes,
+                    'variant_label' => $variantLabel,
                 ]
             ]);
 
             $response = $this->mini()->getData(true);
             $response['success'] = true;
             $response['message'] = 'Product added to cart successfully!';
-            
+            // Echo selected attribute ids for debugging (client may send various shapes)
+            $response['selected_attributes'] = $selectedAttrIds;
+
             if ($request->has('redirect')) {
                 $response['redirect'] = $request->redirect;
             }
@@ -244,7 +308,7 @@ class CartController extends Controller
             $cart = $this->cart();
             return response()->json([
                 'success'  => true,
-                'count'    => (int)$cart->getTotalQuantity(),
+                'count'    => $cart->getContent()->count(),
                 'subtotal' => number_format((float)$cart->getSubTotal(), 2),
                 'items'    => $cart->getContent()->values(),
             ]);
