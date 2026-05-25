@@ -34,7 +34,14 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::orderBy('id','desc')->paginate(10);
+        $products = Product::with([
+                'category',
+                'brand',
+                'variants.variantItems.attributeItem',
+            ])
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
         return view('backend.inventory.products.index', compact('products'));
     }
 
@@ -54,7 +61,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        
+
         // Handle specifications
         if ($request->has('spec_keys') && $request->has('spec_values')) {
             $specs = [];
@@ -181,44 +188,7 @@ class ProductController extends Controller
             'seo'
         ]);
 
-        // ------------------------------------------
-        // SELECTED ATTRIBUTE IDS
-        // ------------------------------------------
-        $selectedAttributeIds = $product->variants
-            ->pluck('variantItems.*.attribute_id')
-            ->flatten()
-            ->unique()
-            ->values();
-
-        // ------------------------------------------
-        // SELECTED ATTRIBUTE ITEM IDS (group by attribute)
-        // ------------------------------------------
-        $selectedItems = [];  // <-- needed by your blade
-
-        foreach ($product->variants as $variant) {
-            foreach ($variant->variantItems as $item) {
-                $selectedItems[$item->attribute_id][] = $item->attribute_item_id;
-            }
-        }
-
-        // remove duplicates
-        foreach ($selectedItems as $attrId => $items) {
-            $selectedItems[$attrId] = array_unique($items);
-        }
-
-        // ------------------------------------------
-        // Existing Attribute Images (if you store them)
-        // Structure:  $existingImages[attribute_id][item_id] = "path/to/img.jpg"
-        // ------------------------------------------
-        $existingImages = [];
-
-        foreach ($product->variants as $variant) {
-            foreach ($variant->variantItems as $item) {
-                if ($item->image) {
-                    $existingImages[$item->attribute_id][$item->attribute_item_id] = $item->image;
-                }
-            }
-        }
+        $variantSelections = $this->getVariantSelectionData($product);
 
         return view('backend.inventory.products.edit', compact(
             'product',
@@ -229,16 +199,14 @@ class ProductController extends Controller
             'attributes',
             'warranties',
             'shippingClasses',
-            'selectedAttributeIds',
-            'selectedItems',          // FIXED
-            'existingImages'          // FIXED
+            'variantSelections'
         ));
     }
 
     public function update(Request $request, Product $product)
     {
         $data = $request->all();
-        
+
         // Handle specifications
         if ($request->has('spec_keys') && $request->has('spec_values')) {
             $specs = [];
@@ -454,13 +422,7 @@ class ProductController extends Controller
             $product = Product::with('variants.variantItems')->find($request->product_id);
 
             if ($product) {
-                foreach ($product->variants as $variant) {
-                    foreach ($variant->variantItems as $item) {
-                        $selectedItems[$item->attribute_id][] = $item->attribute_item_id;
-                        if ($item->image) $existingImages[$item->attribute_id][$item->attribute_item_id] = $item->image;
-                    }
-                }
-                foreach ($selectedItems as $attrId => $items) $selectedItems[$attrId] = array_unique($items);
+                [, $selectedItems, $existingImages] = $this->getVariantSelectionData($product);
             }
         }
 
@@ -548,6 +510,34 @@ class ProductController extends Controller
             $result = $tmp;
         }
         return $result;
+    }
+
+    private function getVariantSelectionData(Product $product): array
+    {
+        $selectedAttributeIds = [];
+        $selectedItems = [];
+        $existingImages = [];
+
+        foreach ($product->variants as $variant) {
+            foreach ($variant->variantItems as $item) {
+                $selectedAttributeIds[] = $item->attribute_id;
+                $selectedItems[$item->attribute_id][] = $item->attribute_item_id;
+
+                if ($item->image) {
+                    $existingImages[$item->attribute_id][$item->attribute_item_id] = $item->image;
+                }
+            }
+        }
+
+        foreach ($selectedItems as $attrId => $items) {
+            $selectedItems[$attrId] = array_values(array_unique($items));
+        }
+
+        return [
+            array_values(array_unique($selectedAttributeIds)),
+            $selectedItems,
+            $existingImages,
+        ];
     }
 
     /**------------------------------------------------------------------------------------------------

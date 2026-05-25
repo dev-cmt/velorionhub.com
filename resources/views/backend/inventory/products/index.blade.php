@@ -29,6 +29,7 @@
                             <th>Name</th>
                             <th>Category</th>
                             <th>Brand</th>
+                            <th>Variants</th>
                             <th>Price</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -48,6 +49,19 @@
                             <td>{{ $product->name }}</td>
                             <td>{{ $product->category->name ?? '-' }}</td>
                             <td>{{ $product->brand->name ?? '-' }}</td>
+                            <td>
+                                @if($product->has_variant && count($product->variant_summary))
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach($product->variant_summary as $variant)
+                                            <span class="badge bg-info text-dark" title="{{ $variant['sku'] }}">
+                                                {{ $variant['label'] }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="badge bg-secondary">No Variant</span>
+                                @endif
+                            </td>
                             <td>{{ number_format($product->sale_price, 2) }}</td>
                             <td>
                                 @if($product->status)
@@ -73,7 +87,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center">No products found.</td>
+                            <td colspan="9" class="text-center">No products found.</td>
                         </tr>
                         @endforelse
                     </tbody>

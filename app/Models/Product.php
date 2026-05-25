@@ -97,7 +97,7 @@ class Product extends Model
     {
         return $this->hasOne(ProductShipping::class);
     }
-    
+
     public function reviews()
     {
         return $this->hasMany(ProductReview::class);
@@ -167,6 +167,30 @@ class Product extends Model
     public function getCurrentDiscountAttribute()
     {
         return $this->discount()->where('status', true)->where('start_date', '<=', now())->where('end_date', '>=', now())->first();
+    }
+
+    public function getVariantSummaryAttribute(): array
+    {
+        if (!$this->relationLoaded('variants')) {
+            $this->loadMissing('variants.variantItems.attributeItem');
+        }
+
+        return $this->variants->map(function (ProductVariant $variant) {
+            $label = $variant->variantItems
+                ->map(function (ProductVariantItem $item) {
+                    return $item->attributeItem->name ?? null;
+                })
+                ->filter()
+                ->implode(' / ');
+
+            return [
+                'id' => $variant->id,
+                'sku' => $variant->variant_sku,
+                'label' => $label ?: $variant->variant_sku,
+                'price' => $variant->variant_price,
+                'stock' => $variant->variant_stock,
+            ];
+        })->values()->all();
     }
 
 

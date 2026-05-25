@@ -349,204 +349,14 @@
                     </div>
                 </div>
 
-                <!-- Product Variants -->
-                <div class="card custom-card">
-                    <div class="card-header justify-content-between">
-                        <div class="card-title">Product Variants Preview</div>
-                        <div class="custom-toggle-switch d-flex align-items-center">
-                            <input type="hidden" name="has_variant" value="0">
-                            <input id="hasVariantToggle" name="has_variant" type="checkbox" value="1"
-                                {{ old('has_variant') ? 'checked' : '' }}>
-                            <label for="hasVariantToggle" class="label-primary"></label>
-                        </div>
-                    </div>
-
-                    <div class="card-body" id="variant_card_body" style="{{ old('has_variant') ? '' : 'display:none;' }}">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Attributes</label>
-                                <select name="attribute_id[]" id="attribute_id" class="form-select searchable" multiple>
-                                    @foreach($attributes as $attribute)
-                                        <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="attribute_items_container" class="row"></div>
-
-                        <div id="variant_combinations_container"></div>
-                    </div>
-                </div>
-
-                @push('js')
-                <script>
-                    $('#hasVariantToggle').on('change', function() {
-                        $('#variant_card_body').toggle(this.checked);
-                    });
-                </script>
-
-                <script>
-                    $(function() {
-                        // Initialize Choices.js for select elements
-                        function initChoices() {
-                            $('.attribute-item').each(function() {
-                                if (!$(this).data('choices-initialized')) {
-                                    new Choices(this, {
-                                        removeItemButton: true,
-                                        searchEnabled: true,
-                                        placeholderValue: 'Select Items'
-                                    });
-                                    $(this).data('choices-initialized', true);
-                                }
-                            });
-                        }
-
-                        // Load attribute items (e.g. Color, Size options)
-                        function loadAttributeItems() {
-                            let selected = $('#attribute_id').val();
-                            if (!selected || selected.length === 0) {
-                                $('#attribute_items_container').html('');
-                                $('#variant_combinations_container').html('');
-                                return;
-                            }
-
-                            $.get('{{ route("attributes.getItems") }}', { attribute_ids: selected }, function(html) {
-                                $('#attribute_items_container').html(html);
-                                initChoices();
-                            });
-                        }
-
-                        // Load variant combinations (SKU generation)
-                        function loadVariantCombinations() {
-                            let attrs = [];
-                            $('.attribute-item').each(function() {
-                                let id = $(this).data('id');
-                                let items = $(this).val();
-                                if (items && items.length) attrs.push({ id, items });
-                            });
-
-                            $.ajax({
-                                url: '{{ route("products.getItemsCombo") }}',
-                                method: 'GET',
-                                data: {
-                                    sku: $('#sku').val(),
-                                    sale_price: $('#sale_price').val(),
-                                    purchase_price: $('#purchase_price').val(),
-                                    total_stock: $('#total_stock').val(),
-                                    attributes: attrs
-                                },
-                                success: function(html) {
-                                    $('#variant_combinations_container').html(html);
-                                }
-                            });
-                        }
-
-                        // ✅ NEW: Dynamically show file inputs for color/image attributes
-                        function updateImageUploadFields() {
-                            $('.attribute-item').each(function() {
-                                let hasImage = $(this).data('has-image'); // detect attribute with images (Color)
-                                if (!hasImage) return;
-
-                                let attrId = $(this).data('id');
-                                let selectedItems = $(this).find('option:selected');
-                                let container = $('.image-upload-container[data-attr-id="' + attrId + '"] .image-upload-fields');
-
-                                container.html(''); // Clear previous fields
-
-                                selectedItems.each(function() {
-                                    let itemId = $(this).val();
-                                    let itemName = $(this).text();
-
-                                    // Add file upload input per selected item
-                                    let fieldHtml = `
-                                        <div class="d-flex align-items-center mb-2 single-upload-field" data-item-id="${itemId}">
-                                            <span class="me-2 fw-semibold text-secondary attribute-image-label">${itemName}</span>
-                                            <input type="file" name="attribute_images[${attrId}][${itemId}]" class="form-control form-control-sm attribute-image-input" accept="image/*">
-                                            <img src="" alt="${itemName}" class="attribute-image-preview ms-2 d-none">
-                                        </div>
-                                    `;
-                                    container.append(fieldHtml);
-                                });
-                            });
-                        }
-
-                        // Show instant thumbnail preview for attribute images (e.g., Color)
-                        function setAttributeImagePreview(fileInput) {
-                            const $field = $(fileInput).closest('.single-upload-field');
-                            let $img = $field.find('.attribute-image-preview');
-
-                            if (!$img.length) {
-                                $img = $('<img class="attribute-image-preview ms-2 d-none" alt="Preview">');
-                                $field.append($img);
-                            }
-
-                            const file = fileInput.files && fileInput.files[0];
-                            const previousUrl = $img.data('object-url');
-                            if (previousUrl) {
-                                URL.revokeObjectURL(previousUrl);
-                                $img.removeData('object-url');
-                            }
-
-                            if (!file) {
-                                $img.attr('src', '').addClass('d-none');
-                                return;
-                            }
-
-                            const url = URL.createObjectURL(file);
-                            $img.attr('src', url).removeClass('d-none');
-                            $img.data('object-url', url);
-                        }
-
-                        // --------------------
-                        // Event Bindings
-                        // --------------------
-                        $('#attribute_id').on('change', loadAttributeItems);
-
-                            // When user selects attribute items (e.g., colors or sizes)
-                            $(document).on('change', '.attribute-item', function() {
-                                loadVariantCombinations();
-                                updateImageUploadFields(); // 👈 Add this
-                            });
-
-                            // When user picks an image for a color/attribute item
-                            $(document).on('change', '.attribute-image-input', function() {
-                                setAttributeImagePreview(this);
-                            });
-
-                            // When SKU or Price changes, refresh variant combinations
-                            $(document).on('keyup change', '#sku, #sale_price, #purchase_price, #total_stock', loadVariantCombinations);
-
-                            // Remove variant row
-                            $(document).on('click', '.remove-variant', function() {
-                                $(this).closest('tr').remove();
-                            });
-
-                            // Add/Remove Specification row
-                            $('#add_spec_row').on('click', function() {
-                                let row = `<tr>
-                                    <td><input type="text" name="spec_keys[]" class="form-control form-control-sm" placeholder="Name"></td>
-                                    <td><input type="text" name="spec_values[]" class="form-control form-control-sm" placeholder="Value"></td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-danger remove-spec-row"><i class="ri-delete-bin-line"></i></button>
-                                    </td>
-                                </tr>`;
-                                $('#specifications_table tbody').append(row);
-                            });
-                            $(document).on('click', '.remove-spec-row', function() {
-                                $(this).closest('tr').remove();
-                            });
-
-                            // Initialize on page load
-                            initChoices();
-                        });
-                    </script>
-
-                @endpush
-
-
-
-
+                @include('backend.inventory.products.partials._variant_section', [
+                    'attributes' => $attributes,
+                    'hasVariant' => old('has_variant', false),
+                    'selectedAttributeIds' => [],
+                    'selectedItems' => [],
+                    'existingImages' => [],
+                    'productId' => null,
+                ])
 
             </div>
 
@@ -558,9 +368,10 @@
                         <div class="card-title">Images</div>
                     </div>
                     <div class="card-body pt-1">
-                        <div class="d-flex gap-3 align-items-start">
+                        <div class="d-flex gap-3 align-items-start flex-nowrap">
                             <!-- Main & Hover Group -->
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 flex-shrink-0">
+                                <!-- Main-->
                                 <div class="text-center">
                                     <span class="fw-bold text-muted d-block mb-1" style="font-size: 9px; letter-spacing: 0.5px;">MAIN</span>
                                     <div class="image-preview-box shadow-sm" id="main_image_container">
@@ -578,6 +389,7 @@
                                     @error('main_image') <div class="text-danger mt-1" style="font-size: 8px;">{{ $message }}</div> @enderror
                                 </div>
 
+                                <!-- Hover -->
                                 <div class="text-center">
                                     <span class="fw-bold text-muted d-block mb-1" style="font-size: 9px; letter-spacing: 0.5px;">HOVER</span>
                                     <div class="image-preview-box shadow-sm" id="hover_image_container">
