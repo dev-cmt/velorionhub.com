@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Theme;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +30,7 @@ class Theme1Controller extends Controller
 
         $best_sellers = $products->shuffle()->take(10);
         $new_arrivals = $products->sortByDesc('created_at')->take(10);
-        return view('frontend.welcome', compact('seotags','breadcrumbs', 'products', 'categories', 'best_sellers', 'new_arrivals'));
+        return view('theme1.welcome', compact('seotags','breadcrumbs', 'products', 'categories', 'best_sellers', 'new_arrivals'));
     }
 
     public function shop()
@@ -41,7 +42,7 @@ class Theme1Controller extends Controller
         $breadcrumbs = $this->generateBreadcrumbJsonLd([
             ['name' => 'Home', 'url' => url('/')],
         ]);
-        return view('frontend.shop', compact('seotags','breadcrumbs'));
+        return view('theme1.shop', compact('seotags','breadcrumbs'));
     }
 
     public function productShow($slug)
@@ -73,7 +74,7 @@ class Theme1Controller extends Controller
             ->take(10)
             ->get();
 
-        return view('frontend.product-details', compact('seotags','breadcrumbs', 'product', 'related_products'));
+        return view('theme1.product-details', compact('seotags','breadcrumbs', 'product', 'related_products'));
     }
 
     public function checkout()
@@ -85,7 +86,7 @@ class Theme1Controller extends Controller
         $breadcrumbs = $this->generateBreadcrumbJsonLd([
             ['name' => 'Home', 'url' => url('/')],
         ]);
-        return view('frontend.checkout', compact('seotags','breadcrumbs'));
+        return view('theme1.checkout', compact('seotags','breadcrumbs'));
     }
 
     public function cart()
@@ -97,7 +98,7 @@ class Theme1Controller extends Controller
         $breadcrumbs = $this->generateBreadcrumbJsonLd([
             ['name' => 'Home', 'url' => url('/')],
         ]);
-        return view('frontend.cart', compact('seotags','breadcrumbs'));
+        return view('theme1.cart', compact('seotags','breadcrumbs'));
     }
 
     public function wishlist()
@@ -109,7 +110,7 @@ class Theme1Controller extends Controller
         $breadcrumbs = $this->generateBreadcrumbJsonLd([
             ['name' => 'Home', 'url' => url('/')],
         ]);
-        return view('frontend.wishlist', compact('seotags','breadcrumbs'));
+        return view('theme1.wishlist', compact('seotags','breadcrumbs'));
     }
 
     public function compare()
@@ -121,7 +122,7 @@ class Theme1Controller extends Controller
         $breadcrumbs = $this->generateBreadcrumbJsonLd([
             ['name' => 'Home', 'url' => url('/')],
         ]);
-        return view('frontend.compare', compact('seotags','breadcrumbs'));
+        return view('theme1.compare', compact('seotags','breadcrumbs'));
     }
 
 }
