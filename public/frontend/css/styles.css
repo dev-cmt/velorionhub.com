@@ -2,7 +2,7 @@
     * Name: Onsus - Multipurpose eCommerce
     * Version: 1.0.0
     * Author: Themesflat
-    * Author URI: http://themesflat.com 
+    * Author URI: http://themesflat.com
 
 	* Abstracts variable
 
@@ -467,15 +467,15 @@ video {
 }
 
 .text-cl-4 {
-  color: var(--text-4);
+  color: var(--text-4) !important;
 }
 
 .text-cl-5 {
-  color: var(--text-5);
+  color: var(--text-5) !important;
 }
 
 .text-cl-7 {
-  color: var(--text-7);
+  color: var(--text-7) !important;
 }
 
 .text-primary {
@@ -872,7 +872,7 @@ a:focus, a:hover {
   background-color: var(--primary);
 }
 
-/* Preload 
+/* Preload
 ------------------------------------------- */
 .preload-container {
   display: flex;
@@ -1418,7 +1418,7 @@ a:focus, a:hover {
 /*------------ Components ---------------- */
 /*------------ header ---------------- */
 .tf-topbar {
-  padding: 5px 0px;
+  padding: 2px 0px; /*CH-5px 0px*/
 }
 
 .topbar-left {
@@ -9503,7 +9503,7 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
     flex-shrink: 0;
   }
   .tf-topbar {
-    padding: 12px 0px;
+    padding: 2px 0px;  /*CH-12px 0px*/
   }
   .tf-topbar.style-2 {
     padding: 7.5px 0px;

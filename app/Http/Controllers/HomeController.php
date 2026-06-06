@@ -27,7 +27,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        $products = Product::with('media')->withCount('reviews')->withAvg('reviews', 'rating')->active()->get();
+        $products = Product::with(['media', 'category'])->withCount('reviews')->withAvg('reviews', 'rating')->active()->get();
         $hot_deals = $products->take(10);
 
         $slides = HomeSlide::query()
@@ -55,7 +55,7 @@ class HomeController extends Controller
         $categories = Category::with('media')->where('is_home', true)->where('status', true)->take(8)->get();
 
         $best_sellers = $products->shuffle()->take(10);
-        $new_arrivals = Product::with('media')->withCount('reviews')->withAvg('reviews', 'rating')->active()->latest()->take(10)->get();
+        $new_arrivals = Product::with(['media', 'category'])->withCount('reviews')->withAvg('reviews', 'rating')->active()->latest()->take(10)->get();
         $top_rated = $products->sortByDesc('reviews_avg_rating')->take(3);
         $special_offers = $products->filter(function($p) {
             return $p->sale_price < $p->regular_price;
