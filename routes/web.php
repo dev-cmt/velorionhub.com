@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
@@ -31,12 +30,41 @@ use App\Http\Controllers\PromotionBannerController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PageSectionController;
 use App\Http\Controllers\SearchController;
-
-Route::get('/search-suggestions', [SearchController::class, 'suggest'])->name('search.suggest');
-
+use Illuminate\Support\Facades\Auth;
+use Darryldecode\Cart\Facades\CartFacade as Cart;
 
 Route::get('/sync-permissions', [AdminController::class, 'resyncPermissions'])->name('sync.permissions');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+
+Route::get('/dd', function () {
+    // Cart::session(Auth::id() ?? session()->getId())->clear();
+    $cart = Cart::session(Auth::id() ?? session()->getId());
+    $items = $cart->getContent()->sortBy('id');
+
+    dd($items->map(function ($item) {
+        return [
+            'id' => $item->id,
+            'name' => $item->name,
+            'quantity' => $item->quantity,
+            'price' => $item->price,
+            'attributes' => $item->attributes,
+        ];
+    }));
+});
+
+Route::get('/clear-cart', function () {
+
+    $sessionKey = Auth::id() ?? session()->getId();
+
+    Cart::session($sessionKey)->clear();
+
+    session()->flush();        // remove all session data
+    session()->invalidate();   // destroy session
+    session()->regenerate();   // new session
+
+    return 'Cart + Session Reset Done';
+});
+
 Route::get('/cc', function () {
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
     \Illuminate\Support\Facades\Artisan::call('config:clear');
@@ -74,12 +102,15 @@ Route::controller($controller)->group(function () {
     Route::get('/track-order', 'trackOrder')->name('track.order');
     Route::get('/faq', 'faq')->name('faq');
 });
+Route::get('/search-suggestions', [SearchController::class, 'suggest'])->name('search.suggest');
 
 // Frontend Cart
-Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/add', [CartController::class, 'addCart'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'updateQty'])->name('cart.update.qty');
-Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-Route::get('/cart/mini', [CartController::class, 'mini'])->name('cart.mini');
+Route::get('/cart/mini', [CartController::class, 'cartItemMinus'])->name('cart.mini');
+Route::get('/cart/plus', [CartController::class, 'cartItemPlus'])->name('cart.plus');
+Route::delete('/cart/remove/{id}', [CartController::class, 'cartItemRemove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'cartClear'])->name('cart.clear');
 
 // Dashboard
 Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard')->middleware('auth');
@@ -288,6 +319,10 @@ Route::middleware('auth')->group(function () {
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('setting.index');
     Route::post('/settings-update', [SettingController::class, 'update'])->name('setting.update');
+    Route::get('/website-settings', [SettingController::class, 'webSettings'])->name('website-settings.index');
+    Route::get('/system-settings', [SettingController::class, 'systemSettings'])->name('system-settings.index');
+    Route::get('/financial-settings', [SettingController::class, 'financialSettings'])->name('financial-settings.index');
+    Route::get('/other-settings', [SettingController::class, 'otherSettings'])->name('other-settings.index');
 
     // SEO settings
     Route::get('/seo-pages',[PageSeoController::class,'index'])->name('settings.seo.index');

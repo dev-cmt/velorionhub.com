@@ -254,7 +254,7 @@
                         @foreach ($hot_deals as $product)
                             <div class="block-products-carousel__column">
                                 <div class="block-products-carousel__cell">
-                                    @include($viewsPath . '.partials.product-card', ['product' => $product])
+                                    @include($filePath . '.partials.product-card', ['product' => $product])
                                 </div>
                             </div>
                         @endforeach
@@ -314,7 +314,7 @@
                                 @foreach ($best_sellers as $product)
                                     <div class="block-products-carousel__column">
                                         <div class="block-products-carousel__cell">
-                                            @include($viewsPath . '.partials.product-card', ['product' => $product])
+                                            @include($filePath . '.partials.product-card', ['product' => $product])
                                         </div>
                                     </div>
                                 @endforeach
@@ -419,7 +419,7 @@
                     <div class="block-products-carousel__carousel-loader"></div>
                     <div class="owl-carousel">
                         @foreach ($new_arrivals as $product)
-                            @include($viewsPath . '.partials.product-card-horizontal', ['product' => $product])
+                            @include($filePath . '.partials.product-card-horizontal', ['product' => $product])
                         @endforeach
                     </div>
                 </div>
@@ -461,7 +461,7 @@
                         @foreach ($best_sellers as $product)
                             <div class="block-products-carousel__column">
                                 <div class="block-products-carousel__cell">
-                                    @include($viewsPath . '.partials.product-card', ['product' => $product])
+                                    @include($filePath . '.partials.product-card', ['product' => $product])
                                 </div>
                             </div>
                         @endforeach
@@ -478,7 +478,7 @@
                         <div class="block-products-columns__title">Top Rated</div>
                         <div class="block-products-columns__list">
                             @foreach($top_rated as $product)
-                                @include($viewsPath . '.partials.product-card-horizontal', ['product' => $product])
+                                @include($filePath . '.partials.product-card-horizontal', ['product' => $product])
                             @endforeach
                         </div>
                     </div>
@@ -486,7 +486,7 @@
                         <div class="block-products-columns__title">Special Offers</div>
                         <div class="block-products-columns__list">
                             @foreach($special_offers as $product)
-                                @include($viewsPath . '.partials.product-card-horizontal', ['product' => $product])
+                                @include($filePath . '.partials.product-card-horizontal', ['product' => $product])
                             @endforeach
                         </div>
                     </div>
@@ -494,7 +494,7 @@
                         <div class="block-products-columns__title">Bestsellers</div>
                         <div class="block-products-columns__list">
                             @foreach($column_bestsellers as $product)
-                                @include($viewsPath . '.partials.product-card-horizontal', ['product' => $product])
+                                @include($filePath . '.partials.product-card-horizontal', ['product' => $product])
                             @endforeach
                         </div>
                     </div>

@@ -26,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         $settings = Setting::first() ?? null;
         View::share('settings', $settings);
 
+        // Theme Configuration
         if ($settings && $settings->active_theme) {
             $themes = config('theme');
             if (isset($themes[$settings->active_theme])) {
@@ -35,9 +36,8 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         }
-
-        $viewsPath = config("theme.getTheme.views_path");
-        View::share('viewsPath', $viewsPath);
+        $filePath = config("theme.getTheme.file_path");
+        View::share('filePath', $filePath);
 
         $categories = Category::where('status', true)->whereNull('parent_id')->with('children')->get();
         View::share('categories', $categories);

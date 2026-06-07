@@ -13,7 +13,7 @@
                     </p>
                     <p class="body-small text-main-4">
                         Free Shipping on Orders
-                        <span class="fw-semibold text-cl-7">$50+</span>
+                        <span class="text-primary fw-semibold">$50+</span>
                     </p>
                 </div>
             </div>
@@ -23,10 +23,9 @@
                         <i class="icon icon-budget text-cl-7"></i>
                         <div class="tf-curs text-cl-7">
                             <select class="image-select center style-default type-cur">
-                                <option selected>USD | United States ($)</option>
-                                <option>EUR | France (€)</option>
-                                <option>EUR | Germany (€)</option>
-                                <option>VND | Vietnam (₫)</option>
+                                <option selected>BDT(৳)</option>
+                                <option>USD($)</option>
+                                <option>EUR(€)</option>
                             </select>
                         </div>
                     </div>

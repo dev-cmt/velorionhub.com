@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_requisition')->default(false);
             $table->string('invoice_no', 30)->unique()->index();
             $table->string('source', 20)->default('web')->index();
             $table->string('customer_name')->nullable();
             $table->string('customer_phone')->nullable();
             $table->text('customer_address')->nullable();
+            $table->text('customer_activity')->nullable();
 
             $table->decimal('sub_total', 12, 2)->default(0);
             $table->decimal('shipping_cost', 12, 2)->default(0);

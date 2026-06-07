@@ -36,6 +36,7 @@ return new class extends Migration {
 
             $table->boolean('is_loading')->default(true);
             $table->boolean('is_slider')->default(false);
+            $table->string('active_theme')->nullable();
             $table->timestamps();
         });
     }

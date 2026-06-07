@@ -31,6 +31,7 @@ class Setting extends Model
         'youtube',
         'whatsapp',
         'telegram',
+
         'is_loading',
         'is_slider',
         'active_theme',

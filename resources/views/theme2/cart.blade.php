@@ -25,16 +25,6 @@
             @php
                 $cart = \Cart::session(Auth::id() ?? session()->getId());
                 $items = $cart->getContent()->sortBy('id');
-
-                dd($items->map(function($item) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'quantity' => $item->quantity,
-                        'price' => $item->price,
-                        'attributes' => $item->attributes,
-                    ];
-                }));
             @endphp
 
             @if($items->count() > 0)

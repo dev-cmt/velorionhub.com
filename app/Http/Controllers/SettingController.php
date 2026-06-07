@@ -103,4 +103,24 @@ class SettingController extends Controller
 
         return redirect()->back()->with('success', 'Settings updated successfully');
     }
+    public function webSettings()
+    {
+        $settings = Setting::first();
+        return view('backend.web_setting', compact('settings'));
+    }
+    public function systemSettings()
+    {
+        $settings = Setting::first();
+        return view('backend.system_setting', compact('settings'));
+    }
+    public function financialSettings()
+    {
+        $settings = Setting::first();
+        return view('backend.financial_setting', compact('settings'));
+    }
+    public function otherSettings()
+    {
+        $settings = Setting::first();
+        return view('backend.other_setting', compact('settings'));
+    }
 }

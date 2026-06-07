@@ -10,21 +10,21 @@
 	{!! $breadcrumbs ?? '' !!}
 	{!! $jsonld ?? '' !!}
 
-    <link rel="icon" type="image/png" href="{{asset('frontend')}}/favicon.png">
+    <link rel="icon" type="image/png" href="{{asset($filePath)}}/favicon.png">
 
     <!-- fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i">
     <!-- css -->
-    <link rel="stylesheet" href="{{asset('frontend')}}/vendor/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/vendor/owl-carousel/assets/owl.carousel.min.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/vendor/photoswipe/photoswipe.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/vendor/photoswipe/default-skin/default-skin.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/vendor/select2/css/select2.min.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/style-red.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/header-red.css" media="(min-width: 1200px)">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/mobile-red.css" media="(max-width: 1199px)">
+    <link rel="stylesheet" href="{{asset($filePath)}}/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/vendor/owl-carousel/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/vendor/photoswipe/photoswipe.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/vendor/photoswipe/default-skin/default-skin.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/vendor/select2/css/select2.min.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/style-red.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/header-red.css" media="(min-width: 1200px)">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/mobile-red.css" media="(max-width: 1199px)">
     <!-- font - fontawesome -->
-    <link rel="stylesheet" href="{{asset('frontend')}}/vendor/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/vendor/fontawesome/css/all.min.css">
 
     <!-- Toastr -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
@@ -36,7 +36,7 @@
     <!-- site -->
     <div class="site">
         <!-- Start of Header -->
-        @include('frontend.partials.navbar')
+        @include($filePath . '.partials.navbar')
         <!-- End of Header -->
 
         <!-- Start of Main -->
@@ -44,25 +44,25 @@
         <!-- End of Main -->
 
         <!-- Start of Footer -->
-        @include('frontend.partials.footer')
+        @include($filePath . '.partials.footer')
         <!-- End of Footer -->
     </div>
     <!-- site / end -->
 
     <!-- modals -->
-    @include('frontend.partials.modals')
+    @include($filePath . '.partials.modals')
     <!-- modals / end -->
 
     <!-- scripts -->
-    <script src="{{asset('frontend')}}/vendor/jquery/jquery.min.js"></script>
-    <script src="{{asset('frontend')}}/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="{{asset('frontend')}}/vendor/owl-carousel/owl.carousel.min.js"></script>
-    <script src="{{asset('frontend')}}/vendor/nouislider/nouislider.min.js"></script>
-    <script src="{{asset('frontend')}}/vendor/photoswipe/photoswipe.min.js"></script>
-    <script src="{{asset('frontend')}}/vendor/photoswipe/photoswipe-ui-default.min.js"></script>
-    <script src="{{asset('frontend')}}/vendor/select2/js/select2.min.js"></script>
-    <script src="{{asset('frontend')}}/js/number.js"></script>
-    <script src="{{asset('frontend')}}/js/main.js"></script>
+    <script src="{{asset($filePath)}}/vendor/jquery/jquery.min.js"></script>
+    <script src="{{asset($filePath)}}/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="{{asset($filePath)}}/vendor/owl-carousel/owl.carousel.min.js"></script>
+    <script src="{{asset($filePath)}}/vendor/nouislider/nouislider.min.js"></script>
+    <script src="{{asset($filePath)}}/vendor/photoswipe/photoswipe.min.js"></script>
+    <script src="{{asset($filePath)}}/vendor/photoswipe/photoswipe-ui-default.min.js"></script>
+    <script src="{{asset($filePath)}}/vendor/select2/js/select2.min.js"></script>
+    <script src="{{asset($filePath)}}/js/number.js"></script>
+    <script src="{{asset($filePath)}}/js/main.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
@@ -148,9 +148,6 @@
                     toastr.error(res.message);
                 }
             }
-
-            // LOAD CART ON PAGE LOAD
-            $.get("{{ route('cart.mini') }}", updateMiniCart);
 
             // ADD TO CART (Direct Button)
             $(document).on('click', '.btn-cart', function () {

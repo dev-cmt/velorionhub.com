@@ -599,7 +599,7 @@
                 @can('view settings')
                 <!-- Dashboard - Always visible -->
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('website-settings.index') }}" class="side-menu__item">
                         <i class="bx bx-globe side-menu__icon"></i>
                         <span class="side-menu__label">Website Settings</span>
                     </a>
@@ -609,9 +609,9 @@
                 @can('view settings')
                 <!-- Dashboard - Always visible -->
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('system-settings.index') }}" class="side-menu__item">
                         <i class="bx bx-tv side-menu__icon"></i>
-                        <span class="side-menu__label">System Settingss</span>
+                        <span class="side-menu__label">System Settings</span>
                     </a>
                 </li>
                 @endcan
@@ -619,7 +619,7 @@
                 @can('view settings')
                 <!-- Dashboard - Always visible -->
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('financial-settings.index') }}" class="side-menu__item">
                         <i class="bx bx-dollar-circle side-menu__icon"></i>
                         <span class="side-menu__label">Financial Settings</span>
                     </a>
@@ -629,7 +629,7 @@
                 @can('view settings')
                 <!-- Dashboard - Always visible -->
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('other-settings.index') }}" class="side-menu__item">
                         <i class="bx bx-category-alt side-menu__icon"></i>
                         <span class="side-menu__label">Other Settings</span>
                     </a>

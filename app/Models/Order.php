@@ -12,6 +12,7 @@ class Order extends Model
         'customer_name',
         'customer_phone',
         'customer_address',
+        'customer_activity',
         'sub_total',
         'shipping_cost',
         'discount',

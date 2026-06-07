@@ -26,6 +26,13 @@ class Theme2Controller extends Controller
 {
     use SeoTrait;
 
+    protected $filePath;
+
+    public function __construct()
+    {
+        $this->filePath = config('theme.getTheme.file_path');
+    }
+
     public function index()
     {
         $products = Product::with('media')->withCount('reviews')->withAvg('reviews', 'rating')->active()->get();
@@ -65,7 +72,7 @@ class Theme2Controller extends Controller
         $brands = Brand::where('status', true)->orderBy('sort_order')->get();
         $latest_posts = BlogPost::with('author')->where('status', 'published')->latest()->take(10)->get();
 
-        return view('theme2.index', compact(
+        return view($this->filePath . '.index', compact(
             'seotags',
             'breadcrumbs',
             'breadcrumb_list',
@@ -153,7 +160,7 @@ class Theme2Controller extends Controller
 
         $latest_products = Product::with('media')->active()->latest()->take(5)->get();
 
-        return view('theme2.shop', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'products', 'categories', 'brands', 'latest_products'));
+        return view($this->filePath . '.shop', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'products', 'categories', 'brands', 'latest_products'));
     }
 
     public function productShow($slug)
@@ -182,7 +189,7 @@ class Theme2Controller extends Controller
             ->take(10)
             ->get();
 
-        return view('theme2.product-details', compact('seotags','breadcrumbs', 'breadcrumb_list', 'product', 'related_products'));
+        return view($this->filePath . '.product-details', compact('seotags','breadcrumbs', 'breadcrumb_list', 'product', 'related_products'));
     }
 
     public function checkout()
@@ -197,7 +204,7 @@ class Theme2Controller extends Controller
             ['name' => 'Checkout', 'url' => route('checkout')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('theme2.checkout', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.checkout', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function cart()
@@ -211,7 +218,7 @@ class Theme2Controller extends Controller
             ['name' => 'Cart', 'url' => route('cart')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('theme2.cart', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.cart', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function wishlist()
@@ -226,7 +233,7 @@ class Theme2Controller extends Controller
             ['name' => 'Wishlist', 'url' => route('wishlist')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('theme2.wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function compare()
@@ -241,7 +248,7 @@ class Theme2Controller extends Controller
             ['name' => 'Compare', 'url' => route('compare')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('theme2.compare', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.compare', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function blog(Request $request)
@@ -281,7 +288,7 @@ class Theme2Controller extends Controller
         $latest_posts = BlogPost::published()->latest()->take(5)->get();
         $blog_tags = Tag::whereHas('blogPosts')->get();
 
-        return view('theme2.blog', compact('blog', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'blog_categories', 'latest_posts', 'blog_tags'));
+        return view($this->filePath . '.blog', compact('blog', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'blog_categories', 'latest_posts', 'blog_tags'));
     }
 
     public function subscribe(Request $request)
@@ -310,7 +317,7 @@ class Theme2Controller extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('theme2.blog-details', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'post', 'jsonld'));
+        return view($this->filePath . '.blog-details', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'post', 'jsonld'));
     }
 
 
@@ -332,7 +339,7 @@ class Theme2Controller extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('theme2.catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function catalogShow($slug)
@@ -355,7 +362,7 @@ class Theme2Controller extends Controller
             ];
             $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-            return view('theme2.catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'category'));
+            return view($this->filePath . '.catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'category'));
         }
 
         return redirect()->route('shop', ['category' => $category->slug]);
@@ -372,7 +379,7 @@ class Theme2Controller extends Controller
 
         ProductReview::create([
             'product_id' => $product->id,
-            'user_id' => auth()->id(), // Nullable if guest
+            'user_id' => Auth::id(), // Nullable if guest
             'name' => $request->name,
             'email' => $request->email,
             'rating' => $request->rating,
@@ -530,7 +537,7 @@ class Theme2Controller extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('theme2.about-us', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.about-us', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function contacts()
@@ -544,7 +551,7 @@ class Theme2Controller extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('theme2.contacts', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.contacts', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function trackOrder()
@@ -558,7 +565,7 @@ class Theme2Controller extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('theme2.track-order', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.track-order', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function faq()
@@ -572,6 +579,6 @@ class Theme2Controller extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('theme2.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 }

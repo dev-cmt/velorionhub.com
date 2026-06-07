@@ -25,7 +25,7 @@ class FrontendLayout extends Component
      */
     public function render()
     {
-        $viewsPath = config("theme.getTheme.views_path");
+        $viewsPath = config("theme.getTheme.file_path");
         return view($viewsPath . '.layouts.master');
     }
 }

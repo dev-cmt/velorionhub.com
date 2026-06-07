@@ -176,21 +176,21 @@
                             <div class="product-form__body">
                                 ${formBodyHtml || ''}
                             </div>
-                        </form>
 
-                        <!-- Dynamic Actions -->
-                        <div class="quickview__product-actions">
-                            <div class="quickview__product-actions-item quickview__product-actions-item--quantity">
-                                <div class="input-number">
-                                    <input class="input-number__input form-control quantity" type="number" name="count" min="1" value="1">
-                                    <div class="input-number__add"></div>
-                                    <div class="input-number__sub"></div>
+                            <!-- Dynamic Actions -->
+                            <div class="quickview__product-actions">
+                                <div class="quickview__product-actions-item quickview__product-actions-item--quantity">
+                                    <div class="input-number">
+                                        <input class="input-number__input form-control quantity" type="number" name="count" min="1" value="1">
+                                        <div class="input-number__add"></div>
+                                        <div class="input-number__sub"></div>
+                                    </div>
+                                </div>
+                                <div class="quickview__product-actions-item quickview__product-actions-item--addtocart">
+                                    <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
                                 </div>
                             </div>
-                            <div class="quickview__product-actions-item quickview__product-actions-item--addtocart">
-                                <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
                 <a href="${seeDetailsUrl}" class="quickview__see-details">See full details</a>

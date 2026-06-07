@@ -378,7 +378,7 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
                                     <div class="block-products-carousel__carousel-loader"></div>
                                     <div class="owl-carousel">
                                         @foreach($related_products as $item)
-                                            @include('frontend.partials.product-card', ['product' => $item])
+                                            @include($filePath . '.partials.product-card', ['product' => $item])
                                         @endforeach
                                     </div>
                                 </div>

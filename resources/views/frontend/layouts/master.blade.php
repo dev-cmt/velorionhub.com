@@ -36,6 +36,7 @@
         <i class="icon icon-arrow-right"></i>
     </button>
 
+    @if($settings && $settings->is_loading)
     <!-- preload -->
     <div class="preload preload-container" id="preload">
         <div class="preload-logo">
@@ -43,6 +44,7 @@
         </div>
     </div>
     <!-- /preload -->
+    @endif
 
     <div id="wrapper">
         <!-- Start of Header -->

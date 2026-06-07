@@ -25,6 +25,13 @@ class HomeController extends Controller
 {
     use SeoTrait;
 
+    protected $filePath;
+
+    public function __construct()
+    {
+        $this->filePath = config('theme.getTheme.file_path');
+    }
+
     public function index()
     {
         $products = Product::with(['media', 'category'])->withCount('reviews')->withAvg('reviews', 'rating')->active()->get();
@@ -64,7 +71,7 @@ class HomeController extends Controller
         $brands = Brand::where('status', true)->orderBy('sort_order')->get();
         $latest_posts = BlogPost::with('author')->where('status', 'published')->latest()->take(10)->get();
 
-        return view('frontend.index', compact(
+        return view($this->filePath . 'index', compact(
             'seotags',
             'breadcrumbs',
             'breadcrumb_list',
@@ -152,7 +159,7 @@ class HomeController extends Controller
 
         $latest_products = Product::with('media')->active()->latest()->take(5)->get();
 
-        return view('frontend.shop', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'products', 'categories', 'brands', 'latest_products'));
+        return view($this->filePath . 'shop', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'products', 'categories', 'brands', 'latest_products'));
     }
 
     public function productShow($slug)
@@ -181,7 +188,7 @@ class HomeController extends Controller
             ->take(10)
             ->get();
 
-        return view('frontend.product-details', compact('seotags','breadcrumbs', 'breadcrumb_list', 'product', 'related_products'));
+        return view($this->filePath . 'product-details', compact('seotags','breadcrumbs', 'breadcrumb_list', 'product', 'related_products'));
     }
 
     public function checkout()
@@ -196,7 +203,7 @@ class HomeController extends Controller
             ['name' => 'Checkout', 'url' => route('checkout')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('frontend.checkout', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'checkout', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function cart()
@@ -210,7 +217,7 @@ class HomeController extends Controller
             ['name' => 'Cart', 'url' => route('cart')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('frontend.cart', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'cart', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function wishlist()
@@ -225,7 +232,7 @@ class HomeController extends Controller
             ['name' => 'Wishlist', 'url' => route('wishlist')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('frontend.wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function compare()
@@ -240,7 +247,7 @@ class HomeController extends Controller
             ['name' => 'Compare', 'url' => route('compare')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view('frontend.compare', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'compare', compact('seotags','breadcrumbs', 'breadcrumb_list'));
     }
 
     public function blog(Request $request)
@@ -280,7 +287,7 @@ class HomeController extends Controller
         $latest_posts = BlogPost::published()->latest()->take(5)->get();
         $blog_tags = Tag::whereHas('blogPosts')->get();
 
-        return view('frontend.blog', compact('blog', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'blog_categories', 'latest_posts', 'blog_tags'));
+        return view($this->filePath . 'blog', compact('blog', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'blog_categories', 'latest_posts', 'blog_tags'));
     }
 
     public function subscribe(Request $request)
@@ -309,7 +316,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('frontend.blog-details', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'post', 'jsonld'));
+        return view($this->filePath . 'blog-details', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'post', 'jsonld'));
     }
 
 
@@ -331,7 +338,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('frontend.catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function catalogShow($slug)
@@ -354,7 +361,7 @@ class HomeController extends Controller
             ];
             $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-            return view('frontend.catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'category'));
+            return view($this->filePath . 'catalog', compact('categories', 'seotags', 'breadcrumbs', 'breadcrumb_list', 'category'));
         }
 
         return redirect()->route('shop', ['category' => $category->slug]);
@@ -371,7 +378,7 @@ class HomeController extends Controller
 
         ProductReview::create([
             'product_id' => $product->id,
-            'user_id' => auth()->id(), // Nullable if guest
+            'user_id' => Auth::id(), // Nullable if guest
             'name' => $request->name,
             'email' => $request->email,
             'rating' => $request->rating,
@@ -529,7 +536,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('frontend.about-us', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'about-us', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function contacts()
@@ -543,7 +550,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('frontend.contacts', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'contacts', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function trackOrder()
@@ -557,7 +564,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('frontend.track-order', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'track-order', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 
     public function faq()
@@ -571,6 +578,6 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view('frontend.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . 'faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
 }
