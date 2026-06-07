@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\Setting;
+use App\Models\Category;
+use App\Models\Page;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,10 +26,23 @@ class AppServiceProvider extends ServiceProvider
         $settings = Setting::first() ?? null;
         View::share('settings', $settings);
 
-        $categories = \App\Models\Category::where('status', true)->whereNull('parent_id')->with('children')->get();
+        if ($settings && $settings->active_theme) {
+            $themes = config('theme');
+            if (isset($themes[$settings->active_theme])) {
+                config([
+                    'theme.getTheme' => $themes[$settings->active_theme],
+                    'theme.frontend' => $themes[$settings->active_theme],
+                ]);
+            }
+        }
+
+        $viewsPath = config("theme.getTheme.views_path");
+        View::share('viewsPath', $viewsPath);
+
+        $categories = Category::where('status', true)->whereNull('parent_id')->with('children')->get();
         View::share('categories', $categories);
 
-        $pages = \App\Models\Page::where('status', true)->get();
+        $pages = Page::where('status', true)->get();
         View::share('pages', $pages);
     }
 }

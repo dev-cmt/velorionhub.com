@@ -106,6 +106,14 @@
                                         Slider</label>
                                 </div>
                             </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="active_theme" class="form-label">Frontend Theme</label>
+                                <select name="active_theme" id="active_theme" class="form-select">
+                                    <option value="frontend" {{ ($settings && $settings->active_theme == 'frontend') ? 'selected' : '' }}>Default Theme</option>
+                                    <option value="theme1" {{ ($settings && $settings->active_theme == 'theme1') ? 'selected' : '' }}>Theme 1</option>
+                                    <option value="theme2" {{ ($settings && $settings->active_theme == 'theme2') ? 'selected' : '' }}>Theme 2</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>

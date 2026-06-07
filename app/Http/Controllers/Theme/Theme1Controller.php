@@ -15,7 +15,7 @@ class Theme1Controller extends Controller
 {
     use SeoTrait;
 
-    public function welcome()
+    public function index()
     {
         $products = Product::with('media')->withCount('reviews')->withAvg('reviews', 'rating')->active()->get();
 
@@ -30,7 +30,7 @@ class Theme1Controller extends Controller
 
         $best_sellers = $products->shuffle()->take(10);
         $new_arrivals = $products->sortByDesc('created_at')->take(10);
-        return view('theme1.welcome', compact('seotags','breadcrumbs', 'products', 'categories', 'best_sellers', 'new_arrivals'));
+        return view('theme1.index', compact('seotags','breadcrumbs', 'products', 'categories', 'best_sellers', 'new_arrivals'));
     }
 
     public function shop()
@@ -48,8 +48,8 @@ class Theme1Controller extends Controller
     public function productShow($slug)
     {
         $product = Product::with([
-            'media', 
-            'brand', 
+            'media',
+            'brand',
             'category',
             'variants.variantItems.attribute',
             'variants.variantItems.attributeItem'

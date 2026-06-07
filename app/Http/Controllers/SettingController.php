@@ -92,6 +92,15 @@ class SettingController extends Controller
             Setting::create($input);
         }
 
+        try {
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            \Illuminate\Support\Facades\Artisan::call('route:clear');
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        } catch (\Exception $e) {
+            // Ignore if artisan calls fail in some environments
+        }
+
         return redirect()->back()->with('success', 'Settings updated successfully');
     }
 }

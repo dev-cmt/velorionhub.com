@@ -135,10 +135,7 @@
                     <div class="swiper-wrapper">
                         @forelse($dealProducts as $index => $product)
                             <div class="swiper-slide">
-                                @include('frontend.partials.product-item-deal', [
-                                    'product' => $product,
-                                    'wowDelay' => ($index * 0.1) . 's',
-                                ])
+                                @include('frontend.partials.product-item-deal', ['product' => $product, 'showProgress' => true, 'wowDelay' => ($index * 0.1) . 's'])
                             </div>
                         @empty
                             <div class="swiper-slide">

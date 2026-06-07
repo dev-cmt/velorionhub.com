@@ -1,27 +1,53 @@
-@isset($product)
 @php
+    // Determine sale state
     $isSale = floatval($product->sale_price) < floatval($product->regular_price);
     $discountPercentage = 0;
     if ($isSale && floatval($product->regular_price) > 0) {
         $discountPercentage = round(((floatval($product->regular_price) - floatval($product->sale_price)) / floatval($product->regular_price)) * 100);
     }
-    $mainImage   = $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
-    $hoverImage  = $product->hover_image ? asset($product->hover_image) : $mainImage;
-    $productUrl  = route('product.show', $product->slug);
-    $categoryName = $product->category->name ?? 'Uncategorized';
-    $categoryUrl  = $product->category ? route('shop', ['category' => $product->category->slug]) : route('shop');
-    $sold        = (int) ($product->stock_out ?? 0);
-    $available   = max(0, (int) ($product->total_stock ?? 0));
-    $totalUnits  = $sold + $available;
-    $soldPercent = $totalUnits > 0 ? round(($sold / $totalUnits) * 100) : 0;
-    $inWishlist  = false;
-    $inCompare   = false;
+
+    // Get categories and brand list
+    $categoriesList = [];
+    if ($product->category) {
+        $categoriesList[] = '<a href="' . route('shop', ['category' => $product->category->slug]) . '">' . $product->category->name . '</a>';
+    }
+    if ($product->brand) {
+        $categoriesList[] = '<a href="' . route('shop', ['brand' => $product->brand->slug]) . '">' . $product->brand->name . '</a>';
+    }
+    $categoriesHtml = count($categoriesList) > 0 ? implode(', ', $categoriesList) : '<a href="#">Jersey</a>';
+
+    // Fallback images
+    $mainImage = $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
+    $hoverImage = $product->hover_image ? asset($product->hover_image) : null;
+
+    // Get sizes/attributes if present
+    $variantAttributes = [];
+    if ($product->has_variant && $product->variants && $product->variants->count() > 0) {
+        foreach ($product->variants as $variant) {
+            foreach ($variant->variantItems as $item) {
+                if ($item->attribute && $item->attributeItem) {
+                    $variantAttributes[$item->attribute->name][$item->attributeItem->id] = $item->attributeItem->name;
+                }
+            }
+        }
+    }
+
+    // Determine Wishlist state
+    $inWishlist = false;
     try {
-        $sessionId   = (Auth::id() ?? session()->getId());
-        $wishlistCart = \Cart::session($sessionId . '_wishlist');
-        if ($wishlistCart && $wishlistCart->get($product->id)) { $inWishlist = true; }
-        $compareCart  = \Cart::session($sessionId . '_compare');
-        if ($compareCart && $compareCart->get($product->id))  { $inCompare  = true; }
+        $wishlistCart = \Cart::session((Auth::id() ?? session()->getId()) . '_wishlist');
+        if ($wishlistCart && $wishlistCart->get($product->id)) {
+            $inWishlist = true;
+        }
+    } catch (\Exception $e) {}
+
+    // Determine Compare state
+    $inCompare = false;
+    try {
+        $compareCart = \Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+        if ($compareCart && $compareCart->get($product->id)) {
+            $inCompare = true;
+        }
     } catch (\Exception $e) {}
 @endphp
 

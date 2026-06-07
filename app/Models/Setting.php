@@ -33,5 +33,6 @@ class Setting extends Model
         'telegram',
         'is_loading',
         'is_slider',
+        'active_theme',
     ];
 }

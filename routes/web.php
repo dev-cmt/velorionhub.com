@@ -46,7 +46,7 @@ Route::get('/cc', function () {
     return 'Cleared!';
 });
 
-$controller = config("theme.frontend.controller");
+$controller = config("theme.getTheme.controller");
 Route::controller($controller)->group(function () {
     Route::get('/', 'index')->name('home');
     Route::get('/shop', 'shop')->name('shop');
@@ -66,7 +66,7 @@ Route::controller($controller)->group(function () {
     Route::get('/blog/{slug}', 'blogShow')->name('blog.show');
     Route::post('/subscribe', 'subscribe')->name('subscribe');
     Route::post('/review-store/{product}', 'storeReview')->name('review.store');
-    
+
     Route::get('/catalog', 'catalog')->name('catalog');
     Route::get('/catalog/{slug}', 'catalogShow')->name('catalog.show');
     Route::get('/about-us', 'aboutUs')->name('about.us');
@@ -295,7 +295,7 @@ Route::middleware('auth')->group(function () {
 
     // Home Slides
     Route::resource('home-slides', HomeSlideController::class)->except(['create', 'edit']);
-    
+
     // Promotion Banners
     Route::resource('promotion-banners', PromotionBannerController::class)->except(['create', 'edit']);
 
