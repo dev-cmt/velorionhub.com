@@ -20,7 +20,11 @@
     <tbody>
         @foreach($variants as $variant)
         <tr>
-            <td  class="text-nowrap"> {{ $variant['name'] }}</td>
+            <td  class="text-nowrap">
+                {{ $variant['name'] }}
+                <input type="hidden" name="variants[id][]" value="{{ $variant['id'] ?? '' }}">
+                <input type="hidden" name="variants[attribute_item_ids][]" value="{{ implode(',', $variant['items'] ?? []) }}">
+            </td>
             <td><input type="text" name="variants[variant_sku][]" class="form-control form-control-sm" value="{{ $variant['variant_sku'] }}"></td>
             <td><input type="number" name="variants[variant_price][]" class="form-control form-control-sm" value="{{ $variant['variant_price'] }}"></td>
             <td><input type="number" name="variants[purchase_cost][]" class="form-control form-control-sm" value="{{ $variant['purchase_cost'] }}"></td>
