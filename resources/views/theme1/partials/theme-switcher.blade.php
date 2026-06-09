@@ -32,7 +32,7 @@
                     </div>
                     <figure class="product-media">
                         <a href="product-default.html">
-                            <img src="{{asset('frontend')}}/images/cart/product-1.jpg" alt="product" height="84"
+                            <img src="{{asset($filePath)}}/images/cart/product-1.jpg" alt="product" height="84"
                                 width="94" />
                         </a>
                     </figure>
@@ -54,7 +54,7 @@
                     </div>
                     <figure class="product-media">
                         <a href="product-default.html">
-                            <img src="{{asset('frontend')}}/images/cart/product-2.jpg" alt="product" width="84"
+                            <img src="{{asset($filePath)}}/images/cart/product-2.jpg" alt="product" width="84"
                                 height="94" />
                         </a>
                     </figure>
@@ -594,29 +594,29 @@
                     <div class="swiper-wrapper row cols-1 gutter-no">
                         <div class="swiper-slide">
                             <figure class="product-image">
-                                <img src="{{asset('frontend')}}/images/products/popup/1-440x494.jpg"
-                                    data-zoom-image="{{asset('frontend')}}/images/products/popup/1-800x900.jpg"
+                                <img src="{{asset($filePath)}}/images/products/popup/1-440x494.jpg"
+                                    data-zoom-image="{{asset($filePath)}}/images/products/popup/1-800x900.jpg"
                                     alt="Water Boil Black Utensil" width="800" height="900">
                             </figure>
                         </div>
                         <div class="swiper-slide">
                             <figure class="product-image">
-                                <img src="{{asset('frontend')}}/images/products/popup/2-440x494.jpg"
-                                    data-zoom-image="{{asset('frontend')}}/images/products/popup/2-800x900.jpg"
+                                <img src="{{asset($filePath)}}/images/products/popup/2-440x494.jpg"
+                                    data-zoom-image="{{asset($filePath)}}/images/products/popup/2-800x900.jpg"
                                     alt="Water Boil Black Utensil" width="800" height="900">
                             </figure>
                         </div>
                         <div class="swiper-slide">
                             <figure class="product-image">
-                                <img src="{{asset('frontend')}}/images/products/popup/3-440x494.jpg"
-                                    data-zoom-image="{{asset('frontend')}}/images/products/popup/3-800x900.jpg"
+                                <img src="{{asset($filePath)}}/images/products/popup/3-440x494.jpg"
+                                    data-zoom-image="{{asset($filePath)}}/images/products/popup/3-800x900.jpg"
                                     alt="Water Boil Black Utensil" width="800" height="900">
                             </figure>
                         </div>
                         <div class="swiper-slide">
                             <figure class="product-image">
-                                <img src="{{asset('frontend')}}/images/products/popup/4-440x494.jpg"
-                                    data-zoom-image="{{asset('frontend')}}/images/products/popup/4-800x900.jpg"
+                                <img src="{{asset($filePath)}}/images/products/popup/4-440x494.jpg"
+                                    data-zoom-image="{{asset($filePath)}}/images/products/popup/4-800x900.jpg"
                                     alt="Water Boil Black Utensil" width="800" height="900">
                             </figure>
                         </div>
@@ -633,19 +633,19 @@
                 }">
                     <div class="product-thumbs swiper-wrapper row cols-4 gutter-sm">
                         <div class="product-thumb swiper-slide">
-                            <img src="{{asset('frontend')}}/images/products/popup/1-103x116.jpg" alt="Product Thumb"
+                            <img src="{{asset($filePath)}}/images/products/popup/1-103x116.jpg" alt="Product Thumb"
                                 width="103" height="116">
                         </div>
                         <div class="product-thumb swiper-slide">
-                            <img src="{{asset('frontend')}}/images/products/popup/2-103x116.jpg" alt="Product Thumb"
+                            <img src="{{asset($filePath)}}/images/products/popup/2-103x116.jpg" alt="Product Thumb"
                                 width="103" height="116">
                         </div>
                         <div class="product-thumb swiper-slide">
-                            <img src="{{asset('frontend')}}/images/products/popup/3-103x116.jpg" alt="Product Thumb"
+                            <img src="{{asset($filePath)}}/images/products/popup/3-103x116.jpg" alt="Product Thumb"
                                 width="103" height="116">
                         </div>
                         <div class="product-thumb swiper-slide">
-                            <img src="{{asset('frontend')}}/images/products/popup/4-103x116.jpg" alt="Product Thumb"
+                            <img src="{{asset($filePath)}}/images/products/popup/4-103x116.jpg" alt="Product Thumb"
                                 width="103" height="116">
                         </div>
                     </div>
@@ -659,7 +659,7 @@
                 <h2 class="product-title">Electronics Black Wrist Watch</h2>
                 <div class="product-bm-wrapper">
                     <figure class="brand">
-                        <img src="{{asset('frontend')}}/images/products/brand/brand-1.jpg" alt="Brand" width="102"
+                        <img src="{{asset($filePath)}}/images/products/brand/brand-1.jpg" alt="Brand" width="102"
                             height="48" />
                     </figure>
                     <div class="product-meta">

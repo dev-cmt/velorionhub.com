@@ -15,16 +15,16 @@
                 <!-- End of DropDown Menu -->
 
                 <div class="dropdown">
-                    <a href="#language"><img src="{{asset('frontend')}}/images/flags/eng.png" alt="ENG Flag" width="14"
+                    <a href="#language"><img src="{{asset($filePath)}}/images/flags/eng.png" alt="ENG Flag" width="14"
                             height="8" class="dropdown-image" /> ENG</a>
                     <div class="dropdown-box">
                         <a href="#ENG">
-                            <img src="{{asset('frontend')}}/images/flags/eng.png" alt="ENG Flag" width="14" height="8"
+                            <img src="{{asset($filePath)}}/images/flags/eng.png" alt="ENG Flag" width="14" height="8"
                                 class="dropdown-image" />
                             ENG
                         </a>
                         <a href="#FRA">
-                            <img src="{{asset('frontend')}}/images/flags/fra.png" alt="FRA Flag" width="14" height="8"
+                            <img src="{{asset($filePath)}}/images/flags/fra.png" alt="FRA Flag" width="14" height="8"
                                 class="dropdown-image" />
                             FRA
                         </a>
@@ -35,10 +35,10 @@
                 <a href="blog.html" class="d-lg-show">Blog</a>
                 <a href="contact-us.html" class="d-lg-show">Contact Us</a>
                 <a href="my-account.html" class="d-lg-show">My Account</a>
-                <a href="{{asset('frontend')}}/ajax/login.html" class="d-lg-show login sign-in"><i
+                <a href="{{asset($filePath)}}/ajax/login.html" class="d-lg-show login sign-in"><i
                         class="w-icon-account"></i>Sign In</a>
                 <span class="delimiter d-lg-show">/</span>
-                <a href="{{asset('frontend')}}/ajax/login.html" class="ml-0 d-lg-show login register">Register</a>
+                <a href="{{asset($filePath)}}/ajax/login.html" class="ml-0 d-lg-show login register">Register</a>
             </div>
         </div>
     </div>
@@ -50,7 +50,7 @@
                 <a href="#" class="mobile-menu-toggle  w-icon-hamburger" aria-label="menu-toggle">
                 </a>
                 <a href="{{url('/')}}" class="logo ml-lg-0">
-                    <img src="{{asset('frontend')}}/images/demos/demo2/header-logo.png" alt="logo" width="144"
+                    <img src="{{asset($filePath)}}/images/demos/demo2/header-logo.png" alt="logo" width="144"
                         height="45" />
                 </a>
                 <nav class="main-nav">
@@ -338,7 +338,7 @@
                                         <li>
                                             <div class="banner-fixed menu-banner menu-banner2">
                                                 <figure>
-                                                    <img src="{{asset('frontend')}}/images/menu/banner-2.jpg"
+                                                    <img src="{{asset($filePath)}}/images/menu/banner-2.jpg"
                                                         alt="Menu Banner" width="235" height="347" />
                                                 </figure>
                                                 <div class="banner-content">
@@ -421,7 +421,7 @@
                                         <li>
                                             <div class="menu-banner banner-fixed menu-banner3">
                                                 <figure>
-                                                    <img src="{{asset('frontend')}}/images/menu/banner-3.jpg"
+                                                    <img src="{{asset($filePath)}}/images/menu/banner-3.jpg"
                                                         alt="Menu Banner" width="235" height="461" />
                                                 </figure>
                                                 <div class="banner-content">
@@ -507,7 +507,7 @@
                                         <li>
                                             <div class="menu-banner banner-fixed menu-banner4">
                                                 <figure>
-                                                    <img src="{{asset('frontend')}}/images/menu/banner-4.jpg"
+                                                    <img src="{{asset($filePath)}}/images/menu/banner-4.jpg"
                                                         alt="Menu Banner" width="235" height="433" />
                                                 </figure>
                                                 <div class="banner-content">
@@ -599,7 +599,7 @@
                                             <div class="col-6">
                                                 <div class="banner banner-fixed menu-banner5 br-xs">
                                                     <figure>
-                                                        <img src="{{asset('frontend')}}/images/menu/banner-5.jpg"
+                                                        <img src="{{asset($filePath)}}/images/menu/banner-5.jpg"
                                                             alt="Banner" width="410" height="123"
                                                             style="background-color: #D2D2D2;" />
                                                     </figure>
@@ -619,7 +619,7 @@
                                             <div class="col-6">
                                                 <div class="banner banner-fixed menu-banner5 br-xs">
                                                     <figure>
-                                                        <img src="{{asset('frontend')}}/images/menu/banner-6.jpg"
+                                                        <img src="{{asset($filePath)}}/images/menu/banner-6.jpg"
                                                             alt="Banner" width="410" height="123"
                                                             style="background-color: #9F9888;" />
                                                     </figure>

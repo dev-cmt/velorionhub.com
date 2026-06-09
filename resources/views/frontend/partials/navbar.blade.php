@@ -48,7 +48,7 @@
                 <div class="col-md-3 col-7 d-flex align-items-center">
                     <div class="logo-site">
                         <a href="{{ route('home') }}">
-                            <img src="{{asset('frontend')}}/images/logo/logo.svg" alt="Logo">
+                            <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
                         </a>
                     </div>
                 </div>
@@ -336,33 +336,18 @@
                                 </div>
                             </div>
                         </li>
-                        <li class="nav-item relative">
-                            <a href="#" class="item-link body-md-2 fw-semibold">
-                                <span>Page</span>
-                                <i class="icon icon-arrow-down"></i>
-                            </a>
-                            <div class="sub-menu-container">
-                                <ul class="sub-menu-list">
-                                    <li>
-                                        <a href="privacy.html" class="body-md-2 link">
-                                            <span>Privacy & Policy</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="terms.html" class="body-md-2 link">
-                                            <span>Terms & Conditions</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
                         <li class="nav-item pst-unset">
-                            <a href="{{ route('home') }}" class="item-link body-md-2 fw-semibold">
+                            <a href="{{ route('about.us') }}" class="item-link body-md-2 fw-semibold">
                                 <span>About Us</span>
                             </a>
                         </li>
                         <li class="nav-item pst-unset">
-                            <a href="{{ route('home') }}" class="item-link body-md-2 fw-semibold">
+                            <a href="{{ route('blog') }}" class="item-link body-md-2 fw-semibold">
+                                <span>Blog</span>
+                            </a>
+                        </li>
+                        <li class="nav-item pst-unset">
+                            <a href="{{ route('contacts') }}" class="item-link body-md-2 fw-semibold">
                                 <span>Contact Us</span>
                             </a>
                         </li>

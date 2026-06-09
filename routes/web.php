@@ -101,6 +101,9 @@ Route::controller($controller)->group(function () {
     Route::get('/contacts', 'contacts')->name('contacts');
     Route::get('/track-order', 'trackOrder')->name('track.order');
     Route::get('/faq', 'faq')->name('faq');
+    Route::get('/my-account', 'myAccount')->name('my.account');
+    Route::get('/order-list', 'orderList')->name('order.list');
+    Route::get('/account-edit', 'accountEdit')->name('account.edit');
 });
 Route::get('/search-suggestions', [SearchController::class, 'suggest'])->name('search.suggest');
 

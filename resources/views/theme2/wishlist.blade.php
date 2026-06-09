@@ -19,18 +19,18 @@
             </div>
         </div>
     </div>
-    
+
     <div class="block">
         <div class="container">
             @php
                 $wishlist = \Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getContent();
             @endphp
             @if($wishlist->count() > 0)
-            
+
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
-            
+
             <table class="wishlist">
                 <thead class="wishlist__head">
                     <tr class="wishlist__row">
@@ -56,11 +56,11 @@
                         </td>
                         <td class="wishlist__column wishlist__column--price">${{ number_format($item->price, 2) }}</td>
                         <td class="wishlist__column wishlist__column--tocart">
-                            <button type="button" class="btn btn-primary btn-sm btn-cart" 
-                                data-id="{{ $item->id }}" 
-                                data-name="{{ $item->name }}" 
-                                data-price="{{ $item->price }}" 
-                                data-image="{{ $item->attributes->image }}" 
+                            <button type="button" class="btn btn-primary btn-sm btn-cart"
+                                data-id="{{ $item->id }}"
+                                data-name="{{ $item->name }}"
+                                data-price="{{ $item->price }}"
+                                data-image="{{ $item->attributes->image }}"
                                 data-url="{{ $item->attributes->url }}">Add to cart</button>
                         </td>
                         <td class="wishlist__column wishlist__column--remove">
@@ -68,7 +68,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-light btn-sm btn-svg-icon">
-                                    <svg width="12px" height="12px"><use xlink:href="{{asset('frontend')}}/images/sprite.svg#cross-12"></use></svg>
+                                    <svg width="12px" height="12px"><use xlink:href="{{asset($filePath)}}/images/sprite.svg#cross-12"></use></svg>
                                 </button>
                             </form>
                         </td>

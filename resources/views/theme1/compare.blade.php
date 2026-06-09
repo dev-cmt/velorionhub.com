@@ -29,7 +29,7 @@
                         <div class="product text-center">
                             <figure class="product-media">
                                 <a href="product-default.html">
-                                    <img src="{{asset('frontend')}}/images/products/elements/1.jpg" alt="Product" width="228"
+                                    <img src="{{asset($filePath)}}/images/products/elements/1.jpg" alt="Product" width="228"
                                         height="257" />
                                 </a>
                                 <div class="product-action-vertical">
@@ -48,7 +48,7 @@
                         <div class="product text-center">
                             <figure class="product-media">
                                 <a href="product-default.html">
-                                    <img src="{{asset('frontend')}}/images/products/elements/2.jpg" alt="Product" width="228"
+                                    <img src="{{asset($filePath)}}/images/products/elements/2.jpg" alt="Product" width="228"
                                         height="257" />
                                 </a>
                                 <div class="product-action-vertical">
@@ -67,7 +67,7 @@
                         <div class="product text-center">
                             <figure class="product-media">
                                 <a href="product-default.html">
-                                    <img src="{{asset('frontend')}}/images/products/elements/3.jpg" alt="Product" width="228"
+                                    <img src="{{asset($filePath)}}/images/products/elements/3.jpg" alt="Product" width="228"
                                         height="257" />
                                 </a>
                                 <div class="product-action-vertical">
@@ -86,7 +86,7 @@
                         <div class="product text-center">
                             <figure class="product-media">
                                 <a href="product-default.html">
-                                    <img src="{{asset('frontend')}}/images/products/elements/4-1.jpg" alt="Product" width="228"
+                                    <img src="{{asset($filePath)}}/images/products/elements/4-1.jpg" alt="Product" width="228"
                                         height="257" />
                                 </a>
                                 <div class="product-action-vertical">

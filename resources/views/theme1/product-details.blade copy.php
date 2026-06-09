@@ -1,7 +1,7 @@
 <x-frontend-layout title="Home Page" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
     @push('css')
-        <link rel="stylesheet" type="text/css" href="{{asset('frontend')}}/vendor/photoswipe/photoswipe.min.css">
-        <link rel="stylesheet" type="text/css" href="{{asset('frontend')}}/vendor/photoswipe/default-skin/default-skin.min.css">
+        <link rel="stylesheet" type="text/css" href="{{asset($filePath)}}/vendor/photoswipe/photoswipe.min.css">
+        <link rel="stylesheet" type="text/css" href="{{asset($filePath)}}/vendor/photoswipe/default-skin/default-skin.min.css">
     @endpush
 
     <!-- Start of Breadcrumb -->
@@ -16,7 +16,7 @@
                     <i class="w-icon-angle-left"></i>
                 </a>
                 <span class="product-nav-popup">
-                    <img src="{{asset('frontend')}}/images/products/product-nav-prev.jpg" alt="Product" width="110"
+                    <img src="{{asset($filePath)}}/images/products/product-nav-prev.jpg" alt="Product" width="110"
                         height="110" />
                     <span class="product-name">Soft Sound Maker</span>
                 </span>
@@ -26,7 +26,7 @@
                     <i class="w-icon-angle-right"></i>
                 </a>
                 <span class="product-nav-popup">
-                    <img src="{{asset('frontend')}}/images/products/product-nav-next.jpg" alt="Product" width="110"
+                    <img src="{{asset($filePath)}}/images/products/product-nav-next.jpg" alt="Product" width="110"
                         height="110" />
                     <span class="product-name">Fabulous Sound Speaker</span>
                 </span>
@@ -46,7 +46,7 @@
                             <div class="product-gallery product-gallery-sticky">
 
                                 {{-- Main Swiper --}}
-                                <div class="swiper-container product-single-swiper swiper-theme nav-inner" 
+                                <div class="swiper-container product-single-swiper swiper-theme nav-inner"
                                     data-swiper-options="{
                                         'navigation': {
                                             'nextEl': '.swiper-button-next',
@@ -84,7 +84,7 @@
                                 </div>
 
                                 {{-- Thumbnails --}}
-                                <div class="product-thumbs-wrap swiper-container" 
+                                <div class="product-thumbs-wrap swiper-container"
                                     data-swiper-options="{
                                         'navigation': {
                                             'nextEl': '.swiper-button-next',
@@ -253,7 +253,7 @@
                                     <div class="banner banner-video product-video br-xs">
                                         <figure class="banner-media">
                                             <a href="#">
-                                                <img src="{{asset('frontend')}}/images/products/video-banner-610x300.jpg"
+                                                <img src="{{asset($filePath)}}/images/products/video-banner-610x300.jpg"
                                                     alt="banner" width="610" height="300"
                                                     style="background-color: #bebebe;">
                                             </a>
@@ -468,7 +468,7 @@
                             <div class="widget widget-banner mb-9">
                                 <div class="banner banner-fixed br-sm">
                                     <figure>
-                                        <img src="{{asset('frontend')}}/images/shop/banner3.jpg" alt="Banner" width="266"
+                                        <img src="{{asset($filePath)}}/images/shop/banner3.jpg" alt="Banner" width="266"
                                             height="220" style="background-color: #1D2D44;" />
                                     </figure>
                                     <div class="banner-content">
@@ -488,7 +488,7 @@
                                 <div class="title-link-wrapper mb-2">
                                     <h4 class="title title-link font-weight-bold">More Products</h4>
                                 </div>
-                            
+
                                 <div class="swiper nav-top">
                                     <div class="swiper-container swiper-theme nav-top" data-swiper-options = "{
                                         'slidesPerView': 1,
@@ -503,7 +503,7 @@
                                                 <div class="product product-widget">
                                                     <figure class="product-media">
                                                         <a href="#">
-                                                            <img src="{{asset('frontend')}}/images/shop/13.jpg" alt="Product"
+                                                            <img src="{{asset($filePath)}}/images/shop/13.jpg" alt="Product"
                                                                 width="100" height="113" />
                                                         </a>
                                                     </figure>
@@ -523,7 +523,7 @@
                                                 <div class="product product-widget">
                                                     <figure class="product-media">
                                                         <a href="#">
-                                                            <img src="{{asset('frontend')}}/images/shop/14.jpg" alt="Product"
+                                                            <img src="{{asset($filePath)}}/images/shop/14.jpg" alt="Product"
                                                                 width="100" height="113" />
                                                         </a>
                                                     </figure>
@@ -543,7 +543,7 @@
                                                 <div class="product product-widget">
                                                     <figure class="product-media">
                                                         <a href="#">
-                                                            <img src="{{asset('frontend')}}/images/shop/15.jpg" alt="Product"
+                                                            <img src="{{asset($filePath)}}/images/shop/15.jpg" alt="Product"
                                                                 width="100" height="113" />
                                                         </a>
                                                     </figure>
@@ -565,7 +565,7 @@
                                                 <div class="product product-widget">
                                                     <figure class="product-media">
                                                         <a href="#">
-                                                            <img src="{{asset('frontend')}}/images/shop/16.jpg" alt="Product"
+                                                            <img src="{{asset($filePath)}}/images/shop/16.jpg" alt="Product"
                                                                 width="100" height="113" />
                                                         </a>
                                                     </figure>
@@ -585,7 +585,7 @@
                                                 <div class="product product-widget">
                                                     <figure class="product-media">
                                                         <a href="#">
-                                                            <img src="{{asset('frontend')}}/images/shop/17.jpg" alt="Product"
+                                                            <img src="{{asset($filePath)}}/images/shop/17.jpg" alt="Product"
                                                                 width="100" height="113" />
                                                         </a>
                                                     </figure>
@@ -605,7 +605,7 @@
                                                 <div class="product product-widget">
                                                     <figure class="product-media">
                                                         <a href="#">
-                                                            <img src="{{asset('frontend')}}/images/shop/18.jpg" alt="Product"
+                                                            <img src="{{asset($filePath)}}/images/shop/18.jpg" alt="Product"
                                                                 width="100" height="113" />
                                                         </a>
                                                     </figure>
@@ -639,8 +639,8 @@
     <!-- End of Page Content -->
 
     @push('js')
-        <script src="{{asset('frontend')}}/vendor/sticky/sticky.min.js"></script>
-        <script src="{{asset('frontend')}}/vendor/photoswipe/photoswipe.min.js"></script>
-        <script src="{{asset('frontend')}}/vendor/photoswipe/photoswipe-ui-default.min.js"></script>
+        <script src="{{asset($filePath)}}/vendor/sticky/sticky.min.js"></script>
+        <script src="{{asset($filePath)}}/vendor/photoswipe/photoswipe.min.js"></script>
+        <script src="{{asset($filePath)}}/vendor/photoswipe/photoswipe-ui-default.min.js"></script>
     @endpush
 </x-frontend-layout>

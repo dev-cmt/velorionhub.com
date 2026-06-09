@@ -6,15 +6,15 @@
                 <div class="ft-inner flex-wrap flex-xl-nowrap">
                     <div class="ft-logo">
                         <a href="{{ route('home') }}" class="logo-site">
-                            <img src="{{asset('frontend')}}/images/logo/logo.svg" alt="Logo">
+                            <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
                         </a>
                         <div class="method-payment">
                             <p>We accept:</p>
                             <ul class="method-list">
-                                <li><img src="{{asset('frontend')}}/images/payment/visa.svg" alt="Payment"></li>
-                                <li><img src="{{asset('frontend')}}/images/payment/paypal.svg" alt="Payment"></li>
-                                <li><img src="{{asset('frontend')}}/images/payment/discover.svg" alt="Payment"></li>
-                                <li><img src="{{asset('frontend')}}/images/payment/master.svg" alt="Payment"></li>
+                                <li><img src="{{asset($filePath)}}/images/payment/visa.svg" alt="Payment"></li>
+                                <li><img src="{{asset($filePath)}}/images/payment/paypal.svg" alt="Payment"></li>
+                                <li><img src="{{asset($filePath)}}/images/payment/discover.svg" alt="Payment"></li>
+                                <li><img src="{{asset($filePath)}}/images/payment/master.svg" alt="Payment"></li>
                             </ul>
                         </div>
                     </div>

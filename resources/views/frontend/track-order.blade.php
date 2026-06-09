@@ -1,52 +1,60 @@
 <x-frontend-layout title="Track Order" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
-    <!-- site__body -->
-    <div class="site__body">
-        <div class="block-header block-header--has-breadcrumb block-header--has-title">
-            <div class="container">
-                <div class="block-header__body">
-                    <nav class="breadcrumb block-header__breadcrumb" aria-label="breadcrumb">
-                        <ol class="breadcrumb__list">
-                            @foreach($breadcrumb_list as $breadcrumb)
-                                <li class="breadcrumb__item @if($loop->first) breadcrumb__item--parent breadcrumb__item--first @endif @if($loop->last) breadcrumb__item--current @endif">
-                                    @if(!$loop->last)
-                                        <a href="{{ $breadcrumb['url'] }}" class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</a>
-                                    @else
-                                        <span class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</span>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ol>
-                    </nav>
-                    <h1 class="block-header__title">Track Order</h1>
-                </div>
-            </div>
-        </div>
-        <div class="block">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-8 col-lg-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <p>To track your order please enter your Order ID in the box below and press the "Track" button. This was given to you on your receipt and in the confirmation email you should have received.</p>
-                                <form>
-                                    <div class="form-group">
-                                        <label for="track-order-id">Order ID</label>
-                                        <input type="text" id="track-order-id" class="form-control" placeholder="Order ID">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="track-email">Billing Email</label>
-                                        <input type="email" id="track-email" class="form-control" placeholder="Email address">
-                                    </div>
-                                    <div class="form-button">
-                                        <button type="submit" class="btn btn-primary btn-lg btn-block">Track</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Breakcrumbs -->
+    <div class="tf-sp-3 pb-0">
+        <div class="container">
+            <ul class="breakcrumbs">
+                <li>
+                    <a href="index.html" class="body-small link">
+                        Home
+                    </a>
+                </li>
+                <li class="d-flex align-items-center">
+                    <i class="icon icon-arrow-right"></i>
+                </li>
+                <li>
+                    <p class="body-small">
+                        Track Your Order
+                    </p>
+                </li>
+            </ul>
         </div>
     </div>
-    <!-- site__body / end -->
+    <!-- /Breakcrumbs -->
+    <!-- Track Order -->
+    <section class="s-track-order tf-sp-2">
+        <div class="container">
+            <div class="position-relative">
+                <div class="parallax-image">
+                    <img src="{{asset($filePath)}}/images/section/parallax-3.jpg" data-src="{{asset($filePath)}}/images/section/parallax-3.jpg" alt=""
+                        class="lazyload effect-paralax">
+                </div>
+                <div class="wrap">
+                    <div class="box-title">
+                        <h5 class="fw-semibold">Track your order</h5>
+                        <p class="body-text-3">To track your order, please enter your order ID in the box below
+                            and
+                            press the "Track" button. The ID has been sent to you on your receipt and in the
+                            confirmation email you received.</p>
+                    </div>
+                    <form class="form-trackorder def">
+                        <fieldset>
+                            <label>Oder ID</label>
+                            <input class="def" type="text" placeholder="Found in your order confirmation email"
+                                required>
+                        </fieldset>
+                        <fieldset>
+                            <label>Order email</label>
+                            <input class="def" type="text" placeholder="Email you used during checkout" required>
+                        </fieldset>
+                        <div class="box-btn">
+                            <button type="submit" class="tf-btn w-100">
+                                <span class="text-white">Track</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /Track Order -->
 </x-frontend-layout>

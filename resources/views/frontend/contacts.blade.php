@@ -1,88 +1,79 @@
 <x-frontend-layout title="Contact Us" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
-    <!-- site__body -->
-    <div class="site__body">
-        <div class="block-header block-header--has-breadcrumb block-header--has-title">
-            <div class="container">
-                <div class="block-header__body">
-                    <nav class="breadcrumb block-header__breadcrumb" aria-label="breadcrumb">
-                        <ol class="breadcrumb__list">
-                            @foreach($breadcrumb_list as $breadcrumb)
-                                <li class="breadcrumb__item @if($loop->first) breadcrumb__item--parent breadcrumb__item--first @endif @if($loop->last) breadcrumb__item--current @endif">
-                                    @if(!$loop->last)
-                                        <a href="{{ $breadcrumb['url'] }}" class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</a>
-                                    @else
-                                        <span class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</span>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ol>
-                    </nav>
-                    <h1 class="block-header__title">Contact Us</h1>
-                </div>
-            </div>
+    <!-- Breakcrumbs -->
+    <div class="tf-sp-3 pb-0">
+        <div class="container">
+            <ul class="breakcrumbs">
+                <li><a href="index.html" class="body-small link">Home</a></li>
+                <li class="d-flex align-items-center">
+                    <i class="icon icon-arrow-right"></i>
+                </li>
+                <li><span class="body-small">Contact</span></li>
+            </ul>
         </div>
-        <div class="block">
-            <div class="container container--max--lg">
-                <div class="card contacts">
-                    <div class="contacts__map">
-                        <iframe src='https://maps.google.com/maps?q=Holbrook-Palmer%20Park&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed' frameborder='0' scrolling='no' marginheight='0' marginwidth='0'></iframe>
-                    </div>
-                    <div class="card-body card-body--padding--2">
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pb-4 pb-lg-0">
-                                <div class="mr-1">
-                                    <h4 class="contact-us__header card-title">Our Address</h4>
-                                    <div class="contact-us__address">
-                                        <p>
-                                            715 Fake Ave, Apt. 34, New York, NY 10021 USA<br>
-                                            Email Address red parts@example.com<br>
-                                            Phone number +1 (800) 060-07-30
-                                        </p>
-                                        <p>
-                                            <strong>Opening Hours</strong><br>
-                                            <p>Monday to Friday: 8am-8pm<br />Saturday: 8am-6pm<br />Sunday: 10am-4pm</p>
-                                        </p>
-                                        <p>
-                                            <strong>Comment</strong><br>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur suscipit suscipit mi, non
-                                            tempor nulla finibus eget. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="ml-1">
-                                    <h4 class="contact-us__header card-title">Leave us a Message</h4>
-                                    <form class="ajax_form" method="post" action="http://redparts.webps.pp.ua/contact-us.html" name="contact">
-                                        <input type="text" name="nospam:blank" value="" style="display:none;" />
-                                        <div class="form-row">
-                                            <div class="form-group col-md-6">
-                                                <label for="form-name">Your Name <span class="text-danger">*</span></label>
-                                                <input type="text" id="form-name" class="form-control" placeholder="Your Name" name="name" value="" required>
-                                            </div>
-                                            <div class="form-group col-md-6">
-                                                <label for="form-email">Email Address <span class="text-danger">*</span></label>
-                                                <input type="email" id="form-email" class="form-control" placeholder="Email Address" name="email" value="" required>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="form-subject">Subject</label>
-                                            <input type="text" id="form-subject" class="form-control" placeholder="Subject" name="subject" value="">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="form-message">Message <span class="text-danger">*</span></label>
-                                            <textarea id="form-message" class="form-control" rows="4" name="message" required></textarea>
-                                        </div>
-                                        <input type="submit" class="btn btn-primary" name="contact" value="Send Message">
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="block-space block-space--layout--before-footer"></div>
     </div>
-    <!-- site__body / end -->
+    <!-- /Breakcrumbs -->
+    <!-- Contact -->
+    <section class="tf-sp-2">
+        <div class="container">
+            <div class="wg-map">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11678.740279919208!2d-75.53672684990242!3d39.167930537914174!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c77b533177974f%3A0xd017ee22f8759803!2sWesley%20College%20%2F%20DSU!5e0!3m2!1sen!2s!4v1741056536407!5m2!1sen!2s"
+                    height="585" style="border-radius:8px; width: 100%;" allowfullscreen=""
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+                <div class="bottom">
+                    <div class="contact-wrap">
+                        <div class="box-title">
+                            <h5 class="fw-semibold">Get A Quote</h5>
+                            <p class="body-text-3">
+                                Fill up the form and our Team will get back to you within 24 hours.
+                            </p>
+                        </div>
+                        <form class="form-contact def">
+                            <fieldset>
+                                <label>Name</label>
+                                <input type="text" required>
+                            </fieldset>
+                            <fieldset>
+                                <label>Subject</label>
+                                <input type="text" required>
+                            </fieldset>
+                            <fieldset class="d-flex flex-column">
+                                <label>Your message</label>
+                                <textarea style="height: 170px;" required></textarea>
+                            </fieldset>
+                            <div class="box-btn-submit">
+                                <button type="submit" class="tf-btn text-white w-100">
+                                    Send message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="contact-info">
+                        <h5 class="fw-semibold">Contact Infomation</h5>
+                        <ul class="info-list">
+                            <li>
+                                <span class="icon"><i class="icon-location"></i></span>
+                                <a href="https://www.google.com/maps?q=8500%20Lorem%20StreetChicago" class="link"
+                                    target="_blank">
+                                    8500 Lorem Street Chicago, <br>
+                                    IL 55030 Dolor sit amet
+                                </a>
+                            </li>
+                            <li>
+                                <span class="icon"><i class="icon-phone"></i></span>
+                                <a href="tel:1234567" class="product-title fw-semibold link"><span>+8(800) 123
+                                        4567</span></a>
+                            </li>
+                            <li>
+                                <span class="icon"><i class="icon-direction"></i></span>
+                                <a href="mailto:onsus@support.com" class="link"><span>onsus@support.com</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /Contact -->
 </x-frontend-layout>

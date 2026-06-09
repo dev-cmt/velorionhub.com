@@ -1,112 +1,183 @@
 <x-frontend-layout title="Compare" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
-    <div class="block-header block-header--has-breadcrumb block-header--has-title">
+    <!-- Breakcrumbs -->
+    <div class="tf-sp-3 pb-0">
         <div class="container">
-            <div class="block-header__body">
-                <nav class="breadcrumb block-header__breadcrumb" aria-label="breadcrumb">
-                    <ol class="breadcrumb__list">
-                        @foreach($breadcrumb_list as $breadcrumb)
-                            <li class="breadcrumb__item @if($loop->first) breadcrumb__item--parent breadcrumb__item--first @endif @if($loop->last) breadcrumb__item--current @endif">
-                                @if(!$loop->last)
-                                    <a href="{{ $breadcrumb['url'] }}" class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</a>
-                                @else
-                                    <span class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ol>
-                </nav>
-                <h1 class="block-header__title">Compare</h1>
-            </div>
+            <ul class="breakcrumbs">
+                <li>
+                    <a href="index.html" class="body-small link">
+                        Home
+                    </a>
+                </li>
+                <li class="d-flex align-items-center">
+                    <i class="icon icon-arrow-right"></i>
+                </li>
+                <li>
+                    <span class="body-small"> Compare</span>
+                </li>
+            </ul>
         </div>
     </div>
-    
-    <div class="block">
+    <!-- /Breakcrumbs -->
+    <!-- Compare -->
+    <div class="tf-sp-2">
         <div class="container">
-            @php
-                $compare = \Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getContent();
-            @endphp
-            @if($compare->count() > 0)
-            
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            
-            <div class="table-responsive">
-                <table class="compare-table">
+            <div class="tf-compare">
+                <table class="tf-table-compare">
                     <tbody>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">Product</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">
-                                <a href="{{ $item->attributes->url }}" class="compare-table__product-link">
-                                    <div class="compare-table__product-image">
-                                        <img src="{{ $item->attributes->image }}" alt="" width="200" height="200">
-                                    </div>
-                                    <div class="compare-table__product-name">{{ $item->name }}</div>
+                        <tr class="tf-compare-row row-info">
+                            <td class="tf-compare-col">
+                                <h6 class="fw-semibold">Product Name</h6>
+                            </td>
+                            <td class="tf-compare-col tf-compare-info">
+                                <div class="compare-item_info">
+                                    <a href="#"
+                                        class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link">Samsung
+                                        Galaxy S10+, 128GB, Ceramic Black - Unlocked</a>
+                                    <span class="icon">
+                                        <i class="icon-close remove link cs-pointer"></i>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="tf-compare-col tf-compare-info">
+                                <div class="compare-item_info">
+                                    <a href="#"
+                                        class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link">Samsung
+                                        Galaxy S10+, 128GB, Ceramic Black - Unlocked</a>
+                                    <span class="icon">
+                                        <i class="icon-close remove link cs-pointer"></i>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="tf-compare-col tf-compare-info">
+                                <div class="compare-item_info">
+                                    <a href="#"
+                                        class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link">Samsung
+                                        Galaxy S10+, 128GB, Ceramic Black - Unlocked</a>
+                                    <span class="icon">
+                                        <i class="icon-close remove link cs-pointer"></i>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="tf-compare-col tf-compare-info">
+                                <div class="compare-item_info">
+                                    <a href="#"
+                                        class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link">Samsung
+                                        Galaxy S10+, 128GB, Ceramic Black - Unlocked</a>
+                                    <span class="icon">
+                                        <i class="icon-close remove link cs-pointer"></i>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="tf-compare-row row-image">
+                            <td class="tf-compare-col">
+                                <h6 class="fw-semibold">Image</h6>
+                            </td>
+                            <td class="tf-compare-col tf-compare-image">
+                                <a href="#" class="image">
+                                    <img src="{{asset($filePath)}}/images/product/product-165.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-165.jpg" alt="Image" class="lazyload">
                                 </a>
                             </td>
-                            @endforeach
-                        </tr>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">Availability</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">
-                                <span class="badge badge-success">{{ $item->attributes->stock }}</span>
+                            <td class="tf-compare-col tf-compare-image">
+                                <a href="#" class="image">
+                                    <img src="{{asset($filePath)}}/images/product/product-43.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-43.jpg" alt="Image" class="lazyload">
+                                </a>
                             </td>
-                            @endforeach
-                        </tr>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">Price</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">${{ number_format($item->price, 2) }}</td>
-                            @endforeach
-                        </tr>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">Add to cart</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">
-                                <button type="button" class="btn btn-primary btn-sm btn-cart" 
-                                    data-id="{{ $item->id }}" 
-                                    data-name="{{ $item->name }}" 
-                                    data-price="{{ $item->price }}" 
-                                    data-image="{{ $item->attributes->image }}" 
-                                    data-url="{{ $item->attributes->url }}">Add to cart</button>
+                            <td class="tf-compare-col tf-compare-image">
+                                <a href="#" class="image">
+                                    <img src="{{asset($filePath)}}/images/product/product-137.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-137.jpg" alt="Image" class="lazyload">
+                                </a>
                             </td>
-                            @endforeach
-                        </tr>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">SKU</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">{{ $item->attributes->sku }}</td>
-                            @endforeach
-                        </tr>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">Brand</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">{{ $item->attributes->brand }}</td>
-                            @endforeach
-                        </tr>
-                        <tr class="compare-table__row">
-                            <th class="compare-table__column compare-table__column--header">Remove</th>
-                            @foreach($compare as $item)
-                            <td class="compare-table__column compare-table__column--product">
-                                <form action="{{ route('compare.remove', $item->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-sm">Remove</button>
-                                </form>
+                            <td class="tf-compare-col tf-compare-image">
+                                <a href="#" class="image">
+                                    <img src="{{asset($filePath)}}/images/product/product-46.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-46.jpg" alt="Image" class="lazyload">
+                                </a>
                             </td>
-                            @endforeach
+                        </tr>
+                        <tr class="tf-compare-row">
+                            <td class="tf-compare-col">
+                                <h6 class="fw-semibold">SKU</h6>
+                            </td>
+                            <td class="tf-compare-col"> <span>0047</span></td>
+                            <td class="tf-compare-col"> <span>0043</span></td>
+                            <td class="tf-compare-col"> <span>0054</span></td>
+                            <td class="tf-compare-col"> <span>0011</span></td>
+                        </tr>
+                        <tr class="tf-compare-row">
+                            <td class="tf-compare-col">
+                                <h6 class="fw-semibold">Price</h6>
+                            </td>
+                            <td class="tf-compare-col">
+                                <p class="price-wrap fw-medium flex-nowrap">
+                                    <span class="new-price price-text fw-medium mb-0">$80.000</span>
+                                    <span class="old-price body-md-2 text-main-2 fw-normal">$100.000</span>
+                                </p>
+                            </td>
+                            <td class="tf-compare-col">
+                                <p class="price-wrap fw-medium flex-nowrap">
+                                    <span class="new-price price-text fw-medium mb-0">$80.000</span>
+                                    <span class="old-price body-md-2 text-main-2 fw-normal">$100.000</span>
+                                </p>
+                            </td>
+                            <td class="tf-compare-col">
+                                <p class="price-wrap fw-medium flex-nowrap">
+                                    <span class="new-price price-text fw-medium mb-0">$80.000</span>
+                                    <span class="old-price body-md-2 text-main-2 fw-normal">$100.000</span>
+                                </p>
+                            </td>
+                            <td class="tf-compare-col">
+                                <p class="price-wrap fw-medium flex-nowrap">
+                                    <span class="new-price price-text fw-medium mb-0">$80.000</span>
+                                    <span class="old-price body-md-2 text-main-2 fw-normal">$100.000</span>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr class="tf-compare-row">
+                            <td class="tf-compare-col">
+                                <h6 class="fw-semibold">Dimensions</h6>
+                            </td>
+                            <td class="tf-compare-col"><span>N/A</span></td>
+                            <td class="tf-compare-col"><span>N/A</span></td>
+                            <td class="tf-compare-col"><span>N/A</span></td>
+                            <td class="tf-compare-col"><span>N/A</span></td>
+                        </tr>
+                        <tr class="tf-compare-row">
+                            <td class="tf-compare-col">
+                                <h6 class="fw-semibold">Add To Cart</h6>
+                            </td>
+                            <td class="tf-compare-col">
+                                <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                    class="tf-btn btn-gray text-nowrap">
+                                    <span class="text-white">Add To Cart</span>
+                                </a>
+                            </td>
+                            <td class="tf-compare-col">
+                                <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                    class="tf-btn btn-gray text-nowrap">
+                                    <span class="text-white">Add To Cart</span>
+                                </a>
+                            </td>
+                            <td class="tf-compare-col">
+                                <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                    class="tf-btn btn-gray text-nowrap">
+                                    <span class="text-white">Add To Cart</span>
+                                </a>
+                            </td>
+                            <td class="tf-compare-col">
+                                <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                    class="tf-btn btn-gray text-nowrap">
+                                    <span class="text-white">Add To Cart</span>
+                                </a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            @else
-            <div class="text-center pb-5 pt-5">
-                <h3 class="mb-4">Your compare list is empty</h3>
-                <a href="{{ url('/') }}" class="btn btn-primary">Continue Shopping</a>
-            </div>
-            @endif
         </div>
     </div>
+    <!-- /Compare -->
 </x-frontend-layout>

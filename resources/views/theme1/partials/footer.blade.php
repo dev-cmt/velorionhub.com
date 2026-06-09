@@ -33,7 +33,7 @@
                 <div class="col-lg-4 col-sm-6">
                     <div class="widget widget-about">
                         <a href="demo2.html" class="logo-footer">
-                            <img src="{{asset('frontend')}}/images/demos/demo2/footer-logo.png" alt="logo-footer"
+                            <img src="{{asset($filePath)}}/images/demos/demo2/footer-logo.png" alt="logo-footer"
                                 width="144" height="45" />
                         </a>
                         <div class="widget-body">
@@ -101,7 +101,7 @@
             <div class="footer-right">
                 <span class="payment-label mr-lg-8">We're using safe payment for</span>
                 <figure class="payment">
-                    <img src="{{asset('frontend')}}/images/payment.png" alt="payment" width="159" height="25" />
+                    <img src="{{asset($filePath)}}/images/payment.png" alt="payment" width="159" height="25" />
                 </figure>
             </div>
         </div>

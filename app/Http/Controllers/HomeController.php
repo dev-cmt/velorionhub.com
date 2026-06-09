@@ -580,4 +580,48 @@ class HomeController extends Controller
 
         return view($this->filePath . '.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
     }
+
+    /**
+     * My Account page - shows user details and order history
+     */
+    public function myAccount()
+    {
+        $page = Page::with('seo')->where('slug', 'my-account')->first();
+        $seotags = $this->applySeo($page, 'My Account - ' . config('app.name'));
+
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'My Account', 'url' => route('my.account')],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
+        return view($this->filePath . '.my-account', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+    }
+
+    public function orderList()
+    {
+        $page = Page::with('seo')->where('slug', 'order-list')->first();
+        $seotags = $this->applySeo($page, 'Order List - ' . config('app.name'));
+
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'Order List', 'url' => route('order.list')],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
+        return view($this->filePath . '.order-list', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+    }
+    public function accountEdit()
+    {
+        $page = Page::with('seo')->where('slug', 'account-edit')->first();
+        $seotags = $this->applySeo($page, 'Account Edit - ' . config('app.name'));
+
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'Account Edit', 'url' => route('account.edit')],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
+        return view($this->filePath . '.account-edit', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+    }
 }

@@ -10,23 +10,23 @@
 	{!! $breadcrumbs ?? '' !!}
 	{!! $jsonld ?? '' !!}
 
-    <link rel="icon" type="image/png" href="{{asset('frontend')}}/favicon.png">
+    <link rel="icon" type="image/png" href="{{asset($filePath)}}/favicon.png">
 
     <!-- fonts -->
-    <link rel="stylesheet" href="{{asset('frontend')}}/fonts/font.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/icons/icomoon/style.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/fonts/font.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/icons/icomoon/style.css">
     <!-- css -->
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/sib-styles.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/swiper-bundle.min.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/animate.css">
-    <link rel="stylesheet" href="{{asset('frontend')}}/css/styles.css" type="text/css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/sib-styles.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/swiper-bundle.min.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/animate.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/styles.css" type="text/css">
 
     @stack('css')
 
     <!-- Favicon and Touch Icons  -->
-    <link href="{{asset('frontend')}}/images/logo/short-logo.svg" rel="shortcut icon">
-    <link href="{{asset('frontend')}}/images/logo/short-logo.svg" rel="apple-touch-icon-precomposed">
+    <link href="{{asset($filePath)}}/images/logo/short-logo.svg" rel="shortcut icon">
+    <link href="{{asset($filePath)}}/images/logo/short-logo.svg" rel="apple-touch-icon-precomposed">
 
 </head>
 <body class="preload-wrapper popup-loader">
@@ -65,19 +65,19 @@
     <!-- modals / end -->
 
     <!-- Javascript -->
-    <script src="{{asset('frontend')}}/js/jquery.min.js"></script>
-    <script src="{{asset('frontend')}}/js/bootstrap.min.js"></script>
-    <script src="{{asset('frontend')}}/js/swiper-bundle.min.js"></script>
-    <script src="{{asset('frontend')}}/js/carousel.js"></script>
-    <script src="{{asset('frontend')}}/js/bootstrap-select.min.js"></script>
-    <script src="{{asset('frontend')}}/js/lazysize.min.js"></script>
-    <script src="{{asset('frontend')}}/js/count-down.js"></script>
-    <script src="{{asset('frontend')}}/js/wow.min.js"></script>
-    <script src="{{asset('frontend')}}/js/multiple-modal.js"></script>
-    <script src="{{asset('frontend')}}/js/infinityslide.js"></script>
-    <script src="{{asset('frontend')}}/js/main.js"></script>
-    <script src="{{asset('frontend')}}/js/storefront.js"></script>
-    <script src="{{asset('frontend')}}/js/sibforms.js" defer></script>
+    <script src="{{asset($filePath)}}/js/jquery.min.js"></script>
+    <script src="{{asset($filePath)}}/js/bootstrap.min.js"></script>
+    <script src="{{asset($filePath)}}/js/swiper-bundle.min.js"></script>
+    <script src="{{asset($filePath)}}/js/carousel.js"></script>
+    <script src="{{asset($filePath)}}/js/bootstrap-select.min.js"></script>
+    <script src="{{asset($filePath)}}/js/lazysize.min.js"></script>
+    <script src="{{asset($filePath)}}/js/count-down.js"></script>
+    <script src="{{asset($filePath)}}/js/wow.min.js"></script>
+    <script src="{{asset($filePath)}}/js/multiple-modal.js"></script>
+    <script src="{{asset($filePath)}}/js/infinityslide.js"></script>
+    <script src="{{asset($filePath)}}/js/main.js"></script>
+    <script src="{{asset($filePath)}}/js/storefront.js"></script>
+    <script src="{{asset($filePath)}}/js/sibforms.js" defer></script>
     <script>
         window.VelorionRoutes = {
             cartAdd: "{{ route('cart.add') }}",

@@ -143,7 +143,7 @@
                                 <!-- copyright / end -->
                             </div>
                             <div class="site-footer__payments">
-                                <img src="{{asset('frontend')}}/images/payments.png" alt="">
+                                <img src="{{asset($filePath)}}/images/payments.png" alt="">
                             </div>
                         </div>
                     </div>

@@ -1,185 +1,638 @@
 <x-frontend-layout title="Blog" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
-    <!-- site__body -->
-    <div class="site__body">
-        <div class="block-header block-header--has-breadcrumb block-header--has-title">
-            <div class="container">
-                <div class="block-header__body">
-                    <nav class="breadcrumb block-header__breadcrumb" aria-label="breadcrumb">
-                        <ol class="breadcrumb__list">
-                            @foreach($breadcrumb_list as $breadcrumb)
-                                @if($loop->last)
-                                    <li class="breadcrumb__item breadcrumb__item--current" aria-current="page">
-                                        <span class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</span>
-                                    </li>
-                                @else
-                                    <li class="breadcrumb__item breadcrumb__item--parent {{ $loop->first ? 'breadcrumb__item--first' : '' }}">
-                                        <a href="{{ $breadcrumb['url'] }}" class="breadcrumb__item-link">{{ $breadcrumb['name'] }}</a>
-                                    </li>
-                                @endif
-                            @endforeach
-                        </ol>
-                    </nav>
-                    <h1 class="block-header__title">Lastest News</h1>
-                </div>
-            </div>
+    <!-- Breakcrumbs -->
+    <div class="tf-sp-1">
+        <div class="container">
+            <ul class="breakcrumbs">
+                <li>
+                    <a href="index.html" class="body-small link">
+                        Home
+                    </a>
+                </li>
+                <li class="d-flex align-items-center">
+                    <i class="icon icon-arrow-right"></i>
+                </li>
+                <li>
+                    <span class="body-small">Blog Grid</span>
+                </li>
+            </ul>
         </div>
-        <div class="block blog-view blog-view--layout--grid">
-            <div class="container">
-                <div class="blog-view__body">
-                    <div class="blog-view__item blog-view__item-sidebar">
-
-                        <div class="card widget widget-about-us">
-                            <h4 class="widget__header">About Blog</h4>
-                            <div class="widget-about-us__body">
-                                <div class="widget-about-us__text">
-                                    {{ $settings->description ?? 'Welcome to our blog. Stay updated with the latest news and insights.' }}
-                                </div>
-                                <div class="widget-about-us__social-links social-links">
-                                    <ul class="social-links__list">
-                                        <li class="social-links__item social-links__item--instagram">
-                                            <a href="https://instagram.com/" target="_blank">
-                                                <i class="widget-social__icon fab fa-instagram"></i>
-                                            </a>
-                                        </li>
-                                        <li class="social-links__item social-links__item--twitter">
-                                            <a href="https://twitter.com/" target="_blank">
-                                                <i class="widget-social__icon fab fa-twitter"></i>
-                                            </a>
-                                        </li>
-                                        <li class="social-links__item social-links__item--youtube">
-                                            <a href="https://youtube.com/" target="_blank">
-                                                <i class="widget-social__icon fab fa-youtube"></i>
-                                            </a>
-                                        </li>
-                                        <li class="social-links__item social-links__item--facebook">
-                                            <a href="https://facebook.com/" target="_blank">
-                                                <i class="widget-social__icon fab fa-facebook"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card widget widget-categories">
-                            <div class="widget__header">
-                                <h4>Categories</h4>
-                            </div>
-                            <ul class="widget-categories__list widget-categories__list--root" data-collapse
-                                data-collapse-opened-class="widget-categories__item--open">
-                                @foreach($blog_categories as $blog_category)
-                                <li class="widget-categories__item" data-collapse-item>
-                                    <a class="widget-categories__link"
-                                        href="{{ route('blog', ['category' => $blog_category->slug]) }}">{{ $blog_category->name }}</a>
-                                </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <div class="card widget widget-posts">
-                            <div class="widget__header">
-                                <h4>Latest Posts</h4>
-                            </div>
-                            <ul class="widget-posts__list">
-                                @foreach($latest_posts as $l_post)
-                                <li class="widget-posts__item">
-                                    <div class="widget-posts__image">
-                                        <a href="{{ route('blog.show', $l_post->slug) }}">
-                                            <img src="{{ $l_post->image_path ? asset($l_post->image_path) : asset('images/no-image.jpg') }}" alt="{{ $l_post->title }}" height="60" class="image__tag">
-                                        </a>
-                                    </div>
-                                    <div class="widget-posts__info">
-                                        <div class="widget-posts__name">
-                                            <a href="{{ route('blog.show', $l_post->slug) }}">{{ $l_post->title }}</a>
-                                        </div>
-                                        <div class="widget-posts__date">{{ $l_post->created_at->format('F d, Y') }}</div>
-                                    </div>
-                                </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <div class="widget-newsletter widget">
-                            <h4 class="widget-newsletter__title">Newsletter</h4>
-                            <div class="widget-newsletter__text">
-                                Enter your email address below to subscribe to our newsletter and keep up to date
-                                with the latest news, discounts and special offers.
-                            </div>
-                            @if(session()->has('success'))
-                                <div class="alert alert-success">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
-                            @if(session()->has('error'))
-                                <div class="alert alert-danger">
-                                    {{ session('error') }}
-                                </div>
-                            @endif
-                            <form class="widget-newsletter__form ajax_form" method="post" action="{{ route('subscribe') }}" name="subscribe">
-                                @csrf
-                                <input type="text" name="nospam:blank" value="" style="display:none;" />
-                                <label for="widget-newsletter-email" class="sr-only">Email Address</label>
-                                <input id="widget-newsletter__email" type="text" class="form-control" placeholder="Email Address" name="email" value="" required>
-                                <input type="submit" class="widget-newsletter__button" type="submit" name="subscribe" value="Subscribe">
-                            </form>
-                        </div>
-
-                        @if($blog_tags->count() > 0)
-                        <div class="card widget-tags widget">
-                            <div class="widget__header">
-                                <h4>Tags Cloud</h4>
-                            </div>
-                            <div class="widget-tags__body tags">
-                                <div class="tags__list">
-                                    @foreach($blog_tags as $blog_tag)
-                                        <a href="{{ route('blog', ['tag' => $blog_tag->slug]) }}">{{ $blog_tag->name }}</a>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                    </div>
-                    <div class="blog-view__item blog-view__item-posts">
-                        <div class="block posts-view" id="pdopage">
-                            <div class="posts-view__list posts-list posts-list--layout--grid-2">
-                                <div class="posts-list__body rows" id="pdopage">
-                                    @foreach($blog as $post)
-                                    <div class="posts-list__item">
-                                        <div class="post-card post-card--layout--grid-sm">
-                                            <div class="post-card__image">
-                                                <a href="{{ route('blog.show', $post->slug) }}">
-                                                    <img src="{{ $post->image_path ? asset($post->image_path) : asset('images/no-image.jpg') }}" class="img-fluid w-100" alt="">
-                                                </a>
-                                            </div>
-                                            <div class="post-card__content">
-                                                <div class="post-card__title">
-                                                    <h2><a href="{{ route('blog.show', $post->slug) }}">{{ $post->title }}</a></h2>
-                                                </div>
-                                                <div class="post-card__date">
-                                                    By <a>{{ $post->author->name }}</a> on {{ $post->created_at->format('F d, Y') }}
-                                                </div>
-                                                <div class="post-card__excerpt">
-                                                    <div class="typography">
-                                                        {{ Str::limit(strip_tags($post->content), 100) }}
-                                                    </div>
-                                                </div>
-                                                <div class="post-card__more">
-                                                    <a href="{{ route('blog.show', $post->slug) }}" class="btn btn-secondary btn-sm">Read more</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                            <div class="posts-view__pagination">
-                                {{ $blog->appends(request()->query())->links('vendor.pagination.custom') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="block-space block-space--layout--before-footer"></div>
     </div>
-    <!-- site__body / end -->
+    <!-- /Breakcrumbs -->
+
+    <!-- Blog Grid -->
+    <section>
+        <div class="container">
+            <div class="d-flex gap-36">
+                <div class="tf-grid-layout sm-col-2 md-col-3">
+                    <!-- item 1 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-1.jpg" data-src="{{asset($filePath)}}/images/blog/blog-1.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        Apple's Mostly Virtual WWDC 2022 Keynote Is Set For June6
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 2 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-2.jpg" data-src="{{asset($filePath)}}/images/blog/blog-2.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        Amazon Drivers Injured at Rate of Almost1in5,Union Study Says
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 3 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-3.jpg" data-src="{{asset($filePath)}}/images/blog/blog-3.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        Pixel 6A vs. Pixel 5A With 5G:
+                                        What Specs Are Changing
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 4 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-4.jpg" data-src="{{asset($filePath)}}/images/blog/blog-4.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        My Solution to Lost AirPods:The AirTags U1 Chip
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 5 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-5.jpg" data-src="{{asset($filePath)}}/images/blog/blog-5.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        'Stranger Things'vs.'Obi-Wan Kenobi':Which Will You Watch Friday?
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 6 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-6.jpg" data-src="{{asset($filePath)}}/images/blog/blog-6.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        'Dragon of Death'Unearthed in Argentina Is One of the Largest Pterosaurs
+                                        Ever...
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 7 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-7.jpg" data-src="{{asset($filePath)}}/images/blog/blog-7.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        Google Urged to Stop Collecting Location Data That Could Be Used Against...
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 8 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-8.jpg" data-src="{{asset($filePath)}}/images/blog/blog-8.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        iPhone 14 Rumors:All the Buzzy Camera Gossip and More
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 9 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-9.jpg" data-src="{{asset($filePath)}}/images/blog/blog-9.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        How to See the Mile-Wide Asteroid About to MakeaClose Pass by Earth
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 10 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-10.jpg" data-src="{{asset($filePath)}}/images/blog/blog-10.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        See Skydiving Salamanders Show Off Their Complex Aerial Maneuvers
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 11 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-11.jpg" data-src="{{asset($filePath)}}/images/blog/blog-11.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        SteelSeries Arctis Nova Pro Wireless Review:Great but Imperfect Gaming...
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- item 12 -->
+                    <div class="news-item hover-img">
+                        <a href="blog-detail.html" class="entry_image img-style">
+                            <img src="{{asset($filePath)}}/images/blog/blog-12.jpg" data-src="{{asset($filePath)}}/images/blog/blog-12.jpg" alt=""
+                                class="lazyload">
+                        </a>
+                        <div class="content">
+                            <div class="entry_meta">
+                                <div class="tags">
+                                    <img src="{{asset($filePath)}}/images/folder.svg" alt="">
+                                    <p class="caption fw-medium text-secondary font-2">
+                                        Houseware
+                                    </p>
+                                </div>
+                                <div class="date">
+                                    <p class="caption font-2">
+                                        28 Apr 0222
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="entry_infor_news">
+                                <h6>
+                                    <a href="#" class="link fw-semibold">
+                                        'Sharkcano':NASA Spots Eruption of Underwater Volcano Where Sharks Live
+                                    </a>
+                                </h6>
+                                <p class="subs body-text-3">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum pharetra nec
+                                    nisi at varius. Praesent...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Navigation -->
+                    <ul class="wg-pagination wd-load mt-xl--10">
+                        <li>
+                            <a href="#" class="link">
+                                <i class="icon-arrow-left-lg"></i>
+                            </a>
+                        </li>
+                        <li class="active">
+                            <p class="title-normal link">1</p>
+                        </li>
+                        <li>
+                            <a href="#" class="title-normal link">2</a>
+                        </li>
+                        <li class="d-none d-sm-flex">
+                            <a href="#" class="title-normal link">3</a>
+                        </li>
+                        <li class="d-none d-sm-flex">
+                            <a href="#" class="title-normal link">4</a>
+                        </li>
+                        <li>
+                            <p class="title-normal">...</p>
+                        </li>
+                        <li>
+                            <a href="#" class="title-normal link">10</a>
+                        </li>
+                        <li>
+                            <a href="#" class="link">
+                                <i class="icon-arrow-right-lg"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="blog-sidebar d-xl-flex d-none sidebar-content-wrap">
+                    <div class="sidebar-item style-2">
+                        <h6 class="sb-title fw-semibold">
+                            Categories
+                        </h6>
+                        <div class="sb-content sb-category">
+                            <ul>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Apparel</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Automotive parts & accessories</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Beauty & personal care</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Consumer Electronics</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Fumiture</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Home products</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Machinery</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="link">
+                                        <span class="body-text-3">Timepieces, jewelry & eyewear</span>
+                                        <i class="icon-arrow-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="sidebar-item has-line-bt">
+                        <h6 class="sb-title fw-semibold">
+                            Recent posts
+                        </h6>
+                        <ul class="sb-content sb-recent">
+                            <li class="hover-img">
+                                <a href="blog-detail.html" class="image img-style">
+                                    <img src="{{asset($filePath)}}/images/blog/recent/recent-1.jpg"
+                                        data-src="{{asset($filePath)}}/images/blog/recent/recent-1.jpg" alt="" class="lazyload">
+                                </a>
+                                <div class="content">
+                                    <a href="blog-detail.html" class="body-md-2 fw-semibold link">
+                                        Why Scientists Are Racing to
+                                        EnsureaFuture With Koalas
+                                    </a>
+                                    <p class="date">
+                                        <img src="{{asset($filePath)}}/images/clock.svg" alt="">
+                                        <span class="body-small">
+                                            October 17,2020
+                                        </span>
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="hover-img">
+                                <a href="blog-detail.html" class="image img-style">
+                                    <img src="{{asset($filePath)}}/images/blog/recent/recent-2.jpg"
+                                        data-src="{{asset($filePath)}}/images/blog/recent/recent-2.jpg" alt="" class="lazyload">
+                                </a>
+                                <div class="content">
+                                    <a href="blog-detail.html" class="body-md-2 fw-semibold link">
+                                        Why Scientists Are Racing to
+                                        EnsureaFuture With Koalas
+                                    </a>
+                                    <p class="date">
+                                        <img src="{{asset($filePath)}}/images/clock.svg" alt="">
+                                        <span class="body-small">
+                                            October 17,2020
+                                        </span>
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="hover-img">
+                                <a href="blog-detail.html" class="image img-style">
+                                    <img src="{{asset($filePath)}}/images/blog/recent/recent-3.jpg"
+                                        data-src="{{asset($filePath)}}/images/blog/recent/recent-3.jpg" alt="" class="lazyload">
+                                </a>
+                                <div class="content">
+                                    <a href="blog-detail.html" class="body-md-2 fw-semibold link">
+                                        An Insider's View of the Avengers
+                                        Campus at Disneyland Paris,Opening
+                                        July 20
+                                    </a>
+                                    <p class="date">
+                                        <img src="{{asset($filePath)}}/images/clock.svg" alt="">
+                                        <span class="body-small">
+                                            October 17,2020
+                                        </span>
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="hover-img">
+                                <a href="blog-detail.html" class="image img-style">
+                                    <img src="{{asset($filePath)}}/images/blog/recent/recent-4.jpg"
+                                        data-src="{{asset($filePath)}}/images/blog/recent/recent-4.jpg" alt="" class="lazyload">
+                                </a>
+                                <div class="content">
+                                    <a href="blog-detail.html" class="body-md-2 fw-semibold link">
+                                        Pixel 6A vs. Pixel 5A With 5G:
+                                        What Specs Are Changing
+                                    </a>
+                                    <p class="date">
+                                        <img src="{{asset($filePath)}}/images/clock.svg" alt="">
+                                        <span class="body-small">
+                                            October 17,2020
+                                        </span>
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="hover-img">
+                                <a href="blog-detail.html" class="image img-style">
+                                    <img src="{{asset($filePath)}}/images/blog/recent/recent-5.jpg"
+                                        data-src="{{asset($filePath)}}/images/blog/recent/recent-5.jpg" alt="" class="lazyload">
+                                </a>
+                                <div class="content">
+                                    <a href="blog-detail.html" class="body-md-2 fw-semibold link">
+                                        Where the Money Is for Small Businesses
+                                    </a>
+                                    <p class="date">
+                                        <img src="{{asset($filePath)}}/images/clock.svg" alt="">
+                                        <span class="body-small">
+                                            October 17,2020
+                                        </span>
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="sidebar-item type-space-2">
+                        <h6 class="sb-title fw-semibold">
+                            Tags
+                        </h6>
+                        <ul class="sb-content sb-tags">
+                            <li><a href="#" class="body-text-3">ThemeMu</a></li>
+                            <li><a href="#" class="body-text-3">Busines plans</a></li>
+                            <li><a href="#" class="body-text-3">Middle</a></li>
+                            <li><a href="#" class="body-text-3">Web design</a></li>
+                            <li><a href="#" class="body-text-3">App</a></li>
+                            <li><a href="#" class="body-text-3">Case study</a></li>
+                            <li><a href="#" class="body-text-3">Psychological</a></li>
+                            <li><a href="#" class="body-text-3">Pricing</a></li>
+                            <li><a href="#" class="body-text-3">Methods</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Blog Grid -->
+    <div class="btn-sidebar-mb d-xl-none right">
+        <button data-bs-toggle="offcanvas" data-bs-target="#mbSidebar">
+            <i class="icon icon-sidebar"></i>
+        </button>
+    </div>
 </x-frontend-layout>

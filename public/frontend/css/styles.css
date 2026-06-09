@@ -3482,7 +3482,7 @@ button {
 
 .form-search-product {
   border: 2px solid var(--primary);
-  border-radius: 100px;
+  border-radius: 0px; /*CH-100px*/
   display: flex;
   gap: 15px;
   align-items: center;
@@ -3510,7 +3510,7 @@ button {
   position: absolute;
   width: 35px;
   height: 35px;
-  border-radius: 50%;
+  border-radius: 0px; /*CH-50%*/
   background-color: var(--primary);
   border: unset;
   color: var(--white);

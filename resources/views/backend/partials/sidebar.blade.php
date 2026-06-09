@@ -113,7 +113,7 @@
                 <li class="slide">
                     <a href="{{ route('attributes.index') }}" class="side-menu__item {{ Request::is('attributes*') ? 'active' : '' }}">
                         <i class="bx bx-paste side-menu__icon"></i>
-                        <span class="side-menu__label">Variant Attributes</span>
+                        <span class="side-menu__label">Attributes</span>
                     </a>
                 </li>
                 @endcan
@@ -136,48 +136,23 @@
                 </li>
                 @endcan
 
-                @can('view settings')
-                <li class="slide__category"><span class="category-name">Stock</span></li>
-                @endcan
-
-                @can('view settings')
-                <!-- Dashboard - Always visible -->
-                <li class="slide">
-                    <a href="{{ route('stock-manage.index') }}" class="side-menu__item {{ Request::is('stock-manage*') ? 'active' : '' }}">
-                        <i class="bx bx-layer side-menu__icon"></i>
-                        <span class="side-menu__label">Manage Stock</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('view settings')
-                <!-- Dashboard - Always visible -->
-                <li class="slide">
-                    <a href="{{ route('stock-adjustment.index') }}" class="side-menu__item {{ Request::is('stock-adjustment*') ? 'active' : '' }}">
-                        <i class="bx bx-equalizer side-menu__icon"></i>
-                        <span class="side-menu__label">Stock Adjustment</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('view settings')
-                <!-- Dashboard - Always visible -->
-                <li class="slide">
-                    <a href="{{ route('stock-transfer.index') }}" class="side-menu__item {{ Request::is('stock-transfer*') ? 'active' : '' }}">
-                        <i class="bx bx-transfer side-menu__icon"></i>
-                        <span class="side-menu__label">Stock Transfer</span>
-                    </a>
-                </li>
-                @endcan
-
-
                 <li class="slide__category"><span class="category-name">Sales</span></li>
                 @can('view orders')
                 <li class="slide">
                     <a href="{{ route('orders.index') }}"
                         class="side-menu__item {{ Request::is('orders*') ? 'active' : '' }}">
                         <i class="bx bx-shopping-bag side-menu__icon"></i>
-                        <span class="side-menu__label">Online Orders</span>
+                        <span class="side-menu__label">Orders</span>
+                    </a>
+                </li>
+                @endcan
+
+                @can('view settings')
+                <!-- Dashboard - Always visible -->
+                <li class="slide">
+                    <a href="#" class="side-menu__item">
+                        <i class="bx bx-laptop side-menu__icon"></i>
+                        <span class="side-menu__label">POS</span>
                     </a>
                 </li>
                 @endcan
@@ -197,7 +172,7 @@
                 <li class="slide">
                     <a href="#" class="side-menu__item">
                         <i class="bx bx-trending-down side-menu__icon"></i>
-                        <span class="side-menu__label">Sales Return</span>
+                        <span class="side-menu__label">Sale Return</span>
                     </a>
                 </li>
                 @endcan
@@ -207,7 +182,7 @@
                     <a href="{{ route('sale-requisitions.index') }}"
                         class="side-menu__item {{ Request::is('sale-requisitions*') ? 'active' : '' }}">
                         <i class="bx bx-paste side-menu__icon"></i>
-                        <span class="side-menu__label">Quotation</span>
+                        <span class="side-menu__label">Sale Quotation</span>
                     </a>
                 </li>
                 @endcan
@@ -218,16 +193,6 @@
                         class="side-menu__item {{ Request::is('sale-approve*') ? 'active' : '' }}">
                         <i class="bx bx-badge-check side-menu__icon"></i>
                         <span class="side-menu__label">Sale Approve</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('view settings')
-                <!-- Dashboard - Always visible -->
-                <li class="slide">
-                    <a href="#" class="side-menu__item">
-                        <i class="bx bx-laptop side-menu__icon"></i>
-                        <span class="side-menu__label">POS</span>
                     </a>
                 </li>
                 @endcan
@@ -261,6 +226,40 @@
                     <a href="#" class="side-menu__item">
                         <i class="bx bxs-share side-menu__icon"></i>
                         <span class="side-menu__label">Purchase Return</span>
+                    </a>
+                </li>
+                @endcan
+
+                @can('view settings')
+                <li class="slide__category"><span class="category-name">Stock</span></li>
+                @endcan
+
+                @can('view settings')
+                <!-- Dashboard - Always visible -->
+                <li class="slide">
+                    <a href="{{ route('stock-manage.index') }}" class="side-menu__item {{ Request::is('stock-manage*') ? 'active' : '' }}">
+                        <i class="bx bx-layer side-menu__icon"></i>
+                        <span class="side-menu__label">Stock Manage </span>
+                    </a>
+                </li>
+                @endcan
+
+                @can('view settings')
+                <!-- Dashboard - Always visible -->
+                <li class="slide">
+                    <a href="{{ route('stock-adjustment.index') }}" class="side-menu__item {{ Request::is('stock-adjustment*') ? 'active' : '' }}">
+                        <i class="bx bx-equalizer side-menu__icon"></i>
+                        <span class="side-menu__label">Stock Adjustment</span>
+                    </a>
+                </li>
+                @endcan
+
+                @can('view settings')
+                <!-- Dashboard - Always visible -->
+                <li class="slide">
+                    <a href="{{ route('stock-transfer.index') }}" class="side-menu__item {{ Request::is('stock-transfer*') ? 'active' : '' }}">
+                        <i class="bx bx-transfer side-menu__icon"></i>
+                        <span class="side-menu__label">Stock Transfer</span>
                     </a>
                 </li>
                 @endcan
@@ -494,14 +493,14 @@
                 <li class="slide">
                     <a href="{{ route('home-slides.index') }}" class="side-menu__item {{ Request::is('home-slides*') ? 'active' : '' }}">
                         <i class="bx bx-images side-menu__icon"></i>
-                        <span class="side-menu__label">Home Slides</span>
+                        <span class="side-menu__label">Slides</span>
                     </a>
                 </li>
 
                 <li class="slide">
                     <a href="{{ route('promotion-banners.index') }}" class="side-menu__item {{ Request::is('promotion-banners*') ? 'active' : '' }}">
                         <i class="bx bx-collection side-menu__icon"></i>
-                        <span class="side-menu__label">Promotion Banners</span>
+                        <span class="side-menu__label">Banners</span>
                     </a>
                 </li>
 
