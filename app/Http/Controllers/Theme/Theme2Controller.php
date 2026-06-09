@@ -474,7 +474,19 @@ class Theme2Controller extends Controller
         }
 
         $product = Product::findOrFail($request->id);
-        Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->add([
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_wishlist');
+
+        if ($cart->get($product->id)) {
+            $cart->remove($product->id);
+            return response()->json([
+                'success' => true,
+                'action' => 'removed',
+                'message' => 'Removed from wishlist successfully',
+                'count' => $cart->getTotalQuantity()
+            ]);
+        }
+
+        $cart->add([
             'id' => $product->id,
             'name' => $product->name,
             'price' => $product->sale_price,
@@ -485,12 +497,23 @@ class Theme2Controller extends Controller
                 'stock' => $product->current_stock > 0 ? 'In Stock' : 'Out of Stock',
             ]
         ]);
-        return response()->json(['success' => true, 'message' => 'Added to wishlist successfully', 'count' => Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity()]);
+        return response()->json([
+            'success' => true,
+            'action' => 'added',
+            'message' => 'Added to wishlist successfully',
+            'count' => $cart->getTotalQuantity()
+        ]);
     }
 
     public function removeWishlist($id)
     {
-        Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->remove($id);
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_wishlist');
+        $cart->remove($id);
+        $count = $cart->getTotalQuantity();
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true, 'count' => $count]);
+        }
         return back()->with('success', 'Item removed from wishlist.');
     }
 
@@ -501,7 +524,19 @@ class Theme2Controller extends Controller
         }
 
         $product = Product::with('category', 'brand')->findOrFail($request->id);
-        Cart::session((Auth::id() ?? session()->getId()) . '_compare')->add([
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+
+        if ($cart->get($product->id)) {
+            $cart->remove($product->id);
+            return response()->json([
+                'success' => true,
+                'action' => 'removed',
+                'message' => 'Removed from compare list successfully',
+                'count' => $cart->getTotalQuantity()
+            ]);
+        }
+
+        $cart->add([
             'id' => $product->id,
             'name' => $product->name,
             'price' => $product->sale_price,
@@ -516,12 +551,23 @@ class Theme2Controller extends Controller
                 'description' => $product->short_description ?? 'No description',
             ]
         ]);
-        return response()->json(['success' => true, 'message' => 'Added to compare list successfully', 'count' => Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getTotalQuantity()]);
+        return response()->json([
+            'success' => true,
+            'action' => 'added',
+            'message' => 'Added to compare list successfully',
+            'count' => $cart->getTotalQuantity()
+        ]);
     }
 
     public function removeCompare($id)
     {
-        Cart::session((Auth::id() ?? session()->getId()) . '_compare')->remove($id);
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+        $cart->remove($id);
+        $count = $cart->getTotalQuantity();
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true, 'count' => $count]);
+        }
         return back()->with('success', 'Item removed from compare list.');
     }
 

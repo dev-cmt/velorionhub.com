@@ -36,6 +36,8 @@ use Darryldecode\Cart\Facades\CartFacade as Cart;
 Route::get('/sync-permissions', [AdminController::class, 'resyncPermissions'])->name('sync.permissions');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 
+
+
 Route::get('/dd', function () {
     // Cart::session(Auth::id() ?? session()->getId())->clear();
     $cart = Cart::session(Auth::id() ?? session()->getId());
@@ -64,6 +66,8 @@ Route::get('/clear-cart', function () {
 
     return 'Cart + Session Reset Done';
 });
+
+
 
 Route::get('/cc', function () {
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
@@ -228,7 +232,6 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
-
     // Order
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
@@ -360,8 +363,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-
 // Custom dynamic pages created via the Page Builder
-Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
+// Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
 
 require __DIR__.'/auth.php';

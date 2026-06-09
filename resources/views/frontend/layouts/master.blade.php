@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="{{asset($filePath)}}/css/swiper-bundle.min.css">
     <link rel="stylesheet" href="{{asset($filePath)}}/css/animate.css">
 
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     @stack('css')
     <link rel="stylesheet" href="{{asset($filePath)}}/css/styles.css" type="text/css">
 </head>
@@ -89,12 +91,15 @@
             cartRemove: "{{ route('cart.remove', ':id') }}",
             wishlistAdd: "{{ route('wishlist.add') }}",
             compareAdd: "{{ route('compare.add') }}",
+            wishlistRemove: "{{ route('wishlist.remove', ':id') }}",
+            compareRemove: "{{ route('compare.remove', ':id') }}",
             shop: "{{ route('shop') }}",
             cart: "{{ route('cart') }}",
             checkout: "{{ route('checkout') }}",
             compare: "{{ route('compare') }}",
             wishlist: "{{ route('wishlist') }}",
             noImage: "{{ asset('images/no-image.jpg') }}",
+            csrfToken: "{{ csrf_token() }}",
         };
     </script>
     <script>
@@ -113,6 +118,18 @@
             }
         };
         var AUTOHIDE = Boolean(0);
+    </script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            timeOut: 3000,
+            showMethod: 'slideDown',
+            hideMethod: 'slideUp',
+        };
     </script>
     @stack('js')
 </body>

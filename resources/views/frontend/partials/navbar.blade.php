@@ -26,7 +26,6 @@
                                 <option value="BDT" selected>BDT | ৳</option>
                                 <option value="USD"> USD | $</option>
                                 <option value="EUR"> EUR | €</option>
-                                <option value="GBP"> GBP | £</option>
                             </select>
                         </div>
                     </div>
@@ -76,11 +75,11 @@
                                 <a href="{{ route('wishlist') }}" class="nav-icon-item">
                                     <span class="icon position-relative">
                                         <i class="icon-hearth"></i>
-                                        <span class="count-box wishlist-count">0</span>
+                                        <span class="count-box wishlist-count">{{ Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity() }}</span>
                                     </span>
                                     <div class="infor text-start d-none d-xxl-flex">
                                         <span class="body-text-3 text-main-2">wishlist:</span>
-                                        <h6 class="number-item fw-semibold text-main-2">4 item</h6>
+                                        <h6 class="number-item fw-semibold text-main-2 wishlist-count">{{ Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity() }} item</h6>
                                     </div>
                                 </a>
                             </li>
@@ -88,7 +87,7 @@
                                 <a href="#shoppingCart" data-bs-toggle="offcanvas" class="nav-icon-item">
                                     <span class="icon position-relative">
                                         <i class="icon-cart"></i>
-                                        <span class="count-box cart-count">0</span>
+                                        <span class="count-box cart-count">{{ Cart::session((Auth::id() ?? session()->getId()) . '_cart')->getTotalQuantity() }}</span>
                                     </span>
                                     <div class="infor text-start d-none d-xxl-flex">
                                         <span class="body-text-3 text-main-2">Your cart:</span>
@@ -366,21 +365,21 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // const rates = @json($settings->currency_rates);
-        // const symbols = @json($settings->currency_symbols);
+        const rates = @json($settings->currency_rates);
+        const symbols = @json($settings->currency_symbols);
 
-        const rates = {
-            "BDT": 1,
-            "USD": 0.012,
-            "EUR": 0.011,
-            "GBP": 0.0098
-        };
-        const symbols = {
-            "BDT": "৳",
-            "USD": "$",
-            "EUR": "€",
-            "GBP": "£"
-        };
+        // const rates = {
+        //     "BDT": 1,
+        //     "USD": 0.012,
+        //     "EUR": 0.011,
+        //     "GBP": 0.0098
+        // };
+        // const symbols = {
+        //     "BDT": "৳",
+        //     "USD": "$",
+        //     "EUR": "€",
+        //     "GBP": "£"
+        // };
 
         const select = document.getElementById("currencySelect");
         function updatePrices() {

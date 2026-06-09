@@ -46,8 +46,8 @@
                             </td>
                             <td class="wishlist-item_image">
                                 <a href="product-detail.html">
-                                    <img src="images/product/product-165.jpg"
-                                        data-src="images/product/product-165.jpg" alt="Image" class="lazyload">
+                                    <img src="{{asset($filePath)}}/product/product-165.jpg"
+                                        data-src="{{asset($filePath)}}/product/product-165.jpg" alt="Image" class="lazyload">
                                 </a>
                             </td>
                             <td class="wishlist-item_info">
@@ -77,8 +77,8 @@
                             </td>
                             <td class="wishlist-item_image">
                                 <a href="product-detail.html">
-                                    <img src="images/product/product-43.jpg"
-                                        data-src="images/product/product-43.jpg" alt="Image" class="lazyload">
+                                    <img src="{{asset($filePath)}}/product/product-43.jpg"
+                                        data-src="{{asset($filePath)}}/product/product-43.jpg" alt="Image" class="lazyload">
                                 </a>
                             </td>
                             <td class="wishlist-item_info">
@@ -108,8 +108,8 @@
                             </td>
                             <td class="wishlist-item_image">
                                 <a href="product-detail.html">
-                                    <img src="images/product/product-137.jpg"
-                                        data-src="images/product/product-137.jpg" alt="Image" class="lazyload">
+                                    <img src="{{asset($filePath)}}/product/product-137.jpg"
+                                        data-src="{{asset($filePath)}}/product/product-137.jpg" alt="Image" class="lazyload">
                                 </a>
                             </td>
                             <td class="wishlist-item_info">
@@ -139,8 +139,8 @@
                             </td>
                             <td class="wishlist-item_image">
                                 <a href="product-detail.html">
-                                    <img src="images/product/product-86.jpg"
-                                        data-src="images/product/product-86.jpg" alt="Image" class="lazyload">
+                                    <img src="{{asset($filePath)}}/product/product-86.jpg"
+                                        data-src="{{asset($filePath)}}/product/product-86.jpg" alt="Image" class="lazyload">
                                 </a>
                             </td>
                             <td class="wishlist-item_info">

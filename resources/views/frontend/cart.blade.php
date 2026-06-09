@@ -23,239 +23,196 @@
                         <span class="icon">
                             <i class="icon-shop-cart-1"></i>
                         </span>
-                        <a href="shop-cart.html" class="text-secondary body-text-3">Shopping Cart</a>
+                        <a href="{{ route('cart') }}" class="text-secondary body-text-3">Shopping Cart</a>
                     </div>
                     <div class="step-payment">
                         <span class="icon">
                             <i class="icon-shop-cart-2"></i>
                         </span>
-                        <a href="checkout.html" class="link-secondary body-text-3">Shopping & Checkout</a>
+                        <a href="{{ route('checkout') }}" class="link-secondary body-text-3">Shopping & Checkout</a>
 
                     </div>
                     <div class="step-payment">
                         <span class="icon">
                             <i class="icon-shop-cart-3"></i>
                         </span>
-                        <a href="order-details.html" class="link-secondary body-text-3">Confirmation</a>
+                        <a href="javascript:void(0);" class="link-secondary body-text-3">Confirmation</a>
                     </div>
                 </div>
             </div>
-            <form class="form-discount">
-                <div class="overflow-x-auto">
-                    <table class="tf-table-page-cart">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="tf-cart-item">
-                                <td class="tf-cart-item_product">
-                                    <a href="#" class="img-box"><img src="images/product/shop-cart-1.jpg"
-                                            alt=""></a>
-                                    <div class="cart-info">
-                                        <a href="#" class="cart-title body-md-2 fw-semibold link">
-                                            5Pcs/Lot Trolling Bait
-                                            Minnow Fishing Lure 8.37g Bass Crankbait
-                                            Tackle Wobbler
-                                        </a>
-                                        <div class="variant-box">
-                                            <p class="body-text-3">Color:</p>
-                                            <div class="tf-select">
-                                                <select>
-                                                    <option selected="selected">Yellow</option>
-                                                    <option>Green</option>
-                                                    <option>Black</option>
-                                                    <option>Red</option>
-                                                    <option>Beige</option>
-                                                    <option>Pink</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Price" class="tf-cart-item_price ">
-                                    <p class="cart-price price-on-sale price-text fw-medium">$22.99</p>
-                                </td>
-                                <td data-cart-title="Quantity" class="tf-cart-item_quantity">
-                                    <div class="wg-quantity">
-                                        <span class="btn-quantity btn-decrease">
-                                            <i class="icon-minus"></i>
-                                        </span>
-                                        <input class="quantity-product" type="text" name="number" value="1">
-                                        <span class="btn-quantity btn-increase">
-                                            <i class="icon-plus"></i>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Total" class="tf-cart-item_total">
-                                    <p class="cart-total total-price price-text fw-medium">$22.99</p>
-                                </td>
-                                <td data-cart-title="Remove" class="remove-cart text-xxl-end">
-                                    <span class="remove icon icon-close link"></span>
-                                </td>
-                            </tr>
-                            <tr class="tf-cart-item">
-                                <td class="tf-cart-item_product">
-                                    <a href="#" class="img-box"><img src="images/product/shop-cart-2.jpg"
-                                            alt=""></a>
-                                    <div class="cart-info">
-                                        <a href="#" class="cart-title body-md-2 fw-semibold link">
-                                            Intel Core i9-12900K Unlocked Desktop Processor - 16 <br
-                                                class="d-none d-xl-block"> Cores And 24
-                                            Threads
-                                        </a>
-                                        <div class="variant-box">
-                                            <p class="body-text-3">Color:</p>
-                                            <div class="tf-select">
-                                                <select>
-                                                    <option>Yellow</option>
-                                                    <option>Green</option>
-                                                    <option selected="selected">Black</option>
-                                                    <option>Red</option>
-                                                    <option>Beige</option>
-                                                    <option>Pink</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Price" class="tf-cart-item_price ">
-                                    <p class="cart-price price-on-sale price-text fw-medium">$549.99</p>
-                                </td>
-                                <td data-cart-title="Quantity" class="tf-cart-item_quantity">
-                                    <div class="wg-quantity">
-                                        <span class="btn-quantity btn-decrease">
-                                            <i class="icon-minus"></i>
-                                        </span>
-                                        <input class="quantity-product" type="text" name="number" value="1">
-                                        <span class="btn-quantity btn-increase">
-                                            <i class="icon-plus"></i>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Total" class="tf-cart-item_total">
-                                    <p class="cart-total total-price price-text fw-medium">$549.99</p>
-                                </td>
-                                <td data-cart-title="Remove" class="remove-cart text-xxl-end">
-                                    <span class="remove icon icon-close link"></span>
-                                </td>
-                            </tr>
-                            <tr class="tf-cart-item">
-                                <td class="tf-cart-item_product">
-                                    <a href="#" class="img-box"><img src="images/product/shop-cart-3.jpg"
-                                            alt=""></a>
-                                    <div class="cart-info">
-                                        <a href="#" class="cart-title body-md-2 fw-semibold link">
-                                            Xiaomi Redmi Note 9 Pro 6/128GB GLOBAL VERSION <br
-                                                class="d-none d-xl-block"> 6.67" Snapdragon 720G By
-                                            FedEx
-                                        </a>
-                                        <div class="variant-box">
-                                            <p class="body-text-3">Color:</p>
-                                            <div class="tf-select">
-                                                <select>
-                                                    <option>Yellow</option>
-                                                    <option selected="selected">Green</option>
-                                                    <option>Black</option>
-                                                    <option>Red</option>
-                                                    <option>Beige</option>
-                                                    <option>Pink</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Price" class="tf-cart-item_price ">
-                                    <p class="cart-price price-on-sale price-text fw-medium">$279.71</p>
-                                </td>
-                                <td data-cart-title="Quantity" class="tf-cart-item_quantity">
-                                    <div class="wg-quantity">
-                                        <span class="btn-quantity btn-decrease">
-                                            <i class="icon-minus"></i>
-                                        </span>
-                                        <input class="quantity-product" type="text" name="number" value="1">
-                                        <span class="btn-quantity btn-increase">
-                                            <i class="icon-plus"></i>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Total" class="tf-cart-item_total">
-                                    <p class="cart-total total-price price-text fw-medium">$279.71</p>
-                                </td>
-                                <td data-cart-title="Remove" class="remove-cart text-xxl-end">
-                                    <span class="remove icon icon-close link"></span>
-                                </td>
-                            </tr>
-                            <tr class="tf-cart-item">
-                                <td class="tf-cart-item_product">
-                                    <a href="#" class="img-box"><img src="images/product/shop-cart-4.jpg"
-                                            alt=""></a>
-                                    <div class="cart-info">
-                                        <a href="#" class="cart-title body-md-2 fw-semibold link">
-                                            Lenovo G27Q 27" QHD (2560 x 1440) IPS 165Hz 1ms <br
-                                                class="d-none d-xl-block"> FreeSync Premium Gaming
-                                            Monitor
-                                        </a>
-                                        <div class="variant-box">
-                                            <p class="body-text-3">Color:</p>
-                                            <div class="tf-select">
-                                                <select>
-                                                    <option>Yellow</option>
-                                                    <option>Green</option>
-                                                    <option selected="selected">Black</option>
-                                                    <option>Red</option>
-                                                    <option>Beige</option>
-                                                    <option>Pink</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Price" class="tf-cart-item_price ">
-                                    <p class="cart-price price-on-sale price-text fw-medium">$199.99</p>
-                                </td>
-                                <td data-cart-title="Quantity" class="tf-cart-item_quantity">
-                                    <div class="wg-quantity">
-                                        <span class="btn-quantity btn-decrease">
-                                            <i class="icon-minus"></i>
-                                        </span>
-                                        <input class="quantity-product" type="text" name="number" value="1">
-                                        <span class="btn-quantity btn-increase">
-                                            <i class="icon-plus"></i>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td data-cart-title="Total" class="tf-cart-item_total">
-                                    <p class="cart-total total-price price-text fw-medium">$199.99</p>
-                                </td>
-                                <td data-cart-title="Remove" class="remove-cart text-xxl-end">
-                                    <span class="remove icon icon-close link"></span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
 
-                <div class="cart-bottom">
-                    <div class="ip-discount-code">
-                        <input type="text" placeholder="Enter your cupon code" required>
-                        <button type="submit" class="tf-btn btn-gray">
-                            <span class="text-white">Apply coupon</span>
-                        </button>
+            @php
+                $cart = \Cart::session(Auth::id() ?? session()->getId());
+                $items = $cart->getContent()->sortBy('id');
+            @endphp
+
+            @if($items->count() > 0)
+                <form class="form-discount" onsubmit="event.preventDefault();">
+                    <div class="overflow-x-auto">
+                        <table class="tf-table-page-cart">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($items as $item)
+                                @php
+                                    $product = $item->associatedModel;
+                                    $mainImage = $product && $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
+                                    $productUrl = $product ? route('product.show', $product->slug) : '#';
+                                @endphp
+                                <tr class="tf-cart-item" data-id="{{ $item->id }}">
+                                    <td class="tf-cart-item_product">
+                                        <a href="{{ $productUrl }}" class="img-box">
+                                            <img src="{{ $mainImage }}" alt="{{ $item->name }}">
+                                        </a>
+                                        <div class="cart-info">
+                                            <a href="{{ $productUrl }}" class="cart-title body-md-2 fw-semibold link">
+                                                {{ $item->name }}
+                                            </a>
+                                            @php
+                                                $variantAttributes = $item->attributes->variant_attributes
+                                                    ?? $item->attributes->attributes
+                                                    ?? [];
+
+                                                if (is_string($variantAttributes)) {
+                                                    $decodedVariantAttributes = json_decode($variantAttributes, true);
+                                                    $variantAttributes = is_array($decodedVariantAttributes) ? $decodedVariantAttributes : [];
+                                                }
+
+                                                $variantLabel = $item->attributes->variant_label ?? null;
+                                            @endphp
+
+                                            @if(is_array($variantAttributes) && count($variantAttributes) > 0)
+                                                @php
+                                                    $pairs = [];
+                                                    foreach ($variantAttributes as $k => $v) {
+                                                        $pairs[] = ucfirst($k) . ': ' . $v;
+                                                    }
+                                                    $variantLine = implode(', ', $pairs);
+                                                @endphp
+                                                <div class="variant-box mt-1">
+                                                    <p class="body-text-3 text-secondary"><strong>Variant:</strong> {{ $variantLine }}</p>
+                                                </div>
+                                            @elseif($variantLabel)
+                                                <div class="variant-box mt-1">
+                                                    <p class="body-text-3 text-secondary"><strong>Variant:</strong> {{ $variantLabel }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td data-cart-title="Price" class="tf-cart-item_price ">
+                                        <p class="cart-price price-text fw-medium">TK {{ number_format($item->price, 2) }}</p>
+                                    </td>
+                                    <td data-cart-title="Quantity" class="tf-cart-item_quantity">
+                                        <div class="wg-quantity">
+                                            <span class="btn-quantity btn-decrease-cart">
+                                                <i class="icon-minus"></i>
+                                            </span>
+                                            <input class="quantity-product-cart" type="text" value="{{ $item->quantity }}" data-id="{{ $item->id }}" readonly>
+                                            <span class="btn-quantity btn-increase-cart">
+                                                <i class="icon-plus"></i>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td data-cart-title="Total" class="tf-cart-item_total">
+                                        <p class="cart-total total-price price-text fw-medium">TK {{ number_format($item->price * $item->quantity, 2) }}</p>
+                                    </td>
+                                    <td data-cart-title="Remove" class="remove-cart text-xxl-end">
+                                        <span class="remove icon icon-close link" data-id="{{ $item->id }}"></span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                    <span class="last-total-price main-title fw-semibold">Total:</span>
+
+                    <div class="cart-bottom">
+                        <div class="ip-discount-code">
+                            <input type="text" placeholder="Enter your coupon code">
+                            <button type="button" class="tf-btn btn-gray">
+                                <span class="text-white">Apply coupon</span>
+                            </button>
+                        </div>
+                        <span class="last-total-price main-title fw-semibold">Total: TK {{ number_format($cart->getTotal(), 2) }}</span>
+                    </div>
+                </form>
+                <div class="box-btn">
+                    <a href="{{ route('shop') }}" class="tf-btn btn-gray"><span class="text-white">Continue shopping</span></a>
+                    <a href="{{ route('checkout') }}" class="tf-btn"><span class="text-white">Proceed to checkout</span></a>
                 </div>
-            </form>
-            <div class="box-btn">
-                <a href="404-2.html" class="tf-btn btn-gray"><span class="text-white">Continue
-                        shopping</span></a>
-                <a href="checkout.html" class="tf-btn"><span class="text-white">Proceed to checkout</span></a>
-            </div>
+            @else
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="icon icon-shop-cart-1" style="font-size: 80px; color: #ccc;"></i>
+                    </div>
+                    <h3 class="fw-semibold">Your cart is empty</h3>
+                    <p class="text-muted my-3">Add some items to your cart to get started.</p>
+                    <a href="{{ route('shop') }}" class="tf-btn"><span class="text-white">Return to Shop</span></a>
+                </div>
+            @endif
+
+        </div>
+    </div>
+    @push('js')
+    <script>
+        $(document).ready(function() {
+            $('.btn-increase-cart').click(function() {
+                let input = $(this).siblings('.quantity-product-cart');
+                let val = parseInt(input.val()) + 1;
+                input.val(val).trigger('change');
+            });
+
+            $('.btn-decrease-cart').click(function() {
+                let input = $(this).siblings('.quantity-product-cart');
+                let val = parseInt(input.val()) - 1;
+                if(val >= 1) {
+                    input.val(val).trigger('change');
+                }
+            });
+
+            $('.quantity-product-cart').on('change', function() {
+                let id = $(this).data('id');
+                let qty = $(this).val();
+                $.ajax({
+                    url: "{{ route('cart.update.qty') }}",
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id,
+                        qty: qty,
+                        quantity: qty
+                    },
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            });
+
+            $('.remove-cart .remove').click(function(e) {
+                e.preventDefault();
+                let id = $(this).data('id');
+                if (!id) return;
+                let url = "{{ route('cart.remove', ':id') }}".replace(':id', id);
+                $.ajax({
+                    url: url,
+                    method: "DELETE",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function() {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
 
         </div>
     </div>

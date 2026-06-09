@@ -1,3 +1,27 @@
+@php
+    use Darryldecode\Cart\Facades\CartFacade as Cart;
+    use Illuminate\Support\Facades\Auth;
+
+    $mainImage   = $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
+    $isSale      = floatval($product->sale_price) < floatval($product->regular_price);
+    $discountPct = 0;
+    if ($isSale && floatval($product->regular_price) > 0) {
+        $discountPct = round(((floatval($product->regular_price) - floatval($product->sale_price)) / floatval($product->regular_price)) * 100);
+    }
+
+    // Wishlist / Compare initial state
+    $inWishlist = $inCompare = false;
+    try {
+        $sid = (Auth::id() ?? session()->getId());
+        if (Cart::session($sid . '_wishlist')->get($product->id)) { $inWishlist = true; }
+        if (Cart::session($sid . '_compare')->get($product->id))  { $inCompare  = true; }
+    } catch (\Exception $e) {}
+
+    // Approved reviews
+    $reviews      = $product->reviews()->where('status', 1)->latest()->get();
+    $reviewCount  = $reviews->count();
+    $avgRating    = $reviewCount > 0 ? round($reviews->avg('rating'), 1) : 0;
+@endphp
 <x-frontend-layout title="{{ $product->name }}" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
 
 
@@ -193,34 +217,44 @@
                                             <div class="product__actions">
                                                 <div class="product__actions-item product__actions-item--quantity">
                                                     <div class="input-number">
-                                                        <input class="input-number__input form-control form-control-lg quantity" type="number" name="count" min="1" value="1" id="product-quantity">
+                                                        <input class="input-number__input form-control form-control-lg quantity-product" type="number" name="qty" min="1" value="1" id="product-quantity" max="{{ max(1, $product->total_stock) }}">
                                                         <div class="input-number__add"></div>
                                                         <div class="input-number__sub"></div>
                                                     </div>
                                                 </div>
-                                                <div class="product__actions-item product__actions-item--addtocart">
-                                                    <button type="button" class="btn btn-primary btn-lg btn-block btn-cart"
-                                                        id="product-add-to-cart"
-                                                        data-id="{{ $product->id }}"
-                                                        data-name="{{ $product->name }}"
-                                                        data-price="{{ $product->sale_price }}"
-                                                        data-image="{{ $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg') }}"
-                                                        data-url="{{ route('product.show', $product->slug) }}">Add to cart</button>
-                                                </div>
+                                                 <div class="product__actions-item product__actions-item--addtocart">
+                                                    @if($product->total_stock > 0)
+                                                        <button type="button"
+                                                            class="btn btn-primary btn-lg btn-block add-to-cart"
+                                                            id="product-add-to-cart"
+                                                            data-id="{{ $product->id }}"
+                                                            data-name="{{ $product->name }}"
+                                                            data-price="{{ $product->sale_price }}"
+                                                            data-image="{{ $mainImage }}"
+                                                            data-url="{{ route('product.show', $product->slug) }}">Add to cart
+                                                        </button>
+                                                    @else
+                                                        <button class="btn btn-secondary btn-lg btn-block" disabled>Out of Stock</button>
+                                                    @endif
+                                                 </div>
                                                 <div class="product__actions-divider"></div>
-                                                <button class="product__actions-item product__actions-item--wishlist msWishlistTogglePage" type="button">
-                                                    <svg width="16" height="16">
-                                                        <path d="M13.9,8.4l-5.4,5.4c-0.3,0.3-0.7,0.3-1,0L2.1,8.4c-1.5-1.5-1.5-3.8,0-5.3C2.8,2.4,3.8,2,4.8,2s1.9,0.4,2.6,1.1L8,3.7l0.6-0.6C9.3,2.4,10.3,2,11.3,2c1,0,1.9,0.4,2.6,1.1C15.4,4.6,15.4,6.9,13.9,8.4z" />
-                                                    </svg>
-                                                    <span>Add to Wishlist</span>
+                                                <button class="product__actions-item product__actions-item--wishlist {{ $inWishlist ? 'active' : '' }}"
+                                                    type="button"
+                                                    data-action="wishlist"
+                                                    data-id="{{ $product->id }}"
+                                                    id="product-detail-wishlist"
+                                                    title="{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}">
+                                                    <svg width="16" height="16"><path d="M13.9,8.4l-5.4,5.4c-0.3,0.3-0.7,0.3-1,0L2.1,8.4c-1.5-1.5-1.5-3.8,0-5.3C2.8,2.4,3.8,2,4.8,2s1.9,0.4,2.6,1.1L8,3.7l0.6-0.6C9.3,2.4,10.3,2,11.3,2c1,0,1.9,0.4,2.6,1.1C15.4,4.6,15.4,6.9,13.9,8.4z" /></svg>
+                                                    <span>{{ $inWishlist ? 'In Wishlist' : 'Add to Wishlist' }}</span>
                                                 </button>
-                                                <button class="product__actions-item product__actions-item--compare msCompareTogglePage" type="button">
-                                                    <svg width="16" height="16">
-                                                        <path d="M9,15H7c-0.6,0-1-0.4-1-1V2c0-0.6,0.4-1,1-1h2c0.6,0,1,0.4,1,1v12C10,14.6,9.6,15,9,15z" />
-                                                        <path d="M1,9h2c0.6,0,1,0.4,1,1v4c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1v-4C0,9.4,0.4,9,1,9z" />
-                                                        <path d="M15,5h-2c-0.6,0-1,0.4-1,1v8c0,0.6,0.4,1,1,1h2c0.6,0,1-0.4,1-1V6C16,5.4,15.6,5,15,5z" />
-                                                    </svg>
-                                                    <span>Add to Compare</span>
+                                                <button class="product__actions-item product__actions-item--compare {{ $inCompare ? 'active' : '' }}"
+                                                    type="button"
+                                                    data-action="compare"
+                                                    data-id="{{ $product->id }}"
+                                                    id="product-detail-compare"
+                                                    title="{{ $inCompare ? 'Remove from Compare' : 'Add to Compare' }}">
+                                                    <svg width="16" height="16"><path d="M9,15H7c-0.6,0-1-0.4-1-1V2c0-0.6,0.4-1,1-1h2c0.6,0,1,0.4,1,1v12C10,14.6,9.6,15,9,15z" /><path d="M1,9h2c0.6,0,1,0.4,1,1v4c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1v-4C0,9.4,0.4,9,1,9z" /><path d="M15,5h-2c-0.6,0-1,0.4-1,1v8c0,0.6,0.4,1,1,1h2c0.6,0,1-0.4,1-1V6C16,5.4,15.6,5,15,5z" /></svg>
+                                                    <span>{{ $inCompare ? 'In Compare' : 'Add to Compare' }}</span>
                                                 </button>
                                             </div>
                                         </form>
@@ -269,26 +303,27 @@
                                                 <div class="reviews-view__list">
                                                     <div class="reviews-list">
                                                         <ol class="reviews-list__content">
-                                                            @if($product->reviews && count($product->reviews) > 0)
-                                                                @foreach($product->reviews as $review)
-                                                                    <li class="reviews-list__item">
-                                                                        <div class="review">
-                                                                            <div class="review__body">
-                                                                                <div class="review__meta">
-                                                                                    <div class="review__author">{{ $review->name ?? 'User' }}</div>
-                                                                                    <div class="review__date">{{ $review->created_at ? $review->created_at->format('M d, Y') : '' }}</div>
-                                                                                </div>
-                                                                                <div class="review__content typography">
-                                                                                    {{ $review->comment }}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </li>
-                                                                @endforeach
-                                                            @else
-                                                                <li>No reviews yet. Be the first to review!</li>
-                                                            @endif
-                                                        </ol>
+                                                    @if(session('success'))
+                                                        <div class="alert alert-success mb-3">{{ session('success') }}</div>
+                                                    @endif
+                                                    @forelse($reviews as $review)
+                                                        <li class="reviews-list__item">
+                                                            <div class="review">
+                                                                <div class="review__body">
+                                                                    <div class="review__meta">
+                                                                        <div class="review__author">{{ $review->name ?? 'User' }}</div>
+                                                                        <div class="review__date">{{ $review->created_at ? $review->created_at->format('M d, Y') : '' }}</div>
+                                                                    </div>
+                                                                    <div class="review__content typography">
+                                                                        {{ $review->comment }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    @empty
+                                                        <li>No reviews yet. Be the first to review!</li>
+                                                    @endforelse
+                                                </ol>
                                                     </div>
                                                 </div>
                                                 <form class="reviews-view__form" id="comment-form" method="post" action="{{ route('review.store', $product->id) }}">
@@ -395,14 +430,33 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
     @push('js')
         <script>
             $(document).ready(function() {
-                // Handling review stars click
+                // ── Star rating picker ───────────────────────────────────────────
                 $('.rating__star').click(function() {
                     var rating = $(this).data('title');
                     $('#rating-input').val(rating);
                     $('.rating__current').css('width', (rating * 20) + '%');
                 });
 
-                // Variants handling
+                // ── Wishlist / Compare button text update after toggle ────────────
+                $(document).on('click', '[data-action="wishlist"]', function() {
+                    var btn = $(this);
+                    setTimeout(function() {
+                        var active = btn.hasClass('active');
+                        btn.find('span').text(active ? 'In Wishlist' : 'Add to Wishlist');
+                        btn.attr('title', active ? 'Remove from Wishlist' : 'Add to Wishlist');
+                    }, 400);
+                });
+
+                $(document).on('click', '[data-action="compare"]', function() {
+                    var btn = $(this);
+                    setTimeout(function() {
+                        var active = btn.hasClass('active');
+                        btn.find('span').text(active ? 'In Compare' : 'Add to Compare');
+                        btn.attr('title', active ? 'Remove from Compare' : 'Add to Compare');
+                    }, 400);
+                });
+
+                // ── Variants handling ─────────────────────────────────────────────
                 @if($product->has_variant && $product->variants)
                 const variants = {!! json_encode($product->variants->map(function($v) {
                     return [
@@ -420,7 +474,6 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
                         selectedAttributes.push(parseInt($(this).val()));
                     });
 
-                    // Find matching variant
                     const matchedVariant = variants.find(v => {
                         return selectedAttributes.every(attrId => v.attributes.includes(attrId)) &&
                                v.attributes.length === selectedAttributes.length;
@@ -430,29 +483,20 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
                         $('.product__price--current, .product__price--new').text('TK ' + parseFloat(matchedVariant.price).toFixed(2));
                         $('.product__meta table tr:first-child td').text(matchedVariant.sku);
 
-                        // Update stock badge
                         const stockText = matchedVariant.stock > 0 ? 'In Stock' : 'Out of Stock';
                         const stockClass = matchedVariant.stock > 0 ? 'success' : 'danger';
                         const badge = $('.status-badge');
                         badge.removeClass('status-badge--style--success status-badge--style--danger').addClass('status-badge--style--' + stockClass);
                         badge.find('.status-badge__text').text(stockText);
 
-                        // Update Add to Cart button
                         $('#product-add-to-cart').data('price', matchedVariant.price);
-                        // Keep data-id as the parent product id so server can locate the product
                         $('#product-add-to-cart').data('id', '{{ $product->id }}');
                     }
                 }
 
                 $('.variant-option').change(updateVariantDetails);
-                updateVariantDetails(); // Initial call
+                updateVariantDetails();
                 @endif
-
-                // Add to cart click is handled by master.blade.php globally, but we must ensure it reads #product-quantity
-                $(document).on('click', '#product-add-to-cart', function(e) {
-                    // Update global quantity field used by .btn-cart handler
-                    $('.quantity').val($('#product-quantity').val());
-                });
             });
         </script>
     @endpush

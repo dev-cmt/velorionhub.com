@@ -48,8 +48,8 @@
                             </span>
                             <span class="icon-close remove"></span>
                             <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="images/product/product-165.jpg"
-                                    data-src="images/product/product-165.jpg" alt="">
+                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-165.jpg"
+                                    data-src="{{asset($filePath)}}/images/product/product-165.jpg" alt="">
                             </a>
                             <div class="content">
                                 <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
@@ -92,8 +92,8 @@
                             </span>
                             <span class="icon-close remove"></span>
                             <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="images/product/product-43.jpg"
-                                    data-src="images/product/product-43.jpg" alt="">
+                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-43.jpg"
+                                    data-src="{{asset($filePath)}}/images/product/product-43.jpg" alt="">
                             </a>
                             <div class="content">
                                 <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
@@ -136,8 +136,8 @@
                             </span>
                             <span class="icon-close remove"></span>
                             <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="images/product/product-137.jpg"
-                                    data-src="images/product/product-137.jpg" alt="">
+                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-137.jpg"
+                                    data-src="{{asset($filePath)}}/images/product/product-137.jpg" alt="">
                             </a>
                             <div class="content">
                                 <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
@@ -180,8 +180,8 @@
                             </span>
                             <span class="icon-close remove"></span>
                             <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="images/product/product-86.jpg"
-                                    data-src="images/product/product-86.jpg" alt="">
+                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-86.jpg"
+                                    data-src="{{asset($filePath)}}/images/product/product-86.jpg" alt="">
                             </a>
                             <div class="content">
                                 <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
@@ -243,10 +243,10 @@
                 <div class="card-product style-row row-small-2 align-items-center">
                     <div class="card-product-wrapper">
                         <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="images/product/product-75.jpg"
-                                data-src="images/product/product-75.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="images/product/product-65.jpg"
-                                data-src="images/product/product-65.jpg" alt="image-product">
+                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-75.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-75.jpg" alt="image-product">
+                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-65.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-65.jpg" alt="image-product">
                         </a>
                     </div>
                     <div class="card-product-info">
@@ -268,10 +268,10 @@
                 <div class="card-product style-row row-small-2 align-items-center">
                     <div class="card-product-wrapper">
                         <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="images/product/product-3.jpg"
-                                data-src="images/product/product-3.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="images/product/product-59.jpg"
-                                data-src="images/product/product-59.jpg" alt="image-product">
+                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-3.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-3.jpg" alt="image-product">
+                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-59.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-59.jpg" alt="image-product">
                         </a>
                     </div>
                     <div class="card-product-info">
@@ -293,10 +293,10 @@
                 <div class="card-product style-row row-small-2 align-items-center">
                     <div class="card-product-wrapper">
                         <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="images/product/product-169.jpg"
-                                data-src="images/product/product-169.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="images/product/product-67.jpg"
-                                data-src="images/product/product-67.jpg" alt="image-product">
+                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-169.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-169.jpg" alt="image-product">
+                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-67.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-67.jpg" alt="image-product">
                         </a>
                     </div>
                     <div class="card-product-info">
@@ -318,10 +318,10 @@
                 <div class="card-product style-row row-small-2 align-items-center">
                     <div class="card-product-wrapper">
                         <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="images/product/product-92.jpg"
-                                data-src="images/product/product-92.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="images/product/product-100.jpg"
-                                data-src="images/product/product-100.jpg" alt="image-product">
+                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-92.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-92.jpg" alt="image-product">
+                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-100.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-100.jpg" alt="image-product">
                         </a>
                     </div>
                     <div class="card-product-info">
@@ -343,10 +343,10 @@
                 <div class="card-product style-row row-small-2 align-items-center">
                     <div class="card-product-wrapper">
                         <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="images/product/product-46.jpg"
-                                data-src="images/product/product-46.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="images/product/product-45.jpg"
-                                data-src="images/product/product-45.jpg" alt="image-product">
+                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-46.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-46.jpg" alt="image-product">
+                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-45.jpg"
+                                data-src="{{asset($filePath)}}/images/product/product-45.jpg" alt="image-product">
                         </a>
                     </div>
                     <div class="card-product-info">
@@ -403,40 +403,40 @@
                             <!-- item 1 -->
                             <div class="swiper-slide">
                                 <a href="product-detail.html" class="d-block tf-image-view">
-                                    <img src="images/product/product-thumb/quickview-1.jpg"
-                                        data-src="images/product/product-thumb/quickview-1.jpg" alt=""
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-1.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-thumb/quickview-1.jpg" alt=""
                                         class="lazyload">
                                 </a>
                             </div>
                             <!-- item 2 -->
                             <div class="swiper-slide">
                                 <a href="product-detail.html" class="d-block tf-image-view">
-                                    <img src="images/product/product-thumb/quickview-2.jpg"
-                                        data-src="images/product/product-thumb/quickview-2.jpg" alt=""
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-2.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-thumb/quickview-2.jpg" alt=""
                                         class="lazyload">
                                 </a>
                             </div>
                             <!-- item 3 -->
                             <div class="swiper-slide">
                                 <a href="product-detail.html" class="d-block tf-image-view">
-                                    <img src="images/product/product-thumb/quickview-3.jpg"
-                                        data-src="images/product/product-thumb/quickview-3.jpg" alt=""
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-3.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-thumb/quickview-3.jpg" alt=""
                                         class="lazyload">
                                 </a>
                             </div>
                             <!-- item 4 -->
                             <div class="swiper-slide">
                                 <a href="product-detail.html" class="d-block tf-image-view">
-                                    <img src="images/product/product-thumb/quickview-4.jpg"
-                                        data-src="images/product/product-thumb/quickview-4.jpg" alt=""
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-4.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-thumb/quickview-4.jpg" alt=""
                                         class="lazyload">
                                 </a>
                             </div>
                             <!-- item 5 -->
                             <div class="swiper-slide">
                                 <a href="product-detail.html" class="d-block tf-image-view">
-                                    <img src="images/product/product-thumb/quickview-5.jpg"
-                                        data-src="images/product/product-thumb/quickview-5.jpg" alt=""
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-5.jpg"
+                                        data-src="{{asset($filePath)}}/images/product/product-thumb/quickview-5.jpg" alt=""
                                         class="lazyload">
                                 </a>
                             </div>
@@ -449,31 +449,31 @@
                             <!-- item 1 -->
                             <div class="swiper-slide">
                                 <div class="item">
-                                    <img src="images/product/product-thumb/quickview-1.jpg" alt="">
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-1.jpg" alt="">
                                 </div>
                             </div>
                             <!-- item 2 -->
                             <div class="swiper-slide">
                                 <div class="item">
-                                    <img src="images/product/product-thumb/quickview-2.jpg" alt="">
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-2.jpg" alt="">
                                 </div>
                             </div>
                             <!-- item 3 -->
                             <div class="swiper-slide">
                                 <div class="item">
-                                    <img src="images/product/product-thumb/quickview-3.jpg" alt="">
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-3.jpg" alt="">
                                 </div>
                             </div>
                             <!-- item 4 -->
                             <div class="swiper-slide">
                                 <div class="item">
-                                    <img src="images/product/product-thumb/quickview-4.jpg" alt="">
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-4.jpg" alt="">
                                 </div>
                             </div>
                             <!-- item 5 -->
                             <div class="swiper-slide">
                                 <div class="item">
-                                    <img src="images/product/product-thumb/quickview-5.jpg" alt="">
+                                    <img src="{{asset($filePath)}}/images/product/product-thumb/quickview-5.jpg" alt="">
                                 </div>
                             </div>
                         </div>
@@ -721,8 +721,8 @@
 <div class="offcanvas offcanvas-start canvas-mb" id="mobileMenu">
     <span class="icon-close btn-close-mb link" data-bs-dismiss="offcanvas"></span>
     <div class="logo-site">
-        <a href="index.html">
-            <img src="images/logo/logo.svg" alt="">
+        <a href="{{ url('/') }}">
+            <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="">
         </a>
     </div>
     <div class="mb-canvas-content">
@@ -1386,12 +1386,12 @@
                                             <div class="card-product-wrapper">
                                                 <a href="product-detail.html" class="product-img">
                                                     <img class="img-product lazyload"
-                                                        src="images/product/product-81.jpg"
-                                                        data-src="images/product/product-81.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-81.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-81.jpg"
                                                         alt="image-product">
                                                     <img class="img-hover lazyload"
-                                                        src="images/product/product-21.jpg"
-                                                        data-src="images/product/product-21.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-21.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-21.jpg"
                                                         alt="image-product">
                                                 </a>
                                                 <div class="box-sale-wrap pst-default z-5">
@@ -1474,12 +1474,12 @@
                                             <div class="card-product-wrapper">
                                                 <a href="product-detail.html" class="product-img">
                                                     <img class="img-product lazyload"
-                                                        src="images/product/product-detail-14.jpg"
-                                                        data-src="images/product/product-detail-14.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-detail-14.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-detail-14.jpg"
                                                         alt="image-product">
                                                     <img class="img-hover lazyload"
-                                                        src="images/product/product-detail-16.jpg"
-                                                        data-src="images/product/product-detail-16.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-detail-16.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-detail-16.jpg"
                                                         alt="image-product">
                                                 </a>
                                                 <div class="box-sale-wrap pst-default z-5">
@@ -1563,12 +1563,12 @@
                                             <div class="card-product-wrapper">
                                                 <a href="product-detail.html" class="product-img">
                                                     <img class="img-product lazyload"
-                                                        src="images/product/product-81.jpg"
-                                                        data-src="images/product/product-38.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-81.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-38.jpg"
                                                         alt="image-product">
                                                     <img class="img-hover lazyload"
-                                                        src="images/product/product-11.jpg"
-                                                        data-src="images/product/product-11.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-11.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-11.jpg"
                                                         alt="image-product">
                                                 </a>
                                                 <div class="box-sale-wrap pst-default z-5">
@@ -1652,12 +1652,12 @@
                                             <div class="card-product-wrapper">
                                                 <a href="product-detail.html" class="product-img">
                                                     <img class="img-product lazyload"
-                                                        src="images/product/product-39.jpg"
-                                                        data-src="images/product/product-39.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-39.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-39.jpg"
                                                         alt="image-product">
                                                     <img class="img-hover lazyload"
-                                                        src="images/product/product-56.jpg"
-                                                        data-src="images/product/product-56.jpg"
+                                                        src="{{asset($filePath)}}/images/product/product-56.jpg"
+                                                        data-src="{{asset($filePath)}}/images/product/product-56.jpg"
                                                         alt="image-product">
                                                 </a>
                                                 <div class="box-sale-wrap pst-default z-5">

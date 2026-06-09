@@ -110,12 +110,12 @@
             </div>
             <p class="price-wrap fw-medium">
                 <span class="new-price price-text fw-medium text-primary mb-0 cur-price" data-price="{{ $product->sale_price }}">
-                    ৳ {{ number_format($product->sale_price, 2) }}
+                    TK {{ number_format($product->sale_price, 2) }}
                 </span>
 
                 @if($isSale)
                     <span class="old-price body-md-2 text-main-2 fw-normal cur-price" data-price="{{ $product->regular_price }}">
-                        ৳ {{ number_format($product->regular_price, 2) }}
+                        TK {{ number_format($product->regular_price, 2) }}
                     </span>
                 @endif
             </p>

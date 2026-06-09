@@ -29,197 +29,216 @@
                         <span class="icon">
                             <i class="icon-shop-cart-1"></i>
                         </span>
-                        <a href="shop-cart.html" class="link body-text-3">Shopping Cart</a>
+                        <a href="{{ route('cart') }}" class="link body-text-3">Shopping Cart</a>
                     </div>
                     <div class="step-payment">
                         <span class="icon">
                             <i class="icon-shop-cart-2"></i>
                         </span>
-                        <a href="checkout.html" class="text-secondary link body-text-3">Shopping & Checkout</a>
+                        <a href="{{ route('checkout') }}" class="text-secondary link body-text-3">Shopping & Checkout</a>
 
                     </div>
                     <div class="step-payment">
                         <span class="icon">
                             <i class="icon-shop-cart-3"></i>
                         </span>
-                        <a href="order-details.html" class="link body-text-3">Confirmation</a>
+                        <a href="javascript:void(0);" class="link body-text-3">Confirmation</a>
                     </div>
                 </div>
             </div>
-            <div class="tf-checkout-wrap flex-lg-nowrap">
-                <div class="page-checkout">
-                    <div class="wrap">
-                        <h5 class="title has-account">
-                            <span class="fw-semibold">Contact</span>
-                            <span class="body-text-3">Have an account? <a href="#register" data-bs-toggle="modal"
-                                    class="body-text-3 text-secondary link">Login</a></span>
 
-                        </h5>
-                        <form class="form-checkout-contact">
-                            <label class="body-md-2 fw-semibold">Email or Phone</label>
-                            <input class="def" type="text" placeholder="Your contact" required>
-                            <p class="caption text-main-2 font-2">Order information will be sent to your email</p>
-                        </form>
-                    </div>
-                    <div class="wrap">
-                        <h5 class="title fw-semibold">
-                            Delivery
-                        </h5>
-                        <form class="def">
-                            <fieldset>
-                                <label>Country/Region</label>
-                                <div class="tf-select">
-                                    <select>
-                                        <option selected>Select your Country/Region</option>
-                                        <option>American</option>
-                                    </select>
+            @php
+                $cart = \Cart::session(Auth::id() ?? session()->getId());
+                $items = $cart->getContent();
+            @endphp
+
+            @if($items->count() > 0)
+            <form action="{{ route('place.order') }}" method="POST" id="checkout-form">
+                @csrf
+                <div class="tf-checkout-wrap flex-lg-nowrap">
+                    <div class="page-checkout">
+                        <div class="wrap">
+                            <h5 class="title has-account">
+                                <span class="fw-semibold">Contact</span>
+                                @guest
+                                <span class="body-text-3">Have an account? <a href="#register" data-bs-toggle="modal"
+                                        class="body-text-3 text-secondary link">Login</a></span>
+                                @endguest
+                            </h5>
+                            @if(session('error'))
+                                <div class="alert alert-danger mb-3">{{ session('error') }}</div>
+                            @endif
+                            @if ($errors->any())
+                                <div class="alert alert-danger mb-3">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
                                 </div>
-                            </fieldset>
-                            <div class="cols">
-                                <fieldset>
-                                    <label>First name</label>
-                                    <input type="text" placeholder="e.g. Jonn" required>
-                                </fieldset>
-                                <fieldset>
-                                    <label>Last name</label>
-                                    <input type="text" placeholder="e.g. Doe" required>
-                                </fieldset>
-                            </div>
-                            <div class="cols">
-                                <fieldset>
-                                    <label>City</label>
-                                    <input type="text" placeholder="e.g. New York" required>
-                                </fieldset>
-                                <fieldset>
-                                    <label>State</label>
-                                    <div class="tf-select">
-                                        <select>
-                                            <option selected>Select</option>
-                                            <option>Alabam</option>
-                                            <option>Alaska</option>
-                                            <option>California</option>
-                                            <option>Georgia</option>
-                                            <option>Washington</option>
-                                        </select>
-                                    </div>
-                                </fieldset>
-                                <fieldset>
-                                    <label>ZIP code</label>
-                                    <input type="text" placeholder="e.g. 83254" required>
-                                </fieldset>
-                            </div>
-                            <fieldset>
-                                <label>Address</label>
-                                <input type="email" placeholder="Your detailed address" required>
-                            </fieldset>
-                            <fieldset>
-                                <label>Order note</label>
-                                <textarea placeholder="Note on your order"></textarea>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="wrap">
-                        <h5 class="title">
-                            Payment
-                        </h5>
-                        <form class="form-payment">
-                            <div class="payment-box" id="payment-box">
-                                <div class="payment-item payment-choose-card active">
-                                    <label for="credit-card-method" class="payment-header" data-bs-toggle="collapse"
-                                        data-bs-target="#credit-card-payment" aria-controls="credit-card-payment"
-                                        aria-expanded="true">
-                                        <span class="body-md-2 fw-semibold title">Select payment method</span>
-                                        <input type="radio" name="payment-method" class="d-none tf-check-rounded"
-                                            id="credit-card-method" checked="">
-                                        <p class="select-payment">
-                                            Mastercard
-                                        </p>
-                                    </label>
-                                    <div id="credit-card-payment" class="collapse show"
-                                        data-bs-parent="#payment-box">
-                                        <div class="payment-body">
-                                            <fieldset>
-                                                <label>Credit Card number</label>
-                                                <input type="text" class="number-credit-card"
-                                                    placeholder="xxxx   xxxx   xxxx   xxxx">
-                                            </fieldset>
-                                            <div class="cols">
-                                                <fieldset>
-                                                    <label>Expiration date</label>
-                                                    <input type="date">
-                                                </fieldset>
-                                                <fieldset>
-                                                    <label>CVV</label>
-                                                    <input type="number" placeholder="xxx">
-                                                </fieldset>
-                                            </div>
-                                            <fieldset>
-                                                <label>Name on card</label>
-                                                <input type="text" placeholder="e.g. JOHNDOE">
-                                            </fieldset>
-                                        </div>
-                                    </div>
+                            @endif
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="body-md-2 fw-semibold mb-1">Email Address <span class="text-danger">*</span></label>
+                                    <input class="def" type="email" name="email" value="{{ Auth::user()->email ?? old('email') }}" placeholder="john@example.com" required>
                                 </div>
-                                <div class="payment-item">
-                                    <label for="delivery-method" class="payment-header radio-item collapsed"
-                                        data-bs-toggle="collapse" data-bs-target="#delivery-payment"
-                                        aria-controls="delivery-payment" aria-expanded="false">
-                                        <input type="radio" name="payment-method" class="tf-check-rounded"
-                                            id="delivery-method">
-                                        <span class="body-text-3">Cash on delivery</span>
-                                    </label>
-                                    <div id="delivery-payment" class="collapse" data-bs-parent="#payment-box"></div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="body-md-2 fw-semibold mb-1">Phone Number <span class="text-danger">*</span></label>
+                                    <input class="def" type="text" name="phone" value="{{ old('phone') }}" placeholder="e.g. +8801700000000" required>
                                 </div>
                             </div>
-                            <div class="box-btn">
-                                <a href="order-details.html" class="tf-btn w-100">
-                                    <span class="text-white">Place order</span>
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="flat-sidebar-checkout">
-                    <div class="sidebar-checkout-content">
-                        <h5 class="fw-semibold">Order Summary</h5>
-                        <ul class="list-product">
-                            <li class="item-product">
-                                <a href="#" class="img-product">
-                                    <img src="images/product/sc-2.jpg" alt="">
-                                </a>
-                                <div class="content-box">
-                                    <a href="#" class="link-secondary body-md-2 fw-semibold">
-                                        Audio-Technica ATH-AD700X Audiophile Open-Air
-                                    </a>
-                                    <p class="price-quantity price-text fw-semibold">
-                                        $80.000
-                                        <span class="body-md-2 text-main-2 fw-normal">X1</span>
-                                    </p>
-                                    <p class="body-md-2 text-main-2">Gray</p>
-                                </div>
-                            </li>
-                        </ul>
-                        <div class="">
-                            <p class="body-md-2 fw-semibold sub-type">Discount code</p>
-                            <form class="ip-discount-code style-2">
-                                <input type="text" class="def" placeholder="Your code" required="">
-                                <button type="submit" class="tf-btn btn-gray-2">
-                                    <span>Apply</span>
-                                </button>
-                            </form>
                         </div>
-                        <ul class="sec-total-price">
-                            <li><span class="body-text-3">Sub total</span><span class="body-text-3">$80.000</span>
-                            </li>
-                            <li><span class="body-text-3">Shipping</span><span class="body-text-3">Free
-                                    shipping</span></li>
-                            <li><span class="body-md-2 fw-semibold">Total</span><span
-                                    class="body-md-2 fw-semibold text-primary">$80.000</span>
-                            </li>
-                        </ul>
+                        <div class="wrap">
+                            <h5 class="title fw-semibold">
+                                Delivery Details
+                            </h5>
+                            <div class="def">
+                                <div class="cols">
+                                    <fieldset>
+                                        <label>First name <span class="text-danger">*</span></label>
+                                        <input type="text" name="first_name" value="{{ old('first_name') }}" placeholder="e.g. Jonn" required>
+                                    </fieldset>
+                                    <fieldset>
+                                        <label>Last name <span class="text-danger">*</span></label>
+                                        <input type="text" name="last_name" value="{{ old('last_name') }}" placeholder="e.g. Doe" required>
+                                    </fieldset>
+                                </div>
+                                <div class="cols">
+                                    <fieldset style="flex: 2;">
+                                        <label>City <span class="text-danger">*</span></label>
+                                        <input type="text" name="city" value="{{ old('city') }}" placeholder="e.g. Dhaka" required>
+                                    </fieldset>
+                                    <fieldset style="flex: 1;">
+                                        <label>ZIP code</label>
+                                        <input type="text" name="zip" value="{{ old('zip') }}" placeholder="e.g. 1200">
+                                    </fieldset>
+                                </div>
+                                <fieldset>
+                                    <label>Street Address <span class="text-danger">*</span></label>
+                                    <input type="text" name="address" value="{{ old('address') }}" placeholder="Your detailed street address" required>
+                                </fieldset>
+                                <fieldset>
+                                    <label>Order note</label>
+                                    <textarea name="note" placeholder="Note on your order (optional)">{{ old('note') }}</textarea>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="wrap">
+                            <h5 class="title">
+                                Payment Method
+                            </h5>
+                            <div class="form-payment">
+                                <div class="payment-box" id="payment-box">
+                                    <div class="payment-item payment-choose-card active">
+                                        <label for="delivery-method" class="payment-header radio-item d-flex align-items-center cursor-pointer w-100"
+                                            data-bs-toggle="collapse" data-bs-target="#delivery-payment" aria-controls="delivery-payment" aria-expanded="true">
+                                            <input type="radio" name="payment_method" value="cod" class="tf-check-rounded mr-2"
+                                                id="delivery-method" checked>
+                                            <span class="body-text-3 fw-semibold">Cash on delivery</span>
+                                        </label>
+                                    </div>
+                                    <div class="payment-item">
+                                        <label for="pickup-method" class="payment-header radio-item collapsed d-flex align-items-center cursor-pointer w-100"
+                                            data-bs-toggle="collapse" data-bs-target="#pickup-payment" aria-controls="pickup-payment" aria-expanded="false">
+                                            <input type="radio" name="payment_method" value="cash" class="tf-check-rounded mr-2"
+                                                id="pickup-method">
+                                            <span class="body-text-3 fw-semibold">Cash Pickup</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="box-btn">
+                                    <button type="submit" class="tf-btn w-100">
+                                        <span class="text-white">Place order</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flat-sidebar-checkout">
+                        <div class="sidebar-checkout-content">
+                            <h5 class="fw-semibold">Order Summary</h5>
+                            <ul class="list-product">
+                                @foreach($items as $item)
+                                @php
+                                    $product = $item->associatedModel;
+                                    $mainImage = $product && $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
+                                    $productUrl = $product ? route('product.show', $product->slug) : '#';
+                                @endphp
+                                <li class="item-product">
+                                    <a href="{{ $productUrl }}" class="img-product">
+                                        <img src="{{ $mainImage }}" alt="{{ $item->name }}">
+                                    </a>
+                                    <div class="content-box">
+                                        <a href="{{ $productUrl }}" class="link-secondary body-md-2 fw-semibold">
+                                            {{ $item->name }}
+                                        </a>
+                                        <p class="price-quantity price-text fw-semibold">
+                                            TK {{ number_format($item->price, 2) }}
+                                            <span class="body-md-2 text-main-2 fw-normal">X{{ $item->quantity }}</span>
+                                        </p>
+                                        @php
+                                            $variantAttributes = $item->attributes->variant_attributes
+                                                ?? $item->attributes->attributes
+                                                ?? [];
+
+                                            if (is_string($variantAttributes)) {
+                                                $decodedVariantAttributes = json_decode($variantAttributes, true);
+                                                $variantAttributes = is_array($decodedVariantAttributes) ? $decodedVariantAttributes : [];
+                                            }
+
+                                            $variantLabel = $item->attributes->variant_label ?? null;
+                                        @endphp
+
+                                        @if(is_array($variantAttributes) && count($variantAttributes) > 0)
+                                            @php
+                                                $pairs = [];
+                                                foreach ($variantAttributes as $k => $v) {
+                                                    $pairs[] = ucfirst($k) . ': ' . $v;
+                                                }
+                                                $variantLine = implode(', ', $pairs);
+                                            @endphp
+                                            <p class="body-md-2 text-main-2"><strong>Variant:</strong> {{ $variantLine }}</p>
+                                        @elseif($variantLabel)
+                                            <p class="body-md-2 text-main-2"><strong>Variant:</strong> {{ $variantLabel }}</p>
+                                        @endif
+                                    </div>
+                                </li>
+                                @endforeach
+                            </ul>
+                            <div class="d-none">
+                                <p class="body-md-2 fw-semibold sub-type">Discount code</p>
+                                <div class="ip-discount-code style-2">
+                                    <input type="text" class="def" placeholder="Your code">
+                                    <button type="button" class="tf-btn btn-gray-2">
+                                        <span>Apply</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <ul class="sec-total-price">
+                                <li><span class="body-text-3">Subtotal</span><span class="body-text-3">TK {{ number_format($cart->getSubTotal(), 2) }}</span>
+                                </li>
+                                <li><span class="body-text-3">Shipping</span><span class="body-text-3">Free shipping</span></li>
+                                <li><span class="body-md-2 fw-semibold">Total</span><span
+                                        class="body-md-2 fw-semibold text-primary">TK {{ number_format($cart->getTotal(), 2) }}</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
+            @else
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="icon icon-shop-cart-1" style="font-size: 80px; color: #ccc;"></i>
+                    </div>
+                    <h3 class="fw-semibold">Your shopping cart is empty</h3>
+                    <p class="text-muted my-3">You must add some items to your shopping cart before checking out.</p>
+                    <a href="{{ route('shop') }}" class="tf-btn"><span class="text-white">Continue Shopping</span></a>
+                </div>
+            @endif
+        </div>
+    </section>
+    <!-- /Check Out Cart -->
         </div>
     </section>
     <!-- /Check Out Cart -->

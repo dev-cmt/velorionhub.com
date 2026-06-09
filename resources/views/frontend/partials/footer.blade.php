@@ -103,7 +103,7 @@
                 <div class="ft-center justify-content-xxl-between">
                     <p class="notice text-white justify-content-xxl-between">
                         <span class="main-title fw-semibold ">
-                            <img src="images/mail.svg" alt="">
+                            <img src="{{asset($filePath)}}/images/mail.svg" alt="">
                             10% Off Your First Order
                         </span>
                         <span class="body-text-3">

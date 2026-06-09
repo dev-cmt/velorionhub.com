@@ -5127,6 +5127,7 @@ input[type=number]::-webkit-outer-spin-button {
   -webkit-box-orient: vertical;
   display: -webkit-box;
   overflow: hidden;
+  height: 44px;
 }
 .card-product .box-icon {
   width: 30px;

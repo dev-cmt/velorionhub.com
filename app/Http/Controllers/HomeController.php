@@ -238,6 +238,50 @@ class HomeController extends Controller
         return view($this->filePath . '.wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
+    public function addWishlist(Request $request)
+    {
+        if (!$request->has('id')) {
+            return Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity();
+        }
+
+        $product = Product::findOrFail($request->id);
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_wishlist');
+
+        if ($cart->get($product->id)) {
+            $cart->remove($product->id);
+            return response()->json([
+                'success' => true,
+                'action' => 'removed',
+                'message' => 'Removed from wishlist successfully',
+                'count' => $cart->getTotalQuantity()
+            ]);
+        }
+
+        $cart->add([
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->sale_price,
+            'quantity' => 1,
+            'attributes' => [
+                'image' => $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg'),
+                'url' => route('product.show', $product->slug),
+                'stock' => $product->current_stock > 0 ? 'In Stock' : 'Out of Stock',
+            ]
+        ]);
+        return response()->json([
+            'success' => true,
+            'action' => 'added',
+            'message' => 'Added to wishlist successfully',
+            'count' => $cart->getTotalQuantity()
+        ]);
+    }
+
+    public function removeWishlist($id)
+    {
+        Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->remove($id);
+        return back()->with('success', 'Item removed from wishlist.');
+    }
+
     public function compare()
     {
         // SEO
@@ -250,6 +294,54 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
         return view($this->filePath . '.compare', compact('seotags','breadcrumbs', 'breadcrumb_list', 'page'));
+    }
+
+    public function addCompare(Request $request)
+    {
+        if (!$request->has('id')) {
+            return Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getTotalQuantity();
+        }
+
+        $product = Product::with('category', 'brand')->findOrFail($request->id);
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+
+        if ($cart->get($product->id)) {
+            $cart->remove($product->id);
+            return response()->json([
+                'success' => true,
+                'action' => 'removed',
+                'message' => 'Removed from compare list successfully',
+                'count' => $cart->getTotalQuantity()
+            ]);
+        }
+
+        $cart->add([
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->sale_price,
+            'quantity' => 1,
+            'attributes' => [
+                'image' => $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg'),
+                'url' => route('product.show', $product->slug),
+                'stock' => $product->current_stock > 0 ? 'In Stock' : 'Out of Stock',
+                'sku' => $product->sku ?? 'N/A',
+                'category' => $product->category->name ?? 'Uncategorized',
+                'brand' => $product->brand->name ?? 'No Brand',
+                'description' => $product->short_description ?? 'No description',
+            ]
+        ]);
+        return response()->json([
+            'success' => true,
+            'action' => 'added',
+            'message' => 'Added to compare list successfully',
+            'count' => $cart->getTotalQuantity()
+        ]);
+    }
+
+    public function removeCompare($id)
+    {
+        Cart::session((Auth::id() ?? session()->getId()) . '_compare')->remove($id);
+        return back()->with('success', 'Item removed from compare list.');
     }
 
     public function blog(Request $request)
@@ -466,64 +558,6 @@ class HomeController extends Controller
 
         $theme = config('theme.frontend.views_path');
         return view($theme . '.order-confirm', compact('order', 'breadcrumbs', 'breadcrumb_list'));
-    }
-
-    public function addWishlist(Request $request)
-    {
-        if (!$request->has('id')) {
-            return Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity();
-        }
-
-        $product = Product::findOrFail($request->id);
-        Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->add([
-            'id' => $product->id,
-            'name' => $product->name,
-            'price' => $product->sale_price,
-            'quantity' => 1,
-            'attributes' => [
-                'image' => $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg'),
-                'url' => route('product.show', $product->slug),
-                'stock' => $product->current_stock > 0 ? 'In Stock' : 'Out of Stock',
-            ]
-        ]);
-        return response()->json(['success' => true, 'message' => 'Added to wishlist successfully', 'count' => Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity()]);
-    }
-
-    public function removeWishlist($id)
-    {
-        Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->remove($id);
-        return back()->with('success', 'Item removed from wishlist.');
-    }
-
-    public function addCompare(Request $request)
-    {
-        if (!$request->has('id')) {
-            return Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getTotalQuantity();
-        }
-
-        $product = Product::with('category', 'brand')->findOrFail($request->id);
-        Cart::session((Auth::id() ?? session()->getId()) . '_compare')->add([
-            'id' => $product->id,
-            'name' => $product->name,
-            'price' => $product->sale_price,
-            'quantity' => 1,
-            'attributes' => [
-                'image' => $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg'),
-                'url' => route('product.show', $product->slug),
-                'stock' => $product->current_stock > 0 ? 'In Stock' : 'Out of Stock',
-                'sku' => $product->sku ?? 'N/A',
-                'category' => $product->category->name ?? 'Uncategorized',
-                'brand' => $product->brand->name ?? 'No Brand',
-                'description' => $product->short_description ?? 'No description',
-            ]
-        ]);
-        return response()->json(['success' => true, 'message' => 'Added to compare list successfully', 'count' => Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getTotalQuantity()]);
-    }
-
-    public function removeCompare($id)
-    {
-        Cart::session((Auth::id() ?? session()->getId()) . '_compare')->remove($id);
-        return back()->with('success', 'Item removed from compare list.');
     }
 
 

@@ -25,7 +25,16 @@
     }
 
     function updateWishlistCount(count) {
-        $('.wishlist-count, a[href*="wishlist"] .count-box').text(count);
+        // Update the badge counter
+        $('a[href*="wishlist"] .count-box.wishlist-count').text(count);
+        // Update the icon count-box (navbar)
+        $('.count-box.wishlist-count').text(count);
+        // Update the text label next to icon (e.g. "3 item")
+        $('h6.wishlist-count').text(count + ' item');
+    }
+
+    function updateCompareCount(count) {
+        $('.compare-count, #msCompare').text(count);
     }
 
     function renderMiniCart(res) {
@@ -81,6 +90,7 @@
         const wrap = $('.offcanvas-compare .tf-compare-wrap');
         const empty = $('.offcanvas-compare .mini-compare-empty');
 
+        // Already in compare drawer? skip
         if (wrap.find(`.tf-compare-item[data-id="${product.id}"]`).length) {
             return;
         }
@@ -104,6 +114,14 @@
         `);
     }
 
+    function removeCompareItem(productId) {
+        $('.offcanvas-compare .tf-compare-wrap .tf-compare-item[data-id="' + productId + '"]').remove();
+        if ($('.offcanvas-compare .tf-compare-item').length === 0) {
+            $('.mini-compare-empty').show();
+            $('.tf-compare-wrap').hide();
+        }
+    }
+
     function loadMiniCart() {
         if (!routes.cartMini) return;
         $.get(routes.cartMini).done(renderMiniCart);
@@ -112,14 +130,19 @@
     function loadWishlistCount() {
         if (!routes.wishlistAdd) return;
         $.post(routes.wishlistAdd, { _token: csrf() }).done(function (count) {
-            updateWishlistCount(count);
+            // count returned when no 'id' is sent — plain number
+            if (typeof count === 'number') {
+                updateWishlistCount(count);
+            }
         });
     }
 
     function loadCompareCount() {
         if (!routes.compareAdd) return;
         $.post(routes.compareAdd, { _token: csrf() }).done(function (count) {
-            $('.compare-count').text(count);
+            if (typeof count === 'number') {
+                updateCompareCount(count);
+            }
         });
     }
 
@@ -127,11 +150,11 @@
         const card = $el.closest('.card-product');
         const addBtn = card.find('.add-to-cart').first();
         return {
-            id: addBtn.data('id'),
-            name: addBtn.data('name'),
-            price: addBtn.data('price'),
-            image: addBtn.data('image'),
-            url: addBtn.data('url'),
+            id: addBtn.data('id') || $el.data('id'),
+            name: addBtn.data('name') || '',
+            price: addBtn.data('price') || 0,
+            image: addBtn.data('image') || routes.noImage || '',
+            url: addBtn.data('url') || '#',
         };
     }
 
@@ -209,35 +232,54 @@
         loadWishlistCount();
         loadCompareCount();
 
+        // ─── Add to Cart (product cards) ─────────────────────────────────────
         $(document).on('click', '.add-to-cart', function (e) {
             e.preventDefault();
             const btn = $(this);
+            // Respect qty input if present (e.g. product details page)
+            const qtyInput = btn.closest('form, .tf-product-info-list, .card-product').find('.quantity-product, input[name="qty"], input[name="quantity"]');
+            const qty = qtyInput.length ? (parseInt(qtyInput.val()) || 1) : 1;
+
             const payload = {
                 id: btn.data('id'),
                 name: btn.data('name'),
                 price: btn.data('price'),
                 image: btn.data('image'),
                 url: btn.data('url'),
-                qty: 1,
+                qty: qty,
             };
 
             cartAjax(routes.cartAdd, payload).done(function (res) {
                 renderMiniCart(res);
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('Product added to cart!');
+                }
                 const offcanvas = document.getElementById('shoppingCart');
                 if (offcanvas && typeof bootstrap !== 'undefined') {
                     bootstrap.Offcanvas.getOrCreateInstance(offcanvas).show();
                 }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not add to cart. Please try again.');
+                }
             });
         });
 
+        // ─── Remove from Mini Cart ───────────────────────────────────────────
         $(document).on('click', '#shoppingCart .remove', function () {
             const id = $(this).data('cart-id') || $(this).closest('[data-cart-id]').data('cart-id');
             if (!id || !routes.cartRemove) return;
 
             const url = routes.cartRemove.replace(':id', id);
-            cartAjax(url, { _method: 'DELETE' }).done(renderMiniCart);
+            cartAjax(url, { _method: 'DELETE' }).done(function (res) {
+                renderMiniCart(res);
+                if (typeof toastr !== 'undefined') {
+                    toastr.info('Item removed from cart.');
+                }
+            });
         });
 
+        // ─── Wishlist Toggle (data-action="wishlist") ────────────────────────
         $(document).on('click', '[data-action="wishlist"]', function (e) {
             e.preventDefault();
             const btn = $(this);
@@ -245,30 +287,67 @@
 
             cartAjax(routes.wishlistAdd, { id: productId }).done(function (res) {
                 if (res.success) {
-                    btn.toggleClass('active');
+                    if (res.action === 'added') {
+                        btn.addClass('active');
+                        btn.find('.tooltip').text('In Wishlist');
+                        btn.find('.icon').removeClass('icon-heart2').addClass('icon-hearth');
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(res.message || 'Added to Wishlist!');
+                        }
+                    } else {
+                        btn.removeClass('active');
+                        btn.find('.tooltip').text('Add to Wishlist');
+                        btn.find('.icon').removeClass('icon-hearth').addClass('icon-heart2');
+                        if (typeof toastr !== 'undefined') {
+                            toastr.info(res.message || 'Removed from Wishlist.');
+                        }
+                    }
                     updateWishlistCount(res.count);
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not update wishlist.');
                 }
             });
         });
 
+        // ─── Compare Toggle (data-action="compare") ──────────────────────────
         $(document).on('click', '[data-action="compare"]', function (e) {
             e.preventDefault();
             const btn = $(this);
+            const productId = btn.data('id');
+            // Try to get product data from card (for adding to offcanvas)
             const product = getProductDataFromCard(btn);
 
-            cartAjax(routes.compareAdd, { id: product.id }).done(function (res) {
+            cartAjax(routes.compareAdd, { id: productId }).done(function (res) {
                 if (res.success) {
-                    btn.addClass('active');
-                    appendCompareItem(product);
-                    $('.compare-count').text(res.count);
-                    const offcanvas = document.getElementById('compare');
-                    if (offcanvas && typeof bootstrap !== 'undefined') {
-                        bootstrap.Offcanvas.getOrCreateInstance(offcanvas).show();
+                    updateCompareCount(res.count);
+                    if (res.action === 'added') {
+                        btn.addClass('active');
+                        appendCompareItem(product);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(res.message || 'Added to Compare!');
+                        }
+                        const offcanvas = document.getElementById('compare');
+                        if (offcanvas && typeof bootstrap !== 'undefined') {
+                            bootstrap.Offcanvas.getOrCreateInstance(offcanvas).show();
+                        }
+                    } else {
+                        btn.removeClass('active');
+                        removeCompareItem(productId);
+                        if (typeof toastr !== 'undefined') {
+                            toastr.info(res.message || 'Removed from Compare.');
+                        }
                     }
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not update compare list.');
                 }
             });
         });
 
+        // ─── Quick View ───────────────────────────────────────────────────────
         $(document).on('click', '.quickview', function (e) {
             const url = $(this).data('product-url');
             if (url) {
@@ -277,6 +356,7 @@
             }
         });
 
+        // ─── Quick View — Add to Cart ─────────────────────────────────────────
         $(document).on('click', '.btn-add-quickview', function (e) {
             e.preventDefault();
             const btn = $(this);
@@ -287,14 +367,30 @@
                 image: btn.data('image'),
                 url: btn.data('url'),
                 qty: 1,
-            }).done(renderMiniCart);
+            }).done(function (res) {
+                renderMiniCart(res);
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('Product added to cart!');
+                }
+            });
         });
 
+        // ─── Compare Offcanvas — Remove Item ─────────────────────────────────
         $(document).on('click', '.offcanvas-compare .tf-compare-item .remove', function () {
+            const id = $(this).data('compare-id');
             $(this).closest('.tf-compare-item').remove();
             if ($('.offcanvas-compare .tf-compare-item').length === 0) {
                 $('.mini-compare-empty').show();
                 $('.tf-compare-wrap').hide();
+            }
+            // Also remove from server session
+            if (id && routes.compareRemove) {
+                const url = routes.compareRemove.replace(':id', id);
+                cartAjax(url, { _method: 'DELETE' }).done(function (res) {
+                    if (res && res.count !== undefined) {
+                        updateCompareCount(res.count);
+                    }
+                });
             }
         });
     });

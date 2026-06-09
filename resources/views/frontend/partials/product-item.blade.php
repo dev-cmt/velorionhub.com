@@ -75,7 +75,7 @@
                     @endforeach
                 </div>
                 <div class="wd-quick-shop-footer">
-                    <button type="button" class="btn btn-select-options btn-cart"
+                    <button type="button" class="btn btn-select-options add-to-cart"
                             data-id="{{ $product->id }}"
                             data-name="{{ $product->name }}"
                             data-price="{{ $product->sale_price }}"
@@ -91,8 +91,9 @@
         <div class="wd-buttons">
             <!-- Compare -->
             <button type="button" class="wd-action-btn wd-compare-btn {{ $inCompare ? 'wd-action-btn--active' : '' }}"
-                    title="Compare"
-                    onclick="ajaxToggleCompare(this, {{ $product->id }})">
+                    title="{{ $inCompare ? 'Remove from Compare' : 'Add to Compare' }}"
+                    data-action="compare"
+                    data-id="{{ $product->id }}">
                 <i class="bi bi-arrow-left-right"></i>
             </button>
 
@@ -105,8 +106,9 @@
 
             <!-- Wishlist -->
             <button type="button" class="wd-action-btn wd-wishlist-btn {{ $inWishlist ? 'wd-action-btn--active' : '' }}"
-                    title="{{ $inWishlist ? 'Browse Wishlist' : 'Add to Wishlist' }}"
-                    onclick="ajaxToggleWishlist(this, {{ $product->id }})">
+                    title="{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                    data-action="wishlist"
+                    data-id="{{ $product->id }}">
                 <i class="bi bi-heart{{ $inWishlist ? '-fill' : '' }}"></i>
             </button>
         </div>
@@ -119,7 +121,7 @@
                         Select Options
                     </button>
                 @else
-                    <button type="button" class="btn btn-select-options btn-cart"
+                    <button type="button" class="btn btn-select-options add-to-cart"
                             data-id="{{ $product->id }}"
                             data-name="{{ $product->name }}"
                             data-price="{{ $product->sale_price }}"

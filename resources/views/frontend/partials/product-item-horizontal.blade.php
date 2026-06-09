@@ -49,7 +49,7 @@
                     @endif
                 </p>
                 <!--Action Buttons-->
-                <ul class="list-product-btn {{ $btnClass ?? '' }}">
+                <ul class="list-product-btn flex-row">
                     <li>
                         <a href="#shoppingCart" data-bs-toggle="offcanvas"
                             class="box-icon add-to-cart btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }}"
