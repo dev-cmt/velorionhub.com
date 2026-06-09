@@ -274,4 +274,11 @@
         </div>
     </section>
     <!-- /Recently Viewed -->
+
+    {{-- Dynamic sections appended by Page Builder (for the 'home' page) --}}
+    @if(isset($page) && $page && $page->activeSections->isNotEmpty())
+        @foreach($page->activeSections as $section)
+            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
+        @endforeach
+    @endif
 </x-frontend-layout>

@@ -4,7 +4,7 @@
         <div class="container">
             <ul class="breakcrumbs">
                 <li>
-                    <a href="index.html" class="body-small link">
+                    <a href="{{ route('home') }}" class="body-small link">
                         Home
                     </a>
                 </li>
@@ -20,41 +20,49 @@
         </div>
     </div>
     <!-- /Breakcrumbs -->
-    <!-- Track Order -->
-    <section class="s-track-order tf-sp-2">
-        <div class="container">
-            <div class="position-relative">
-                <div class="parallax-image">
-                    <img src="{{asset($filePath)}}/images/section/parallax-3.jpg" data-src="{{asset($filePath)}}/images/section/parallax-3.jpg" alt=""
-                        class="lazyload effect-paralax">
-                </div>
-                <div class="wrap">
-                    <div class="box-title">
-                        <h5 class="fw-semibold">Track your order</h5>
-                        <p class="body-text-3">To track your order, please enter your order ID in the box below
-                            and
-                            press the "Track" button. The ID has been sent to you on your receipt and in the
-                            confirmation email you received.</p>
+
+    @if($page && $page->activeSections->isNotEmpty())
+        {{-- Dynamic sections from Page Builder --}}
+        @foreach($page->activeSections as $section)
+            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
+        @endforeach
+    @else
+        <!-- Track Order (static fallback) -->
+        <section class="s-track-order tf-sp-2">
+            <div class="container">
+                <div class="position-relative">
+                    <div class="parallax-image">
+                        <img src="{{asset($filePath)}}/images/section/parallax-3.jpg" data-src="{{asset($filePath)}}/images/section/parallax-3.jpg" alt=""
+                            class="lazyload effect-paralax">
                     </div>
-                    <form class="form-trackorder def">
-                        <fieldset>
-                            <label>Oder ID</label>
-                            <input class="def" type="text" placeholder="Found in your order confirmation email"
-                                required>
-                        </fieldset>
-                        <fieldset>
-                            <label>Order email</label>
-                            <input class="def" type="text" placeholder="Email you used during checkout" required>
-                        </fieldset>
-                        <div class="box-btn">
-                            <button type="submit" class="tf-btn w-100">
-                                <span class="text-white">Track</span>
-                            </button>
+                    <div class="wrap">
+                        <div class="box-title">
+                            <h5 class="fw-semibold">Track your order</h5>
+                            <p class="body-text-3">To track your order, please enter your order ID in the box below
+                                and
+                                press the "Track" button. The ID has been sent to you on your receipt and in the
+                                confirmation email you received.</p>
                         </div>
-                    </form>
+                        <form class="form-trackorder def">
+                            <fieldset>
+                                <label>Order ID</label>
+                                <input class="def" type="text" placeholder="Found in your order confirmation email"
+                                    required>
+                            </fieldset>
+                            <fieldset>
+                                <label>Order email</label>
+                                <input class="def" type="text" placeholder="Email you used during checkout" required>
+                            </fieldset>
+                            <div class="box-btn">
+                                <button type="submit" class="tf-btn w-100">
+                                    <span class="text-white">Track</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-    <!-- /Track Order -->
+        </section>
+        <!-- /Track Order -->
+    @endif
 </x-frontend-layout>

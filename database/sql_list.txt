@@ -1,0 +1,4 @@
+ALTER TABLE settings
+ADD COLUMN telegram VARCHAR(255) NULL AFTER whatsapp,
+ADD COLUMN currency_rates JSON NULL AFTER telegram,
+ADD COLUMN currency_symbols JSON NULL AFTER currency_rates;

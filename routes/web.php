@@ -361,4 +361,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
+// Custom dynamic pages created via the Page Builder
+Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
+
 require __DIR__.'/auth.php';

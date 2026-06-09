@@ -48,7 +48,11 @@
                                                 @if($category->image)
                                                     <img src="{{ asset($category->image) }}" width="50" class="img-thumbnail">
                                                 @else
-                                                    <span class="badge bg-secondary">No Image</span>
+                                                    <span class="avatar avatar-md bg-light border" style="width: 50px; height: 35px;">
+                                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                                            <i class="ri-image-line text-muted fs-16"></i>
+                                                        </div>
+                                                    </span>
                                                 @endif
                                             </td>
                                             <td style="padding-left: {{ $padding }}px;">

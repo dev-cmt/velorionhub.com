@@ -7,8 +7,8 @@
                     <p class="body-small text-main-4">
                         <i class="icon-headphone"></i>
                         Call us for free:
-                        <a href="tel:+18001234567" class="text-primary link-secondary fw-semibold">
-                            +1(800) 123 4567
+                        <a href="tel:{{ $settings->phone ?? '+18001234567' }}" class="text-primary link-secondary fw-semibold">
+                            {{ $settings->phone ?? '+1(800) 123 4567' }}
                         </a>
                     </p>
                     <p class="body-small text-main-4">
@@ -22,10 +22,11 @@
                     <div class="tf-cur-item tf-currencies gap-0">
                         <i class="icon icon-budget text-cl-7"></i>
                         <div class="tf-curs text-cl-7">
-                            <select class="image-select center style-default type-cur">
-                                <option selected>BDT(৳)</option>
-                                <option>USD($)</option>
-                                <option>EUR(€)</option>
+                            <select id="currencySelect" class="image-select center style-default type-cur">
+                                <option value="BDT" selected>BDT | ৳</option>
+                                <option value="USD"> USD | $</option>
+                                <option value="EUR"> EUR | €</option>
+                                <option value="GBP"> GBP | £</option>
                             </select>
                         </div>
                     </div>
@@ -48,7 +49,11 @@
                 <div class="col-md-3 col-7 d-flex align-items-center">
                     <div class="logo-site">
                         <a href="{{ route('home') }}">
-                            <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
+                            @if($settings && $settings->logo)
+                                <img src="{{ asset($settings->logo) }}" alt="{{ $settings->company_name ?? 'Logo' }}">
+                            @else
+                                <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
+                            @endif
                         </a>
                     </div>
                 </div>
@@ -358,3 +363,39 @@
     </div>
 </header>
 <!-- /Header -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // const rates = @json($settings->currency_rates);
+        // const symbols = @json($settings->currency_symbols);
+
+        const rates = {
+            "BDT": 1,
+            "USD": 0.012,
+            "EUR": 0.011,
+            "GBP": 0.0098
+        };
+        const symbols = {
+            "BDT": "৳",
+            "USD": "$",
+            "EUR": "€",
+            "GBP": "£"
+        };
+
+        const select = document.getElementById("currencySelect");
+        function updatePrices() {
+            const cur = select.value;
+            document.querySelectorAll(".cur-price").forEach(el => {
+                let price = parseFloat(el.dataset.price || 0);
+                let rate = parseFloat(rates[cur] || 1);
+
+                if (!isNaN(price)) {
+                    el.innerText = (symbols[cur] || "") + " " + (price * rate).toFixed(2);
+                }
+            });
+        }
+
+        select.addEventListener("change", updatePrices);
+        updatePrices();
+    });
+</script>

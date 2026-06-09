@@ -9,7 +9,7 @@
         <div class="container">
             <ul class="breakcrumbs">
                 <li>
-                    <a href="index.html" class="body-small link">
+                    <a href="{{ route('home') }}" class="body-small link">
                         Home
                     </a>
                 </li>
@@ -17,7 +17,7 @@
                     <i class="icon icon-arrow-right"></i>
                 </li>
                 <li>
-                    <a href="product-grid.html" class="body-small link">
+                    <a href="{{ route('shop') }}" class="body-small link">
                         Shop
                     </a>
                 </li>
@@ -25,7 +25,7 @@
                     <i class="icon icon-arrow-right"></i>
                 </li>
                 <li>
-                    <span class="body-small">Product Detail Left Thumbsnail</span>
+                    <span class="body-small">{{ $product->name }}</span>
                 </li>
             </ul>
         </div>
@@ -713,4 +713,10 @@
             });
         </script>
     @endpush
+    {{-- Dynamic sections from Page Builder --}}
+    @if(isset($page) && $page && $page->activeSections->isNotEmpty())
+        @foreach($page->activeSections as $section)
+            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
+        @endforeach
+    @endif
 </x-frontend-layout>

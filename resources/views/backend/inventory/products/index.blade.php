@@ -41,9 +41,15 @@
                             <td>{{ $products->firstItem() + $key }}</td>
                             <td>
                                 @if($product->main_image)
-                                    <img src="{{ asset($product->main_image) }}" alt="photo" class="rounded-circle" width="40" height="40">
+                                    <span class="avatar avatar-xxl border" style="width: 50px; height: 35px;">
+                                        <img src="{{ asset($product->main_image) }}" alt="photo" class="object-fit-cover">
+                                    </span>
                                 @else
-                                    <span class="badge bg-secondary">No Photo</span>
+                                    <span class="avatar avatar-md bg-light border" style="width: 50px; height: 35px;">
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <i class="ri-image-line text-muted fs-16"></i>
+                                        </div>
+                                    </span>
                                 @endif
                             </td>
                             <td>{{ $product->name }}</td>

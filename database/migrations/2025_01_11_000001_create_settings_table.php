@@ -33,6 +33,10 @@ return new class extends Migration {
             $table->string('linkedin')->nullable();
             $table->string('youtube')->nullable();
             $table->string('whatsapp')->nullable();
+            $table->string('telegram')->nullable();
+
+            $table->json('currency_rates')->nullable();
+            $table->json('currency_symbols')->nullable();
 
             $table->boolean('is_loading')->default(true);
             $table->boolean('is_slider')->default(false);

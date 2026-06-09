@@ -161,11 +161,11 @@
             if (filters.minPrice !== null || filters.maxPrice !== null) {
                 let priceFilterLabel = "";
                 if (filters.minPrice !== null && filters.maxPrice !== null) {
-                    priceFilterLabel = `$${filters.minPrice} - $${filters.maxPrice}`;
+                    priceFilterLabel = `TK ${filters.minPrice} - TK ${filters.maxPrice}`;
                 } else if (filters.minPrice !== null) {
-                    priceFilterLabel = `$${filters.minPrice} +`;
+                    priceFilterLabel = `TK ${filters.minPrice} +`;
                 } else {
-                    priceFilterLabel = `$${filters.maxPrice} -`;
+                    priceFilterLabel = `TK ${filters.maxPrice} -`;
                 }
                 appliedFilters.append(
                     `<span class="filter-tag">${priceFilterLabel} <span class="remove-tag icon-close" data-filter="priceRangeInput"></span></span>`
@@ -230,7 +230,7 @@
             $(".wrapper-shop .card-product").each(function () {
                 const product = $(this);
                 let showProduct = true;
-                const priceNew = parseFloat(product.find(".new-price").text().replace("$", ""));
+                const priceNew = parseFloat(product.find(".new-price").text().replace(/[^0-9.]/g, ""));
 
                 if (filters.condition) {
                     const conditionStatus = product.data("condition");
@@ -308,7 +308,15 @@
     var filterSort = function () {
         let originalProductsGrid = $("#gridLayout .card-product").clone();
         $(".select-item").on("click", function () {
-            const sortValue = $(this).data("sort-value");
+            const sortValue = $(this).data("sort-value") || $(this).attr("data-sort-value");
+            if (sortValue && sortValue.toString().indexOf("0-") === 0) {
+                const limit = sortValue.split("-")[1];
+                const url = new URL(window.location.href);
+                url.searchParams.set("limit", limit);
+                url.searchParams.delete("page");
+                window.location.href = url.toString();
+                return;
+            }
             $(".select-item").removeClass("active");
             $(this).addClass("active");
             // $(".text-sort-value").text($(this).find(".text-value-item").text());
@@ -355,14 +363,14 @@
             if (sortValue === "price-low-high") {
                 products.sort(
                     (a, b) =>
-                        parseFloat($(a).find(".new-price").text().replace("$", "")) -
-                        parseFloat($(b).find(".new-price").text().replace("$", ""))
+                        parseFloat($(a).find(".new-price").text().replace(/[^0-9.]/g, "")) -
+                        parseFloat($(b).find(".new-price").text().replace(/[^0-9.]/g, ""))
                 );
             } else if (sortValue === "price-high-low") {
                 products.sort(
                     (a, b) =>
-                        parseFloat($(b).find(".new-price").text().replace("$", "")) -
-                        parseFloat($(a).find(".new-price").text().replace("$", ""))
+                        parseFloat($(b).find(".new-price").text().replace(/[^0-9.]/g, "")) -
+                        parseFloat($(a).find(".new-price").text().replace(/[^0-9.]/g, ""))
                 );
             } else if (sortValue === "a-z") {
                 products.sort((a, b) =>

@@ -26,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
         $settings = Setting::first() ?? null;
         View::share('settings', $settings);
 
+        // Also bind to IoC container so section templates can access via app('settings')
+        $this->app->instance('settings', $settings);
+
         // Theme Configuration
         if ($settings && $settings->active_theme) {
             $themes = config('theme');

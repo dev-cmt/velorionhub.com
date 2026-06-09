@@ -3,7 +3,7 @@
     <div class="tf-sp-3 pb-0">
         <div class="container">
             <ul class="breakcrumbs">
-                <li><a href="index.html" class="body-small link">Home</a></li>
+                <li><a href="{{ route('home') }}" class="body-small link">Home</a></li>
                 <li class="d-flex align-items-center">
                     <i class="icon icon-arrow-right"></i>
                 </li>
@@ -259,4 +259,10 @@
 
         </div>
     </div>
+    {{-- Dynamic sections from Page Builder --}}
+    @if(isset($page) && $page && $page->activeSections->isNotEmpty())
+        @foreach($page->activeSections as $section)
+            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
+        @endforeach
+    @endif
 </x-frontend-layout>

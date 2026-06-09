@@ -4,7 +4,7 @@
         <div class="container">
             <ul class="breakcrumbs">
                 <li>
-                    <a href="index.html" class="body-small link">
+                    <a href="{{ route('home') }}" class="body-small link">
                         Home
                     </a>
                 </li>
@@ -223,4 +223,10 @@
         </div>
     </section>
     <!-- /Check Out Cart -->
+    {{-- Dynamic sections from Page Builder --}}
+    @if(isset($page) && $page && $page->activeSections->isNotEmpty())
+        @foreach($page->activeSections as $section)
+            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
+        @endforeach
+    @endif
 </x-frontend-layout>

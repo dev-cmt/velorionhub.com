@@ -18,6 +18,10 @@ class SettingController extends Controller
         $data = Setting::first();
         $input = $request->all();
 
+        // convert arrays to json-safe format
+        $input['currency_symbols'] = $request->currency_symbols ?? [];
+        $input['currency_rates'] = $request->currency_rates ?? [];
+
         if($request->hasFile('logo'))
         {
             $file = $request->file('logo');

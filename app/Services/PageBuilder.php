@@ -115,7 +115,7 @@ class PageBuilder
         return $this->sectionTypes[$type]['icon'] ?? 'cube';
     }
 
-    public function renderSection(Section $section)
+    public function renderSection(PageSection $section)
     {
         $view = "page-builder.sections.{$section->type}";
 

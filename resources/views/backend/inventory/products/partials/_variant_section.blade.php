@@ -20,7 +20,7 @@
 
     <div class="card-body" id="variant_card_body" style="{{ $hasVariant ? '' : 'display:none;' }}">
         <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-12">
                 <label class="form-label">Attributes</label>
                 <select name="attribute_id[]" id="attribute_id" class="form-select searchable" multiple>
                     @foreach($attributes as $attribute)

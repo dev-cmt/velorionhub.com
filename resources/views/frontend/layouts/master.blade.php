@@ -10,7 +10,16 @@
 	{!! $breadcrumbs ?? '' !!}
 	{!! $jsonld ?? '' !!}
 
+    <!-- Favicon and Touch Icons  -->
+    @if($settings && $settings->favicon)
+    <link rel="icon" type="image/png" href="{{ asset($settings->favicon) }}">
+    <link href="{{ asset($settings->favicon) }}" rel="shortcut icon">
+    <link href="{{ asset($settings->favicon) }}" rel="apple-touch-icon-precomposed">
+    @else
     <link rel="icon" type="image/png" href="{{asset($filePath)}}/favicon.png">
+    <link href="{{asset($filePath)}}/images/logo/short-logo.svg" rel="shortcut icon">
+    <link href="{{asset($filePath)}}/images/logo/short-logo.svg" rel="apple-touch-icon-precomposed">
+    @endif
 
     <!-- fonts -->
     <link rel="stylesheet" href="{{asset($filePath)}}/fonts/font.css">
@@ -20,14 +29,9 @@
     <link rel="stylesheet" href="{{asset($filePath)}}/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{asset($filePath)}}/css/swiper-bundle.min.css">
     <link rel="stylesheet" href="{{asset($filePath)}}/css/animate.css">
-    <link rel="stylesheet" href="{{asset($filePath)}}/css/styles.css" type="text/css">
 
     @stack('css')
-
-    <!-- Favicon and Touch Icons  -->
-    <link href="{{asset($filePath)}}/images/logo/short-logo.svg" rel="shortcut icon">
-    <link href="{{asset($filePath)}}/images/logo/short-logo.svg" rel="apple-touch-icon-precomposed">
-
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/styles.css" type="text/css">
 </head>
 <body class="preload-wrapper popup-loader">
     <!-- Scroll Top -->

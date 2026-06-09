@@ -32,8 +32,16 @@ class Setting extends Model
         'whatsapp',
         'telegram',
 
+        'currency_rates',
+        'currency_symbols',
+
         'is_loading',
         'is_slider',
         'active_theme',
+    ];
+
+    protected $casts = [
+        'currency_symbols' => 'array',
+        'currency_rates' => 'array',
     ];
 }

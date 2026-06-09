@@ -5158,7 +5158,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .card-product .card-product-info {
   display: grid;
-  gap: 20px;
+  gap: 15px; /*CH-20px*/
 }
 .card-product .card-product-info .box-title {
   display: grid;
@@ -7466,7 +7466,7 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
 }
 
 .facet-categories {
-  border-radius: 10px;
+  border-radius: 0px; /*CH-10px*/
   border: 1px solid var(--gray-5);
   margin-bottom: 24px;
 }

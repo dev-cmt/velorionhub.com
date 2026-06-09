@@ -6,7 +6,11 @@
                 <div class="ft-inner flex-wrap flex-xl-nowrap">
                     <div class="ft-logo">
                         <a href="{{ route('home') }}" class="logo-site">
-                            <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
+                            @if($settings && $settings->logo)
+                                <img src="{{ asset($settings->logo) }}" alt="{{ $settings->company_name ?? 'Logo' }}">
+                            @else
+                                <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
+                            @endif
                         </a>
                         <div class="method-payment">
                             <p>We accept:</p>
@@ -64,17 +68,16 @@
                                             <i class="icon-location"></i>
                                         </span>
                                         <a href="#" class="link">
-                                            8500 Lorem Street
-                                            Chicago, IL 55030 Dolor sit amet
+                                            {{ $settings->address ?? '8500 Lorem Street, Chicago, IL 55030' }}
                                         </a>
                                     </li>
                                     <li>
                                         <span class="icon">
                                             <i class="icon-phone"></i>
                                         </span>
-                                        <a href="#" class="product-title">
+                                        <a href="tel:{{ $settings->phone ?? '' }}" class="product-title">
                                             <span class="product-title text-primary">
-                                                +8(800) 123 4567
+                                                {{ $settings->phone ?? '+8(800) 123 4567' }}
                                             </span>
                                         </a>
                                     </li>
@@ -82,9 +85,9 @@
                                         <span class="icon">
                                             <i class="icon-direction"></i>
                                         </span>
-                                        <a href="#" class="">
+                                        <a href="mailto:{{ $settings->email ?? '' }}" class="">
                                             <span class="text-primary">
-                                                onsus@support.com
+                                                {{ $settings->email ?? 'support@example.com' }}
                                             </span>
                                         </a>
                                     </li>
@@ -203,11 +206,31 @@
             <div class="container">
                 <div class="ft-bottom">
                     <ul class="social-list">
+                        @if($settings && $settings->facebook)
+                        <li><a href="{{ $settings->facebook }}"><i class="icon-facebook"></i></a></li>
+                        @else
                         <li><a href="https://www.facebook.com/"><i class="icon-facebook"></i></a></li>
+                        @endif
+                        @if($settings && $settings->twitter)
+                        <li><a href="{{ $settings->twitter }}"><i class="icon-x"></i></a></li>
+                        @else
                         <li><a href="https://x.com/"><i class="icon-x"></i></a></li>
+                        @endif
+                        @if($settings && $settings->instagram)
+                        <li><a href="{{ $settings->instagram }}"><i class="icon-instagram"></i></a></li>
+                        @else
                         <li><a href="https://www.instagram.com/"><i class="icon-instagram"></i></a></li>
+                        @endif
+                        @if($settings && $settings->linkedin)
+                        <li><a href="{{ $settings->linkedin }}"><i class="icon-linkin"></i></a></li>
+                        @else
                         <li><a href="https://www.linkedin.com/"><i class="icon-linkin"></i></a></li>
+                        @endif
+                        @if($settings && $settings->whatsapp)
+                        <li><a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->whatsapp) }}"><i class="icon-whatapp"></i></a></li>
+                        @else
                         <li><a href="https://web.whatsapp.com/"><i class="icon-whatapp"></i></a></li>
+                        @endif
                     </ul>
                     <ul class="ft-menu-list-2 body-text-3">
                         <li><a href="blog-grid.html" class="title-sidebar link fw-bold">New arrivals</a></li>
@@ -221,7 +244,10 @@
                         </li>
                     </ul>
                     <p class="nocopy caption text-center">
-                        <span class="fw-medium">Onsus.</span>© 2025. All right reserved - Designed by ThemesFlat
+                        <span class="fw-medium">{{ $settings->company_name ?? config('app.name') }}.</span>© {{ date('Y') }}. All right reserved
+                        @if($settings && $settings->copyright)
+                            - {{ $settings->copyright }}
+                        @endif
                     </p>
                 </div>
             </div>

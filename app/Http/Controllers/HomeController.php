@@ -52,7 +52,7 @@ class HomeController extends Controller
             ->get();
 
         // SEO
-        $page = Page::with('seo')->where('slug','home')->firstOrFail();
+        $page = Page::with(['seo', 'activeSections'])->where('slug','home')->first();
         $seotags = $this->applySeo($page);
 
         $breadcrumb_list = [
@@ -86,7 +86,8 @@ class HomeController extends Controller
             'special_offers',
             'column_bestsellers',
             'brands',
-            'latest_posts'
+            'latest_posts',
+            'page'
         ));
     }
 
@@ -142,13 +143,17 @@ class HomeController extends Controller
                 break;
         }
 
-        $products = $query->paginate(12)->withQueryString();
+        $limit = request()->get('limit', 20);
+        if (!in_array($limit, [5, 10, 15, 20, 50])) {
+            $limit = 20;
+        }
+        $products = $query->paginate($limit)->withQueryString();
 
         $categories = Category::where('status', true)->whereNull('parent_id')->with('children')->get();
         $brands = Brand::where('status', true)->get();
 
         // SEO
-        $page = Page::with('seo')->where('slug', 'shop')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'shop')->first();
         $seotags = $this->applySeo($page, 'Shop - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -159,7 +164,7 @@ class HomeController extends Controller
 
         $latest_products = Product::with('media')->active()->latest()->take(5)->get();
 
-        return view($this->filePath . '.shop', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'products', 'categories', 'brands', 'latest_products'));
+        return view($this->filePath . '.shop', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'products', 'categories', 'brands', 'latest_products', 'page'));
     }
 
     public function productShow($slug)
@@ -194,22 +199,21 @@ class HomeController extends Controller
     public function checkout()
     {
         // SEO
-        $page = Page::with('seo')->where('slug','checkout')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug','checkout')->first();
         $seotags = $this->applySeo($page, 'Checkout - ' . config('app.name'));
-
 
         $breadcrumb_list = [
             ['name' => 'Home', 'url' => url('/')],
             ['name' => 'Checkout', 'url' => route('checkout')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view($this->filePath . '.checkout', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.checkout', compact('seotags','breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function cart()
     {
         // SEO
-        $page = Page::with('seo')->where('slug','cart')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug','cart')->first();
         $seotags = $this->applySeo($page, 'Cart - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -217,37 +221,35 @@ class HomeController extends Controller
             ['name' => 'Cart', 'url' => route('cart')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view($this->filePath . '.cart', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.cart', compact('seotags','breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function wishlist()
     {
         // SEO
-        $page = Page::with('seo')->where('slug','wishlist')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug','wishlist')->first();
         $seotags = $this->applySeo($page, 'Wishlist - ' . config('app.name'));
-
 
         $breadcrumb_list = [
             ['name' => 'Home', 'url' => url('/')],
             ['name' => 'Wishlist', 'url' => route('wishlist')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view($this->filePath . '.wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.wishlist', compact('seotags','breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function compare()
     {
         // SEO
-        $page = Page::with('seo')->where('slug','compare')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug','compare')->first();
         $seotags = $this->applySeo($page, 'Compare - ' . config('app.name'));
-
 
         $breadcrumb_list = [
             ['name' => 'Home', 'url' => url('/')],
             ['name' => 'Compare', 'url' => route('compare')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
-        return view($this->filePath . '.compare', compact('seotags','breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.compare', compact('seotags','breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function blog(Request $request)
@@ -527,21 +529,21 @@ class HomeController extends Controller
 
     public function aboutUs()
     {
-        $page = Page::with('seo')->where('slug', 'about-us')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'about-us')->first();
         $seotags = $this->applySeo($page, 'About Us - ' . config('app.name'));
 
         $breadcrumb_list = [
             ['name' => 'Home', 'url' => url('/')],
-            ['name' => 'About Us', 'url' => route('about')],
+            ['name' => 'About Us', 'url' => route('about.us')],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.about-us', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.about-us', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function contacts()
     {
-        $page = Page::with('seo')->where('slug', 'contacts')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'contacts')->first();
         $seotags = $this->applySeo($page, 'Contact Us - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -550,12 +552,12 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.contacts', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.contacts', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function trackOrder()
     {
-        $page = Page::with('seo')->where('slug', 'track-order')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'track-order')->first();
         $seotags = $this->applySeo($page, 'Track Order - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -564,12 +566,12 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.track-order', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.track-order', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function faq()
     {
-        $page = Page::with('seo')->where('slug', 'faq')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'faq')->first();
         $seotags = $this->applySeo($page, 'FAQ - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -578,7 +580,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     /**
@@ -586,7 +588,7 @@ class HomeController extends Controller
      */
     public function myAccount()
     {
-        $page = Page::with('seo')->where('slug', 'my-account')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'my-account')->first();
         $seotags = $this->applySeo($page, 'My Account - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -595,12 +597,12 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.my-account', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.my-account', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function orderList()
     {
-        $page = Page::with('seo')->where('slug', 'order-list')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'order-list')->first();
         $seotags = $this->applySeo($page, 'Order List - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -609,11 +611,11 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.order-list', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.order-list', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
     public function accountEdit()
     {
-        $page = Page::with('seo')->where('slug', 'account-edit')->first();
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'account-edit')->first();
         $seotags = $this->applySeo($page, 'Account Edit - ' . config('app.name'));
 
         $breadcrumb_list = [
@@ -622,6 +624,6 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.account-edit', compact('seotags', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.account-edit', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 }
