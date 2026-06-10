@@ -84,16 +84,17 @@ Route::controller($controller)->group(function () {
     Route::get('/shop', 'shop')->name('shop');
     Route::get('/product/{slug}', 'productShow')->name('product.show');
     Route::get('/checkout', 'checkout')->name('checkout');
+
     Route::post('/place-order', 'placeOrder')->name('place.order');
     Route::get('/order/confirm/{invoice}', 'orderConfirm')->name('order.confirm');
     Route::get('/cart', 'cart')->name('cart');
     Route::get('/wishlist', 'wishlist')->name('wishlist');
     Route::post('/wishlist/add', 'addWishlist')->name('wishlist.add');
     Route::delete('/wishlist/remove/{id}', 'removeWishlist')->name('wishlist.remove');
-
     Route::get('/compare', 'compare')->name('compare');
     Route::post('/compare/add', 'addCompare')->name('compare.add');
     Route::delete('/compare/remove/{id}', 'removeCompare')->name('compare.remove');
+
     Route::get('/blog', 'blog')->name('blog');
     Route::get('/blog/{slug}', 'blogShow')->name('blog.show');
     Route::post('/subscribe', 'subscribe')->name('subscribe');

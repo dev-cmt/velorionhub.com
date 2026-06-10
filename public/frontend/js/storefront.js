@@ -16,6 +16,7 @@
         return $.ajax({
             url: url,
             method: method || 'POST',
+            dataType: 'json',
             data: Object.assign({ _token: csrf() }, data || {}),
         });
     }
@@ -25,6 +26,7 @@
     }
 
     function updateWishlistCount(count) {
+        count = parseInt(count, 10) || 0;
         // Update the badge counter
         $('a[href*="wishlist"] .count-box.wishlist-count').text(count);
         // Update the icon count-box (navbar)
@@ -34,6 +36,7 @@
     }
 
     function updateCompareCount(count) {
+        count = parseInt(count, 10) || 0;
         $('.compare-count, #msCompare').text(count);
     }
 
@@ -129,20 +132,17 @@
 
     function loadWishlistCount() {
         if (!routes.wishlistAdd) return;
-        $.post(routes.wishlistAdd, { _token: csrf() }).done(function (count) {
-            // count returned when no 'id' is sent — plain number
-            if (typeof count === 'number') {
-                updateWishlistCount(count);
-            }
+        $.post(routes.wishlistAdd, { _token: csrf() }, null, 'json').done(function (res) {
+            var count = (res && typeof res.count !== 'undefined') ? parseInt(res.count, 10) : 0;
+            updateWishlistCount(count);
         });
     }
 
     function loadCompareCount() {
         if (!routes.compareAdd) return;
-        $.post(routes.compareAdd, { _token: csrf() }).done(function (count) {
-            if (typeof count === 'number') {
-                updateCompareCount(count);
-            }
+        $.post(routes.compareAdd, { _token: csrf() }, null, 'json').done(function (res) {
+            var count = (res && typeof res.count !== 'undefined') ? parseInt(res.count, 10) : 0;
+            updateCompareCount(count);
         });
     }
 
@@ -279,71 +279,89 @@
             });
         });
 
-        // ─── Wishlist Toggle (data-action="wishlist") ────────────────────────
+        // ─── Wishlist Toggle ────────────────────────────────────────────────────────
+        // Handles both: <a data-action="wishlist"> and <button data-action="wishlist" class="wd-action-btn">
         $(document).on('click', '[data-action="wishlist"]', function (e) {
             e.preventDefault();
             const btn = $(this);
             const productId = btn.data('id');
+            if (!productId || !routes.wishlistAdd) return;
+
+            btn.prop('disabled', true);
 
             cartAjax(routes.wishlistAdd, { id: productId }).done(function (res) {
                 if (res.success) {
                     if (res.action === 'added') {
-                        btn.addClass('active');
-                        btn.find('.tooltip').text('In Wishlist');
+                        btn.addClass('active wd-action-btn--active');
+                        // icon-* style (anchor buttons)
                         btn.find('.icon').removeClass('icon-heart2').addClass('icon-hearth');
-                        if (typeof toastr !== 'undefined') {
-                            toastr.success(res.message || 'Added to Wishlist!');
-                        }
+                        // bi-* style (wd-action-btn buttons)
+                        btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                        btn.find('.tooltip').text('In Wishlist');
+                        btn.attr('title', 'Remove from Wishlist');
+                        if (typeof toastr !== 'undefined') toastr.success(res.message || 'Added to Wishlist!');
                     } else {
-                        btn.removeClass('active');
-                        btn.find('.tooltip').text('Add to Wishlist');
+                        btn.removeClass('active wd-action-btn--active');
+                        // icon-* style
                         btn.find('.icon').removeClass('icon-hearth').addClass('icon-heart2');
-                        if (typeof toastr !== 'undefined') {
-                            toastr.info(res.message || 'Removed from Wishlist.');
-                        }
+                        // bi-* style
+                        btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                        btn.find('.tooltip').text('Add to Wishlist');
+                        btn.attr('title', 'Add to Wishlist');
+                        if (typeof toastr !== 'undefined') toastr.info(res.message || 'Removed from Wishlist.');
                     }
                     updateWishlistCount(res.count);
+                } else {
+                    if (typeof toastr !== 'undefined') toastr.error('Could not update wishlist.');
                 }
             }).fail(function () {
-                if (typeof toastr !== 'undefined') {
-                    toastr.error('Could not update wishlist.');
-                }
+                if (typeof toastr !== 'undefined') toastr.error('Could not update wishlist.');
+            }).always(function () {
+                btn.prop('disabled', false);
             });
         });
 
-        // ─── Compare Toggle (data-action="compare") ──────────────────────────
+        // ─── Compare Toggle ────────────────────────────────────────────────────────
+        // Handles both: <a data-action="compare"> and <button data-action="compare" class="wd-action-btn">
+        // NOTE: We stop Bootstrap from auto-opening the offcanvas; we open it manually only on 'added'.
         $(document).on('click', '[data-action="compare"]', function (e) {
             e.preventDefault();
+            e.stopImmediatePropagation(); // prevent Bootstrap data-bs-toggle from firing
             const btn = $(this);
             const productId = btn.data('id');
-            // Try to get product data from card (for adding to offcanvas)
+            if (!productId || !routes.compareAdd) return;
+
+            btn.prop('disabled', true);
+
             const product = getProductDataFromCard(btn);
 
             cartAjax(routes.compareAdd, { id: productId }).done(function (res) {
                 if (res.success) {
                     updateCompareCount(res.count);
                     if (res.action === 'added') {
-                        btn.addClass('active');
+                        btn.addClass('active wd-action-btn--active');
+                        btn.find('.icon').removeClass('icon-compare').addClass('icon-compare1');
+                        btn.attr('title', 'Remove from Compare');
                         appendCompareItem(product);
-                        if (typeof toastr !== 'undefined') {
-                            toastr.success(res.message || 'Added to Compare!');
-                        }
+                        if (typeof toastr !== 'undefined') toastr.success(res.message || 'Added to Compare!');
+                        // Open the offcanvas ONLY when adding
                         const offcanvas = document.getElementById('compare');
                         if (offcanvas && typeof bootstrap !== 'undefined') {
                             bootstrap.Offcanvas.getOrCreateInstance(offcanvas).show();
                         }
                     } else {
-                        btn.removeClass('active');
+                        btn.removeClass('active wd-action-btn--active');
+                        btn.attr('title', 'Add to Compare');
                         removeCompareItem(productId);
-                        if (typeof toastr !== 'undefined') {
-                            toastr.info(res.message || 'Removed from Compare.');
-                        }
+                        if (typeof toastr !== 'undefined') toastr.info(res.message || 'Removed from Compare.');
                     }
+                } else {
+                    if (typeof toastr !== 'undefined') toastr.error('Could not update compare list.');
                 }
             }).fail(function () {
-                if (typeof toastr !== 'undefined') {
-                    toastr.error('Could not update compare list.');
-                }
+                if (typeof toastr !== 'undefined') toastr.error('Could not update compare list.');
+            }).always(function () {
+                btn.prop('disabled', false);
             });
         });
 
@@ -383,7 +401,6 @@
                 $('.mini-compare-empty').show();
                 $('.tf-compare-wrap').hide();
             }
-            // Also remove from server session
             if (id && routes.compareRemove) {
                 const url = routes.compareRemove.replace(':id', id);
                 cartAjax(url, { _method: 'DELETE' }).done(function (res) {
@@ -392,6 +409,61 @@
                     }
                 });
             }
+        });
+
+        // ─── Wishlist Page — Remove Row ──────────────────────────────────────
+        $(document).on('click', '.tf-table-wishlist .remove', function () {
+            const btn = $(this);
+            const id = btn.data('id') || btn.closest('tr').data('id');
+            if (!id || !routes.wishlistRemove) return;
+            const url = routes.wishlistRemove.replace(':id', id);
+            const row = btn.closest('tr.wishlist-item');
+            cartAjax(url, { _method: 'DELETE' }).done(function (res) {
+                if (res && res.success) {
+                    row.fadeOut(300, function () { $(this).remove(); });
+                    updateWishlistCount(res.count);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.info(res.message || 'Item removed from wishlist.');
+                    }
+                    // Show empty footer if no rows left
+                    if ($('.tf-table-wishlist tbody tr.wishlist-item').length === 0) {
+                        $('.tf-table-wishlist tfoot').removeClass('d-none');
+                    }
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not remove item. Please try again.');
+                }
+            });
+        });
+
+        // ─── Compare Page — Remove Column ────────────────────────────────────
+        $(document).on('click', '.tf-table-compare .remove', function () {
+            const btn = $(this);
+            const id = btn.data('id');
+            if (!id || !routes.compareRemove) return;
+            const url = routes.compareRemove.replace(':id', id);
+            const colIndex = btn.closest('td').index();
+            cartAjax(url, { _method: 'DELETE' }).done(function (res) {
+                if (res && res.success) {
+                    // Remove the corresponding <td> from every row
+                    $('.tf-table-compare tr').each(function () {
+                        $(this).find('td').eq(colIndex).remove();
+                    });
+                    updateCompareCount(res.count);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.info(res.message || 'Item removed from compare.');
+                    }
+                    // If no compare items remain, reload to show empty state
+                    if ($('.tf-compare-info').length === 0) {
+                        location.reload();
+                    }
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not remove item. Please try again.');
+                }
+            });
         });
     });
 })(jQuery);

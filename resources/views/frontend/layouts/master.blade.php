@@ -81,9 +81,6 @@
     <script src="{{asset($filePath)}}/js/wow.min.js"></script>
     <script src="{{asset($filePath)}}/js/multiple-modal.js"></script>
     <script src="{{asset($filePath)}}/js/infinityslide.js"></script>
-    <script src="{{asset($filePath)}}/js/main.js"></script>
-    <script src="{{asset($filePath)}}/js/storefront.js"></script>
-    <script src="{{asset($filePath)}}/js/sibforms.js" defer></script>
     <script>
         window.VelorionRoutes = {
             cartAdd: "{{ route('cart.add') }}",
@@ -102,6 +99,10 @@
             csrfToken: "{{ csrf_token() }}",
         };
     </script>
+    <script src="{{asset($filePath)}}/js/main.js"></script>
+    <script src="{{asset($filePath)}}/js/storefront.js"></script>
+    <script src="{{asset($filePath)}}/js/sibforms.js" defer></script>
+
     <script>
         window.REQUIRED_CODE_ERROR_MESSAGE = 'Please choose a country code';
         window.LOCALE = 'en';

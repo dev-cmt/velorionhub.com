@@ -118,7 +118,8 @@
             <!-- Compare -->
             <button type="button" class="wd-action-btn wd-compare-btn {{ $inCompare ? 'wd-action-btn--active' : '' }}"
                     title="Compare"
-                    onclick="ajaxToggleCompare(this, {{ $product->id }})">
+                    data-action="compare"
+                    data-id="{{ $product->id }}">
                 <i class="bi bi-arrow-left-right"></i>
             </button>
 
@@ -131,8 +132,9 @@
 
             <!-- Wishlist -->
             <button type="button" class="wd-action-btn wd-wishlist-btn {{ $inWishlist ? 'wd-action-btn--active' : '' }}"
-                    title="{{ $inWishlist ? 'Browse Wishlist' : 'Add to Wishlist' }}"
-                    onclick="ajaxToggleWishlist(this, {{ $product->id }})">
+                    title="{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}"
+                    data-action="wishlist"
+                    data-id="{{ $product->id }}">
                 <i class="bi bi-heart{{ $inWishlist ? '-fill' : '' }}"></i>
             </button>
         </div>
@@ -656,79 +658,6 @@
                     });
             });
 
-            // Unified AJAX Toggle Wishlist
-            function ajaxToggleWishlist(button, productId) {
-                const btn = $(button);
-                btn.prop('disabled', true);
-
-                $.post("{{ route('wishlist.add') }}", {
-                    _token: "{{ csrf_token() }}",
-                    id: productId
-                })
-                .done(function(response) {
-                    if (response.success) {
-                        btn.toggleClass('wd-action-btn--active');
-                        const isAdded = btn.hasClass('wd-action-btn--active');
-
-                        if (isAdded) {
-                            btn.attr('title', 'Remove from Wishlist');
-                            btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
-                            toastr.success('Product added to wishlist!');
-                        } else {
-                            btn.attr('title', 'Add to Wishlist');
-                            btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
-                            toastr.success('Product removed from wishlist.');
-                        }
-
-                        if (response.count !== undefined) {
-                            $('.wishlist-count strong, .wishlist-count').text(response.count);
-                        }
-                    } else {
-                        toastr.error('Something went wrong. Please try again.');
-                    }
-                })
-                .fail(function() {
-                    toastr.error('Unable to complete request. Please log in.');
-                })
-                .always(function() {
-                    btn.prop('disabled', false);
-                });
-            }
-
-            // Unified AJAX Toggle Compare
-            function ajaxToggleCompare(button, productId) {
-                const btn = $(button);
-                btn.prop('disabled', true);
-
-                $.post("{{ route('compare.add') }}", {
-                    _token: "{{ csrf_token() }}",
-                    id: productId
-                })
-                .done(function(response) {
-                    if (response.success) {
-                        btn.toggleClass('wd-action-btn--active');
-                        const isAdded = btn.hasClass('wd-action-btn--active');
-
-                        if (isAdded) {
-                            toastr.success('Product added to compare list!');
-                        } else {
-                            toastr.success('Product removed from compare list.');
-                        }
-
-                        if (response.count !== undefined) {
-                            $('.compare-count, #msCompare').text(response.count);
-                        }
-                    } else {
-                        toastr.error('Something went wrong. Please try again.');
-                    }
-                })
-                .fail(function() {
-                    toastr.error('Unable to complete request.');
-                })
-                .always(function() {
-                    btn.prop('disabled', false);
-                });
-            }
         </script>
     @endpush
 @endonce

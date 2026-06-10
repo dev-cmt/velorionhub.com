@@ -6,14 +6,14 @@
                 <div class="topbar-left justify-content-xl-start">
                     <p class="body-small text-main-4">
                         <i class="icon-headphone"></i>
-                        Call us for free:
-                        <a href="tel:{{ $settings->phone ?? '+18001234567' }}" class="text-primary link-secondary fw-semibold">
-                            {{ $settings->phone ?? '+1(800) 123 4567' }}
+                        Call us for free: 
+                        <a href="tel:{{ $settings->phone ?? '+8801XXXXXXXXX' }}" class="text-primary link-secondary fw-semibold">
+                            {{ $settings->phone ?? '+8801XXXXXXXXX' }}
                         </a>
                     </p>
                     <p class="body-small text-main-4">
                         Free Shipping on Orders
-                        <span class="text-primary fw-semibold">$50+</span>
+                        <span class="text-primary fw-semibold cur-price" data-price="5000">TK 5000+</span>
                     </p>
                 </div>
             </div>
@@ -29,11 +29,24 @@
                             </select>
                         </div>
                     </div>
-                    <a href="#log" data-bs-toggle="modal" class="tf-cur-item link text-cl-7">
+                    @auth
+                    <a href="{{ route('user.dashboard') }}" class="tf-cur-item link text-cl-7">
                         <i class="icon-user-3 text-cl-7"></i>
                         <span class="body-small">My account:</span>
                         <i class="icon-arrow-down text-cl-7"></i>
                     </a>
+                    @else
+                    <a href="#log" data-bs-toggle="modal" class="tf-cur-item link text-cl-7">
+                        <i class="icon-user-3 text-cl-7"></i>
+                        <span class="body-small">Login:</span>
+                        <i class="icon-arrow-down text-cl-7"></i>
+                    </a>
+                    <a href="#reg" data-bs-toggle="modal" class="tf-cur-item link text-cl-7">
+                        <i class="icon-user-3 text-cl-7"></i>
+                        <span class="body-small">Register:</span>
+                        <i class="icon-arrow-down text-cl-7"></i>
+                    </a>
+                    @endauth
                 </div>
             </div>
         </div>

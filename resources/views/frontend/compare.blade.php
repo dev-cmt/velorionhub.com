@@ -134,28 +134,6 @@
             @endif
         </div>
     </div>
-    @push('js')
-    <script>
-        $(document).ready(function() {
-            $('.tf-compare-info .remove').click(function(e) {
-                e.preventDefault();
-                let id = $(this).data('id');
-                if (!id) return;
-                let url = "{{ route('compare.remove', ':id') }}".replace(':id', id);
-                $.ajax({
-                    url: url,
-                    method: "DELETE",
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function() {
-                        location.reload();
-                    }
-                });
-            });
-        });
-    </script>
-    @endpush
     <!-- /Compare -->
     {{-- Dynamic sections from Page Builder --}}
     @if(isset($page) && $page && $page->activeSections->isNotEmpty())

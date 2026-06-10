@@ -54,7 +54,7 @@
         @endif
 
         <!--Action Buttons-->
-        <ul class="list-product-btn {{ $btnClass ?? '' }}">
+        <ul class="list-product-btn">
             <li>
                 <a href="#shoppingCart" data-bs-toggle="offcanvas"
                     class="box-icon add-to-cart btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }}"
@@ -67,7 +67,7 @@
                     <span class="tooltip">Add to Cart</span>
                 </a>
             </li>
-            <li class="{{ $wishlistClass ?? 'd-none d-sm-block' }} wishlist">
+            <li class="d-none d-sm-block wishlist">
                 <a href="#;"
                     class="box-icon btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }} {{ $inWishlist ? 'active' : '' }}"
                     data-action="wishlist"
@@ -85,7 +85,7 @@
                     <span class="tooltip">Quick View</span>
                 </a>
             </li>
-            <li class="{{ $compareClass ?? 'd-none d-sm-block' }}">
+            <li class="d-none d-sm-block compare">
                 <a href="#compare" data-bs-toggle="offcanvas"
                     class="box-icon btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }} {{ $inCompare ? 'active' : '' }}"
                     data-action="compare"
@@ -167,7 +167,8 @@
                     <p class="caption text-main-2">({{ $product->reviews_count ?? 0 }})</p>
                 </div>
                 <a href="#compare" data-bs-toggle="offcanvas" class="tf-btn-icon style-2"
-                    onclick="ajaxToggleCompare(this, {{ $product->id }})">
+                    data-action="compare"
+                    data-id="{{ $product->id }}">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M9 6.5V9V6.5ZM9 9V11.5V9ZM9 9H11.5H9ZM9 9H6.5H9ZM16.5 9C16.5 9.98491 16.306 10.9602 15.9291 11.8701C15.5522 12.7801 14.9997 13.6069 14.3033 14.3033C13.6069 14.9997 12.7801 15.5522 11.8701 15.9291C10.9602 16.306 9.98491 16.5 9 16.5C8.01509 16.5 7.03982 16.306 6.12987 15.9291C5.21993 15.5522 4.39314 14.9997 3.6967 14.3033C3.00026 13.6069 2.44781 12.7801 2.0709 11.8701C1.69399 10.9602 1.5 9.98491 1.5 9C1.5 7.01088 2.29018 5.10322 3.6967 3.6967C5.10322 2.29018 7.01088 1.5 9 1.5C10.9891 1.5 12.8968 2.29018 14.3033 3.6967C15.7098 5.10322 16.5 7.01088 16.5 9Z"
@@ -195,7 +196,8 @@
             <div class="box-btn">
                 <a href="#compare" data-bs-toggle="offcanvas"
                     class="tf-btn-icon style-2 type-black"
-                    onclick="ajaxToggleCompare(this, {{ $product->id }})">
+                    data-action="compare"
+                    data-id="{{ $product->id }}">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -205,8 +207,10 @@
                     </svg>
                     <span class="body-text-3 fw-normal">Compare</span>
                 </a>
-                <a href="#;" class="tf-btn-icon style-2 type-black"
-                    onclick="ajaxToggleWishlist(this, {{ $product->id }})">
+                <a href="#;"
+                    class="tf-btn-icon style-2 type-black"
+                    data-action="wishlist"
+                    data-id="{{ $product->id }}">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path

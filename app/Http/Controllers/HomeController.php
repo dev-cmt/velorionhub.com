@@ -241,7 +241,8 @@ class HomeController extends Controller
     public function addWishlist(Request $request)
     {
         if (!$request->has('id')) {
-            return Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity();
+            $count = Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity();
+            return response()->json(['count' => $count]);
         }
 
         $product = Product::findOrFail($request->id);
@@ -278,8 +279,13 @@ class HomeController extends Controller
 
     public function removeWishlist($id)
     {
-        Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->remove($id);
-        return back()->with('success', 'Item removed from wishlist.');
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_wishlist');
+        $cart->remove($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from wishlist.',
+            'count'   => $cart->getTotalQuantity(),
+        ]);
     }
 
     public function compare()
@@ -299,7 +305,8 @@ class HomeController extends Controller
     public function addCompare(Request $request)
     {
         if (!$request->has('id')) {
-            return Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getTotalQuantity();
+            $count = Cart::session((Auth::id() ?? session()->getId()) . '_compare')->getTotalQuantity();
+            return response()->json(['count' => $count]);
         }
 
         $product = Product::with('category', 'brand')->findOrFail($request->id);
@@ -340,8 +347,13 @@ class HomeController extends Controller
 
     public function removeCompare($id)
     {
-        Cart::session((Auth::id() ?? session()->getId()) . '_compare')->remove($id);
-        return back()->with('success', 'Item removed from compare list.');
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+        $cart->remove($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from compare list.',
+            'count'   => $cart->getTotalQuantity(),
+        ]);
     }
 
     public function blog(Request $request)
