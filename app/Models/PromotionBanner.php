@@ -12,6 +12,7 @@ class PromotionBanner extends Model
     protected $fillable = [
         'image',
         'title',
+        'price',
         'details',
         'button_text',
         'url',

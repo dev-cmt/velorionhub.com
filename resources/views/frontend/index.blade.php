@@ -1,62 +1,17 @@
 @php
-    $featuredProduct = ($special_offers ?? collect())->first() ?? ($hot_deals ?? collect())->first();
-    $bannerSideProducts = ($hot_deals ?? collect())
-        ->when($featuredProduct, fn($c) => $c->where('id', '!=', $featuredProduct->id))
-        ->take(2);
     $dealProducts = ($special_offers ?? collect())->isNotEmpty()
         ? $special_offers
         : ($hot_deals ?? collect())->filter(fn($p) => floatval($p->sale_price) < floatval($p->regular_price));
     $newArrivalChunks = ($new_arrivals ?? collect())->chunk(2);
     $recentProducts = $best_sellers ?? collect();
-
-    // Pre-compute featured product variables for use in the banner section.
-    // These cannot be sourced from the @include partial because Blade partials
-    // do not propagate variables back to the parent template scope.
-    $productUrl  = null;
-    $mainImage   = null;
-    $categoryName = null;
-    if ($featuredProduct) {
-        $productUrl   = route('product.show', $featuredProduct->slug);
-        $mainImage    = $featuredProduct->main_image ? asset($featuredProduct->main_image) : asset('images/no-image.jpg');
-        $categoryName = $featuredProduct->category->name ?? 'Uncategorized';
-    }
 @endphp
 
 <x-frontend-layout title="Home Page" :breadcrumbs="$breadcrumbs" :seotags="$seotags">
-    <!-- Banner Product -->
-    <section class="has-bg-img" data-bg-img="{{ asset('frontend') }}/images/banner/banner-6.jpg">
-        <div class="container">
-            <div class="banner-product flex-xl-nowrap justify-content-center">
-                @if($featuredProduct)
-                    <div class="product-wrap hover-img flex-md-nowrap justify-content-center">
-                        <a href="{{ $productUrl }}" class="d-inline-flex item-product img-style">
-                            <img src="{{ $mainImage }}" data-src="{{ $mainImage }}" alt="{{ $featuredProduct->name }}" class="lazyload">
-                        </a>
-                        <div class="info-product text-center text-md-start">
-                            <div class="box-title">
-                                <p class="tag-new text-white text-uppercase title-sidebar">New arrival</p>
-                                <h1 class="name">
-                                    <a href="{{ $productUrl }}" class="text-white text-uppercase link">
-                                        {{ $categoryName }}
-                                    </a>
-                                </h1>
-                            </div>
-                            <div class="box-price">
-                                <p class="start text-white">Starting</p>
-                                <h1 class="price text-primary">TK {{ number_format($featuredProduct->sale_price, 2) }}</h1>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                <div class="other-item flex-xl-column flex-md-row">
-                    @foreach($bannerSideProducts as $product)
-                        @include('frontend.partials.product-item-horizontal', ['product' => $product, 'bgWhite' => true])
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- /Banner Product -->
+    @if($settings->is_slider)
+        @include('frontend.partials.slider')
+    @else
+        @include('frontend.partials.hero')
+    @endif
 
     <!-- Iconbox -->
     <div class="tf-sp-2">
@@ -69,7 +24,9 @@
                             <div class="icon-box"><i class="icon icon-delivery-2"></i></div>
                             <div class="content">
                                 <p class="body-text fw-semibold">Free delivery</p>
-                                <p class="body-text-3">Free Shipping for orders over $20</p>
+                                <p class="body-text-3">Free Shipping for orders over
+                                    <span class="cur-price" data-price="5000">TK 5000</span>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -96,7 +53,7 @@
                             <div class="icon-box"><i class="icon icon-reliable"></i></div>
                             <div class="content">
                                 <p class="body-text fw-semibold">Reliable</p>
-                                <p class="body-text-3">Trusted by 2000+ major brands</p>
+                                <p class="body-text-3">Trusted by 2000+ people</p>
                             </div>
                         </div>
                     </div>
@@ -105,7 +62,7 @@
                             <div class="icon-box"><i class="icon icon-check-3"></i></div>
                             <div class="content">
                                 <p class="body-text fw-semibold">Guarantee</p>
-                                <p class="body-text-3">Within 30 days for an exchange</p>
+                                <p class="body-text-3">Within 7 days for an exchange</p>
                             </div>
                         </div>
                     </div>
@@ -150,40 +107,44 @@
     </section>
     <!-- /Deal Today -->
 
-    <!-- Promotion Banners -->
+    <!-- Banner Product -->
+    @if(isset($promotionBanners) && $promotionBanners->isNotEmpty())
     <section>
         <div class="container">
-            <div class="swiper tf-sw-categories overflow-xxl-visible" data-preview="2" data-tablet="2"
+            <div class=" swiper tf-sw-categories overflow-xxl-visible" data-preview="2" data-tablet="2"
                 data-mobile-sm="1" data-mobile="1" data-space-lg="30" data-space-md="20" data-space="15"
                 data-pagination="1" data-pagination-sm="2" data-pagination-md="2" data-pagination-lg="2">
                 <div class="swiper-wrapper">
                     @forelse(($promotionBanners ?? collect())->take(2) as $banner)
-                        <div class="swiper-slide">
-                            <a href="{{ $banner->url ?: route('shop') }}"
-                                class="banner-image-product-2 type-sp-2 hover-img d-block {{ $loop->iteration === 1 ? 'style-2' : '' }}">
-                                <div class="item-image img-style overflow-visible {{ $loop->iteration === 1 ? 'position3' : 'position2' }}">
-                                    <img src="{{ asset($banner->image) }}" data-src="{{ asset($banner->image) }}" alt="{{ $banner->title }}" class="lazyload">
+                    <!-- item 1 -->
+                    <div class="swiper-slide">
+                        <a href="{{ $banner->url ?: route('shop') }}" class="banner-image-product-2 {{ $loop->iteration == 1 ? 'style-2' : '' }} type-sp-2 hover-img d-block">
+                            <div class="item-image img-style overflow-visible position{{ $loop->iteration == 1 ? '3' : '2' }}">
+                                <img src="{{ asset($filePath.'/images/product-'.($loop->iteration == 1 ? '1' : '2').'.png') }}" data-src="{{ asset($filePath.'/images/product-'.($loop->iteration == 1 ? '1' : '2').'.png') }}" alt="{{ $banner->title }}" class="lazyload">
+                            </div>
+                            <div class="item-banner has-bg-img"  data-bg-img="{{ asset($banner->images ?: $filePath.'/images/banner/banner-'.($loop->iteration == 1 ? '4' : '3').'.jpg') }}"
+                                data-bg-size="cover" data-bg-repeat="no-repeat">
+                                <div class="inner {{ $loop->iteration == 1 ? '' : 'justify-content-xl-end' }}">
+                                    @if($banner->price)
+                                        <div class="box-sale-wrap box-price type-3 relative">
+                                            <p class="small-text sub-price">From</p>
+                                            <p class="main-title-2 num-price">{{ $banner->price ?? '' }}</p>
+                                        </div>
+                                    @else
+                                        <p class="mt-3">&nbsp;</p>
+                                    @endif
+
+                                    <h4 class="name fw-normal text-white lh-lg-38 text-xxl-center text-line-clamp-2">
+                                        <span class="fw-bold">
+                                            {{ $banner->title ?? 'Promotion' }}
+                                        </span>
+                                        <br class="d-none d-sm-block">
+                                        {{ $banner->details ?? '' }}
+                                    </h4>
                                 </div>
-                                <div class="item-banner has-bg-img" data-bg-img="{{ asset('frontend') }}/images/banner/banner-{{ $loop->iteration === 1 ? '4' : '3' }}.jpg"
-                                    data-bg-size="cover" data-bg-repeat="no-repeat">
-                                    <div class="inner {{ $loop->iteration === 2 ? 'justify-content-xl-end' : '' }}">
-                                        @if($banner->details)
-                                            <div class="box-sale-wrap {{ $loop->iteration === 1 ? 'box-price' : '' }} type-3 relative">
-                                                <p class="small-text {{ $loop->iteration === 1 ? 'sub-price' : '' }}">{{ $banner->details }}</p>
-                                                @if($banner->button_text)
-                                                    <p class="main-title-2 {{ $loop->iteration === 1 ? 'num-price' : '' }}">{{ $banner->button_text }}</p>
-                                                @endif
-                                            </div>
-                                        @endif
-                                        @if($banner->title)
-                                            <h4 class="name fw-normal text-white lh-lg-38 {{ $loop->iteration === 1 ? 'text-xxl-center text-line-clamp-2' : 'text-xl-end' }}">
-                                                {!! nl2br(e($banner->title)) !!}
-                                            </h4>
-                                        @endif
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
+                            </div>
+                        </a>
+                    </div>
                     @empty
                         @foreach(($categories ?? collect())->take(2) as $category)
                             <div class="swiper-slide">
@@ -204,10 +165,11 @@
             </div>
         </div>
     </section>
-    <!-- /Promotion Banners -->
+    @endif
+    <!-- /Banner Product -->
 
     <!-- New arrivals -->
-    <section class="tf-sp-2 pt-0">
+    <section class="tf-sp-2">
         <div class="container">
             <div class="flat-title wow fadeInUp" data-wow-delay="0s">
                 <h5 class="fw-semibold">New arrivals</h5>

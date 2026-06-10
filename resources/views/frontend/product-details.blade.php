@@ -99,7 +99,7 @@
                                         @foreach($mediaImages as $media)
                                             <div class="swiper-slide stagger-item">
                                                 <div class="item">
-                                                    <img class="lazyload" src="{{ $media->url }}" data-src="{{ $media->url }}" alt="{{ $product->name }}">
+                                                    <img class="lazyload" src="{{ asset($media->path) }}" data-src="{{ asset($media->path) }}" alt="{{ $product->name }}">
                                                 </div>
                                             </div>
                                         @endforeach
@@ -123,12 +123,12 @@
                                         {{-- Additional media slides --}}
                                         @foreach($mediaImages as $media)
                                             <div class="swiper-slide">
-                                                <a href="{{ $media->url }}" target="_blank"
+                                                <a href="{{ asset($media->path) }}" target="_blank"
                                                    class="item" data-pswp-width="600px" data-pswp-height="800px">
                                                     <img class="tf-image-zoom lazyload"
-                                                         src="{{ $media->url }}"
-                                                         data-zoom="{{ $media->url }}"
-                                                         data-src="{{ $media->url }}"
+                                                         src="{{ asset($media->path) }}"
+                                                         data-zoom="{{ asset($media->path) }}"
+                                                         data-src="{{ asset($media->path) }}"
                                                          alt="{{ $product->name }}">
                                                 </a>
                                             </div>
@@ -247,16 +247,23 @@
                                             </div>
                                             <div class="product-box-btn">
                                                 @if($product->total_stock > 0)
+                                                    <button class="tf-btn text-white order-now"
+                                                       data-id="{{ $product->id }}"
+                                                       data-name="{{ $product->name }}"
+                                                       data-price="{{ $product->sale_price }}"
+                                                       data-image="{{ $mainImage }}"
+                                                       data-url="{{ $productUrl }}">
+                                                        Buy Now
+                                                        <i class="icon-cart-2"></i>
+                                                    </button>
                                                     <a href="#shoppingCart" data-bs-toggle="offcanvas"
-                                                       id="product-detail-add-to-cart"
-                                                       class="tf-btn text-white add-to-cart"
+                                                       class="tf-btn btn-line add-to-cart"
                                                        data-id="{{ $product->id }}"
                                                        data-name="{{ $product->name }}"
                                                        data-price="{{ $product->sale_price }}"
                                                        data-image="{{ $mainImage }}"
                                                        data-url="{{ $productUrl }}">
                                                         Add to cart
-                                                        <i class="icon-cart-2"></i>
                                                     </a>
                                                 @else
                                                     <button class="tf-btn text-white" disabled style="opacity:0.6; cursor:not-allowed;">
@@ -264,32 +271,32 @@
                                                     </button>
                                                 @endif
                                             </div>
-                                        </div>
 
-                                        {{-- Wishlist & Compare buttons --}}
-                                        <div class="d-flex gap-2 mt-3">
-                                            <a href="#;"
-                                               class="tf-btn-icon style-2 type-black {{ $inWishlist ? 'active' : '' }}"
-                                               data-action="wishlist"
-                                               data-id="{{ $product->id }}"
-                                               id="product-detail-wishlist"
-                                               title="{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}">
-                                                <i class="icon-heart2"></i>
-                                                <span class="body-text-3 fw-normal ms-1">{{ $inWishlist ? 'In Wishlist' : 'Wishlist' }}</span>
-                                            </a>
-                                            <a href="#compare" data-bs-toggle="offcanvas"
-                                               class="tf-btn-icon style-2 type-black {{ $inCompare ? 'active' : '' }}"
-                                               data-action="compare"
-                                               data-id="{{ $product->id }}"
-                                               id="product-detail-compare"
-                                               title="{{ $inCompare ? 'Remove from Compare' : 'Add to Compare' }}">
-                                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M9 6.5V9V6.5ZM9 9V11.5V9ZM9 9H11.5H9ZM9 9H6.5H9ZM16.5 9C16.5 9.98491 16.306 10.9602 15.9291 11.8701C15.5522 12.7801 14.9997 13.6069 14.3033 14.3033C13.6069 14.9997 12.7801 15.5522 11.8701 15.9291C10.9602 16.306 9.98491 16.5 9 16.5C8.01509 16.5 7.03982 16.306 6.12987 15.9291C5.21993 15.5522 4.39314 14.9997 3.6967 14.3033C3.00026 13.6069 2.44781 12.7801 2.0709 11.8701C1.69399 10.9602 1.5 9.98491 1.5 9C1.5 7.01088 2.29018 5.10322 3.6967 3.6967C5.10322 2.29018 7.01088 1.5 9 1.5C10.9891 1.5 12.8968 2.29018 14.3033 3.6967C15.7098 5.10322 16.5 7.01088 16.5 9Z"
-                                                          stroke="#004EC3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                                <span class="body-text-3 fw-normal ms-1">Compare</span>
-                                            </a>
                                         </div>
+                                    </div>
+
+                                    {{-- Wishlist & Compare buttons --}}
+                                    <div class="d-flex gap-2">
+                                        <a href="#;" class="tf-btn-icon style-2 type-black {{ $inWishlist ? 'active' : '' }}"
+                                            data-action="wishlist"
+                                            data-id="{{ $product->id }}"
+                                            id="product-detail-wishlist"
+                                            title="{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}">
+                                            <i class="icon-heart2"></i>
+                                            <span class="body-text-3 fw-normal ms-1">{{ $inWishlist ? 'In Wishlist' : 'Wishlist' }}</span>
+                                        </a>
+                                        <a href="#compare" data-bs-toggle="offcanvas"
+                                            class="tf-btn-icon style-2 type-black {{ $inCompare ? 'active' : '' }}"
+                                            data-action="compare"
+                                            data-id="{{ $product->id }}"
+                                            id="product-detail-compare"
+                                            title="{{ $inCompare ? 'Remove from Compare' : 'Add to Compare' }}">
+                                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9 6.5V9V6.5ZM9 9V11.5V9ZM9 9H11.5H9ZM9 9H6.5H9ZM16.5 9C16.5 9.98491 16.306 10.9602 15.9291 11.8701C15.5522 12.7801 14.9997 13.6069 14.3033 14.3033C13.6069 14.9997 12.7801 15.5522 11.8701 15.9291C10.9602 16.306 9.98491 16.5 9 16.5C8.01509 16.5 7.03982 16.306 6.12987 15.9291C5.21993 15.5522 4.39314 14.9997 3.6967 14.3033C3.00026 13.6069 2.44781 12.7801 2.0709 11.8701C1.69399 10.9602 1.5 9.98491 1.5 9C1.5 7.01088 2.29018 5.10322 3.6967 3.6967C5.10322 2.29018 7.01088 1.5 9 1.5C10.9891 1.5 12.8968 2.29018 14.3033 3.6967C15.7098 5.10322 16.5 7.01088 16.5 9Z"
+                                                    stroke="#004EC3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="body-text-3 fw-normal ms-1">Compare</span>
+                                        </a>
                                     </div>
 
                                 </div>

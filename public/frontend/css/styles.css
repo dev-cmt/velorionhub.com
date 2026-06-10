@@ -10995,3 +10995,47 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
 }
 
 /*# sourceMappingURL=styles.css.map */
+
+/*---------------CUSTOME CSS----------------*/
+.banner-image-product-2 .item-image img{
+    height: 250px;
+}
+@media (max-width: 575px) {
+  .banner-image-product-2 .item-image img{
+    height: 185px;
+  }
+  .tf-product-info-list.style-2 .tf-product-info-choose-option > * {
+    margin-top: 10px;
+    width: 100%;
+  }
+  .order-now,
+  .add-to-cart {
+    width: 100%;
+  }
+}
+
+/* Green Pulse Effect */
+@keyframes  pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5);
+    }
+    60% {
+        box-shadow: 0 0 0 14px rgba(163, 90, 22, 0);
+    }
+}
+
+/* Left-Right Shake Effect */
+@keyframes  shake-lr {
+    0%, 60%, 100% { transform: translateX(0); }
+    65% { transform: translateX(-6px); }
+    70% { transform: translateX(6px); }
+    75% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    85% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+}
+
+.order-now {
+    animation: pulse-green 2.8s ease-out infinite, shake-lr 3.5s ease-in-out infinite;
+    transition: background 0.2s;
+}

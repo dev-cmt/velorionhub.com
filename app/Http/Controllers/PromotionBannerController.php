@@ -26,7 +26,7 @@ class PromotionBannerController extends Controller
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $data = $request->only(['title', 'details', 'button_text', 'url', 'sort_order']);
+        $data = $request->only(['title', 'price', 'details', 'button_text', 'url', 'sort_order']);
         $data['status'] = $request->boolean('status', true);
         $data['sort_order'] = $data['sort_order'] ?? 0;
 
@@ -51,7 +51,7 @@ class PromotionBannerController extends Controller
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $data = $request->only(['title', 'details', 'button_text', 'url', 'sort_order']);
+        $data = $request->only(['title', 'price', 'details', 'button_text', 'url', 'sort_order']);
         $data['status'] = $request->boolean('status');
         $data['sort_order'] = $data['sort_order'] ?? 0;
 

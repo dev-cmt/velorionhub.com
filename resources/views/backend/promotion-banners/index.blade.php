@@ -83,6 +83,7 @@
                                     <th>#</th>
                                     <th>Image</th>
                                     <th>Title</th>
+                                    <th>Price</th>
                                     <th>Details</th>
                                     <th>Button / URL</th>
                                     <th>Order</th>
@@ -103,6 +104,13 @@
                                         @endif
                                     </td>
                                     <td class="fw-semibold">{{ $banner->title ?: '—' }}</td>
+                                    <td>
+                                        @if($banner->price)
+                                            <span class="badge bg-info-transparent">${{ number_format($banner->price, 2) }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <span class="text-muted" style="max-width:200px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                             {{ $banner->details ?: '—' }}
@@ -130,13 +138,14 @@
                                     </td>
                                     <td>
                                         <div class="btn-list">
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-warning-light btn-icon edit-banner-btn" 
+                                            <button type="button"
+                                                    class="btn btn-sm btn-warning-light btn-icon edit-banner-btn"
                                                     title="Edit"
-                                                    data-bs-toggle="modal" 
+                                                    data-bs-toggle="modal"
                                                     data-bs-target="#editBannerModal"
                                                     data-id="{{ $banner->id }}"
                                                     data-title="{{ $banner->title }}"
+                                                    data-price="{{ $banner->price }}"
                                                     data-details="{{ $banner->details }}"
                                                     data-button_text="{{ $banner->button_text }}"
                                                     data-url="{{ $banner->url }}"
@@ -194,9 +203,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="title" class="form-label">Title</label>
                                 <input type="text" class="form-control" id="title" name="title" placeholder="e.g. New Arrivals">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Price</label>
+                                <input type="number" class="form-control" id="price" name="price" placeholder="0.00" step="0.01" min="0">
                             </div>
                             <div class="col-12 mb-3">
                                 <label for="details" class="form-label">Details / Caption</label>
@@ -255,9 +268,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="edit_title" class="form-label">Title</label>
                                 <input type="text" class="form-control" id="edit_title" name="title">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_price" class="form-label">Price</label>
+                                <input type="number" class="form-control" id="edit_price" name="price" placeholder="0.00" step="0.01" min="0">
                             </div>
                             <div class="col-12 mb-3">
                                 <label for="edit_details" class="form-label">Details / Caption</label>
@@ -350,9 +367,10 @@
             editButtons.forEach(btn => {
                 btn.addEventListener('click', function () {
                     const data = this.dataset;
-                    
+
                     editForm.action = data.update_url;
                     document.getElementById('edit_title').value = data.title;
+                    document.getElementById('edit_price').value = data.price;
                     document.getElementById('edit_details').value = data.details;
                     document.getElementById('edit_button_text').value = data.button_text;
                     document.getElementById('edit_url').value = data.url;

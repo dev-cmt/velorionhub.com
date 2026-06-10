@@ -6,7 +6,7 @@
                 <div class="topbar-left justify-content-xl-start">
                     <p class="body-small text-main-4">
                         <i class="icon-headphone"></i>
-                        Call us for free: 
+                        Call us for free:
                         <a href="tel:{{ $settings->phone ?? '+8801XXXXXXXXX' }}" class="text-primary link-secondary fw-semibold">
                             {{ $settings->phone ?? '+8801XXXXXXXXX' }}
                         </a>
@@ -20,7 +20,7 @@
             <div class="col-xl-6 d-none d-xl-block">
                 <div class="tf-cur justify-content-end bar-lang">
                     <div class="tf-cur-item tf-currencies gap-0">
-                        <i class="icon icon-budget text-cl-7"></i>
+                        <i class="icon icon-budget text-main-4"></i>
                         <div class="tf-curs text-cl-7">
                             <select id="currencySelect" class="image-select center style-default type-cur">
                                 <option value="BDT" selected>BDT | ৳</option>
@@ -30,21 +30,15 @@
                         </div>
                     </div>
                     @auth
-                    <a href="{{ route('user.dashboard') }}" class="tf-cur-item link text-cl-7">
+                    <a href="{{ route('my.account') }}" class="tf-cur-item link text-cl-7">
                         <i class="icon-user-3 text-cl-7"></i>
-                        <span class="body-small">My account:</span>
+                        <span class="body-small">My account</span>
                         <i class="icon-arrow-down text-cl-7"></i>
                     </a>
                     @else
                     <a href="#log" data-bs-toggle="modal" class="tf-cur-item link text-cl-7">
                         <i class="icon-user-3 text-cl-7"></i>
-                        <span class="body-small">Login:</span>
-                        <i class="icon-arrow-down text-cl-7"></i>
-                    </a>
-                    <a href="#reg" data-bs-toggle="modal" class="tf-cur-item link text-cl-7">
-                        <i class="icon-user-3 text-cl-7"></i>
-                        <span class="body-small">Register:</span>
-                        <i class="icon-arrow-down text-cl-7"></i>
+                        <span class="body-small">Login</span>
                     </a>
                     @endauth
                 </div>
