@@ -249,6 +249,14 @@
                 qty: qty,
             };
 
+            const selectedAttributes = btn.closest('form, .tf-product-info-list').find('.variant-option:checked').map(function() {
+                return parseInt($(this).val());
+            }).get();
+
+            if (selectedAttributes && selectedAttributes.length) {
+                payload.attributes = selectedAttributes;
+            }
+
             cartAjax(routes.cartAdd, payload).done(function (res) {
                 renderMiniCart(res);
                 if (typeof toastr !== 'undefined') {
@@ -261,6 +269,45 @@
             }).fail(function () {
                 if (typeof toastr !== 'undefined') {
                     toastr.error('Could not add to cart. Please try again.');
+                }
+            });
+        });
+
+        // ─── Buy Now (order-now) ─────────────────────────────────────────────
+        $(document).on('click', '.order-now', function (e) {
+            e.preventDefault();
+            const btn = $(this);
+            const qtyInput = btn.closest('form, .tf-product-info-list, .card-product').find('.quantity-product, input[name="qty"], input[name="quantity"]');
+            const qty = qtyInput.length ? (parseInt(qtyInput.val()) || 1) : 1;
+
+            const payload = {
+                id: btn.data('id'),
+                name: btn.data('name'),
+                price: btn.data('price'),
+                image: btn.data('image'),
+                url: btn.data('url'),
+                qty: qty,
+            };
+
+            const selectedAttributes = btn.closest('form, .tf-product-info-list').find('.variant-option:checked').map(function() {
+                return parseInt($(this).val());
+            }).get();
+
+            if (selectedAttributes && selectedAttributes.length) {
+                payload.attributes = selectedAttributes;
+            }
+
+            cartAjax(routes.cartAdd, payload).done(function (res) {
+                if (res.success) {
+                    window.location.href = routes.checkout || '/checkout';
+                } else {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(res.message || 'Could not place order. Please try again.');
+                    }
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not place order. Please try again.');
                 }
             });
         });

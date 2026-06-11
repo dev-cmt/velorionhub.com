@@ -41,7 +41,6 @@ class CartController extends Controller
             sort($attributeIds); // normalize
             // find variants
             $attributeIds = array_map('intval', $attributeIds);
-dd($attributeIds);
             $variant = ProductVariant::where('product_id', $product->id)
                 ->with('variantItems.attribute', 'variantItems.attributeItem')
                 ->get()
@@ -57,8 +56,6 @@ dd($attributeIds);
                     return $ids == $attributeIds; // use == not ===
                 })
                 ->first();
-
-            dd($variant);
 
             // build variant key
             $variantKey = $variant ? implode('-', $attributeIds) : null;
@@ -76,8 +73,8 @@ dd($attributeIds);
         }
 
         // ================= SKU / PRICE =================
-        $sku = $variant?->variant_sku ?? $product->sku;
-        $price = $variant?->variant_price ?? $product->sale_price;
+        $sku = $variant ? $variant->variant_sku : $product->sku;
+        $price = $variant ? $variant->variant_price : $product->sale_price;
         $name = $product->name;
 
         // ================= CART =================
@@ -100,7 +97,7 @@ dd($attributeIds);
                 'price' => $price,
                 'quantity' => $quantity,
                 'attributes' => [
-                    'variant_id' => $variant?->id,
+                    'variant_id' => $variant ? $variant->id : null,
                     'variant_key' => $variantKey,
                     'variant_attributes' => $variantAttributes,
                     'variant_label' => $variantLabel,

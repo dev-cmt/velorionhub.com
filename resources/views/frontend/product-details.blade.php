@@ -39,6 +39,54 @@
     @push('css')
         <link rel="stylesheet" href="{{asset($filePath)}}/css/photoswipe.css">
         <link rel="stylesheet" href="{{asset($filePath)}}/css/drift-basic.min.css">
+        <style>
+            .variant-picker-swatches {
+                margin-top: 8px;
+            }
+            .variant-swatch-item {
+                position: relative;
+                user-select: none;
+            }
+            .variant-swatch-label {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 45px;
+                height: 45px;
+                padding: 4px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                background-color: #ffffff;
+                margin-bottom: 0;
+                overflow: hidden;
+            }
+            .variant-swatch-label:hover {
+                border-color: #004EC3;
+                color: #004EC3;
+            }
+            .variant-option:checked + .variant-swatch-label {
+                border-color: #004EC3;
+                background-color: #f0f7ff;
+                font-weight: 600;
+            }
+            .swatch-image {
+                width: 38px;
+                height: 38px;
+                object-fit: cover;
+                border-radius: 2px;
+            }
+            .swatch-text {
+                font-size: 13px;
+                color: #333;
+                padding: 0 10px;
+                white-space: nowrap;
+            }
+            .variant-option:checked + .variant-swatch-label .swatch-text {
+                color: #004EC3;
+            }
+        </style>
     @endpush
 
     <!-- Breadcrumbs -->
@@ -172,7 +220,7 @@
                                             </li>
                                             @if($product->sku)
                                             <li>
-                                                <p class="caption text-main-2">SKU: {{ $product->sku }}</p>
+                                                <p class="caption text-main-2">SKU: <span id="display-sku">{{ $product->sku }}</span></p>
                                             </li>
                                             @endif
                                             <li class="d-flex">
@@ -183,7 +231,7 @@
 
                                     {{-- Price --}}
                                     <div class="infor-center">
-                                        <div class="product-info-price">
+                                        <div class="product-info-price" id="display-product-price">
                                             <h4 class="text-primary cur-price" data-price="{{ $product->sale_price }}">
                                                 TK {{ number_format($product->sale_price, 2) }}
                                             </h4>
@@ -196,7 +244,7 @@
                                         </div>
 
                                         {{-- Stock status --}}
-                                        <div class="mt-1">
+                                        <div class="mt-1" id="display-stock-status">
                                             @if($product->total_stock > 0)
                                                 <span class="badge bg-success">In Stock ({{ $product->total_stock }} available)</span>
                                             @else
@@ -231,6 +279,48 @@
                                     @endif
 
                                     {{-- Add to Cart & Quantity --}}
+                                    <div class="">
+                                        @if($product->has_variant && $product->variants && $product->variants->count() > 0)
+                                            @php
+                                                // Group attribute items by attribute
+                                                $attributes = [];
+                                                foreach ($product->variants as $variant) {
+                                                    foreach ($variant->variantItems as $item) {
+                                                        if ($item->attribute && $item->attributeItem) {
+                                                            $attributes[$item->attribute->name][$item->attributeItem->id] = [
+                                                                'id' => $item->attributeItem->id,
+                                                                'name' => $item->attributeItem->name,
+                                                                'image' => $item->image ? asset($item->image) : null,
+                                                                'has_image' => $item->attribute->has_image,
+                                                            ];
+                                                        }
+                                                    }
+                                                }
+                                            @endphp
+
+                                            @foreach($attributes as $attrName => $items)
+                                                <div class="product-form__item">
+                                                    <span class="product-form__title">{{ $attrName }}</span>
+                                                    <div class="product-form__control">
+                                                        <div class="variant-picker-swatches d-flex flex-wrap gap-2">
+                                                            @foreach($items as $itemId => $itemData)
+                                                                <div class="variant-swatch-item">
+                                                                    <input type="radio" class="form-check-input variant-option d-none" name="attributes[{{ $attrName }}]" id="attr-{{ $itemId }}" value="{{ $itemId }}" {{ $loop->first ? 'checked' : '' }}>
+                                                                    <label class="variant-swatch-label" for="attr-{{ $itemId }}" data-image="{{ $itemData['image'] }}">
+                                                                        @if($itemData['has_image'] && $itemData['image'])
+                                                                            <img src="{{ $itemData['image'] }}" alt="{{ $itemData['name'] }}" title="{{ $itemData['name'] }}" class="swatch-image">
+                                                                        @else
+                                                                            <span class="swatch-text">{{ $itemData['name'] }}</span>
+                                                                        @endif
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
                                     <div class="">
                                         <div class="tf-product-info-choose-option flex-xl-nowrap">
                                             <div class="product-quantity">
@@ -557,6 +647,133 @@
                         btn.attr('title', isActive ? 'Remove from Wishlist' : 'Add to Wishlist');
                     }, 500);
                 });
+
+                // ── Variants handling ─────────────────────────────────────────────
+                @if($product->has_variant && $product->variants)
+                const variants = {!! json_encode($product->variants->map(function($v) {
+                    return [
+                        'id' => $v->id,
+                        'sku' => $v->variant_sku,
+                        'price' => $v->final_price ?? $v->variant_price,
+                        'regular_price' => $v->variant_price,
+                        'stock' => $v->variant_stock,
+                        'attributes' => $v->attributeItems->pluck('id')->toArray()
+                    ];
+                })) !!};
+
+                function updateVariantDetails() {
+                    const selectedAttributes = [];
+                    $('.variant-option:checked').each(function() {
+                        selectedAttributes.push(parseInt($(this).val()));
+                    });
+
+                    const matchedVariant = variants.find(v => {
+                        return selectedAttributes.every(attrId => v.attributes.includes(attrId)) &&
+                               v.attributes.length === selectedAttributes.length;
+                    });
+
+                    if (matchedVariant) {
+                        // 1. Update SKU
+                        $('#display-sku').text(matchedVariant.sku);
+
+                        // 2. Update Price
+                        let salePrice = parseFloat(matchedVariant.price);
+                        let regularPrice = parseFloat(matchedVariant.regular_price);
+
+                        let priceHtml = `<h4 class="text-primary cur-price" data-price="${salePrice}">TK ${salePrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h4>`;
+                        if (regularPrice > salePrice) {
+                            let discountPct = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+                            priceHtml += `
+                                <span class="price-text text-main-2 old-price cur-price" data-price="${regularPrice}">
+                                    TK ${regularPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                </span>
+                                <span class="badge bg-danger ms-2">-${discountPct}%</span>
+                            `;
+                        }
+                        $('#display-product-price').html(priceHtml);
+
+                        // Update buttons data-price
+                        $('.order-now, .add-to-cart').data('price', matchedVariant.price).attr('data-price', matchedVariant.price);
+
+                        // 3. Update Stock Status
+                        const stockStatusContainer = $('#display-stock-status');
+                        if (matchedVariant.stock > 0) {
+                            stockStatusContainer.html('<span class="badge bg-success">In Stock (' + matchedVariant.stock + ' available)</span>');
+                            // Enable buttons & recreate them
+                            $('.product-box-btn').html(`
+                                <button class="tf-btn text-white order-now"
+                                   data-id="{{ $product->id }}"
+                                   data-name="{{ $product->name }}"
+                                   data-price="${matchedVariant.price}"
+                                   data-image="${$('.tf-product-media-main .swiper-slide:first-child img.tf-image-zoom').attr('src')}"
+                                   data-url="{{ $productUrl }}">
+                                    Buy Now
+                                    <i class="icon-cart-2"></i>
+                                </button>
+                                <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                   class="tf-btn btn-line add-to-cart"
+                                   data-id="{{ $product->id }}"
+                                   data-name="{{ $product->name }}"
+                                   data-price="${matchedVariant.price}"
+                                   data-image="${$('.tf-product-media-main .swiper-slide:first-child img.tf-image-zoom').attr('src')}"
+                                   data-url="{{ $productUrl }}">
+                                    Add to cart
+                                </a>
+                            `);
+                        } else {
+                            stockStatusContainer.html('<span class="badge bg-secondary">Out of Stock</span>');
+                            $('.product-box-btn').html(`
+                                <button class="tf-btn text-white" disabled style="opacity:0.6; cursor:not-allowed;">
+                                    Out of Stock
+                                </button>
+                            `);
+                        }
+                    }
+                }
+
+                $('.variant-option').change(function() {
+                    updateVariantDetails();
+
+                    // Update main image if selected option has data-image
+                    const label = $('label[for="' + this.id + '"]');
+                    const imageUrl = label.attr('data-image');
+                    if (imageUrl) {
+                        // Update Swiper Main first slide image
+                        const mainImg = $('.tf-product-media-main .swiper-slide:first-child img.tf-image-zoom');
+                        if (mainImg.length) {
+                            mainImg.attr('src', imageUrl);
+                            mainImg.attr('data-src', imageUrl);
+                            mainImg.attr('data-zoom', imageUrl);
+                        }
+                        const mainAnchor = $('.tf-product-media-main .swiper-slide:first-child a.item');
+                        if (mainAnchor.length) {
+                            mainAnchor.attr('href', imageUrl);
+                        }
+
+                        // Update Swiper Thumbs first slide image
+                        const thumbImg = $('.tf-product-media-thumbs .swiper-slide:first-child img');
+                        if (thumbImg.length) {
+                            thumbImg.attr('src', imageUrl);
+                            thumbImg.attr('data-src', imageUrl);
+                        }
+
+                        // Update buttons data-image
+                        $('.order-now, .add-to-cart').data('image', imageUrl).attr('data-image', imageUrl);
+
+                        // Slide both main & thumbs swiper to 0
+                        const swiperMain = document.querySelector('.tf-product-media-main');
+                        if (swiperMain && swiperMain.swiper) {
+                            swiperMain.swiper.slideTo(0);
+                        }
+                        const swiperThumbs = document.querySelector('.tf-product-media-thumbs');
+                        if (swiperThumbs && swiperThumbs.swiper) {
+                            swiperThumbs.swiper.slideTo(0);
+                        }
+                    }
+                });
+
+                updateVariantDetails();
+                @endif
             });
         </script>
     @endpush
