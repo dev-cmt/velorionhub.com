@@ -57,26 +57,29 @@
         </div>
 
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-12">
+            <div class="row g-4">
+                <div class="col-12">
 
                     @forelse($couriers as $courier)
                         @php
                             $setting = $courier->setting;
                         @endphp
 
-                        <div class="card mt-3 border">
-                            <div class="card-header d-flex align-items-center">
-                                <b>{{ $courier->name }}</b>
-
-                                {{-- optional logo --}}
-                                @if($courier->slug == 'pathao')
-                                    <img style="height:25px;margin-left:10px" src="{{ asset('backEnd/assets/images/pathao.png') }}" alt="Pathao">
-                                @elseif($courier->slug == 'steadfast')
-                                    <img style="height:25px;margin-left:10px" src="{{ asset('backEnd/assets/images/steadfast_new.png') }}" alt="Steadfast">
-                                @elseif($courier->slug == 'carrybee')
-                                    <img style="height:25px;margin-left:10px" src="{{ asset('backEnd/assets/images/carrybee.png') }}" alt="Carrybee">
-                                @endif
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header d-flex align-items-center flex-wrap gap-2 py-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <b class="fs-15">{{ $courier->name }}</b>
+                                    {{-- optional logo --}}
+                                    @if($courier->slug == 'pathao')
+                                        <img style="height:45px" src="{{ asset('backend/images/courier-logo/pathao.jpg') }}" alt="Pathao">
+                                    @elseif($courier->slug == 'steadfast')
+                                        <img style="height:45px" src="{{ asset('backend/images/courier-logo/steadfast.jpg') }}" alt="Steadfast">
+                                    @elseif($courier->slug == 'carrybee')
+                                        <img style="height:45px" src="{{ asset('backend/images/courier-logo/carrybee.png') }}" alt="Carrybee">
+                                    @elseif($courier->slug == 'redx')
+                                        <img style="height:45px" src="{{ asset('backend/images/courier-logo/redx.jpg') }}" alt="RedX">
+                                    @endif
+                                </div>
 
                                 {{-- Active/Inactive badge --}}
                                 <span class="ms-auto badge {{ $courier->status ? 'bg-success' : 'bg-secondary' }}">
@@ -84,26 +87,27 @@
                                 </span>
                             </div>
 
-                            <div class="card-body">
-                                <div class="row">
+                            <div class="card-body p-4">
+                                <div class="row g-4">
 
                                     {{-- LEFT SIDE (FORM) --}}
-                                    <div class="col-md-7">
+                                    <div class="col-lg-7">
                                         <form action="{{ route('courier-settings.update') }}" method="POST">
                                             @csrf
 
                                             <input type="hidden" name="courier_id" value="{{ $courier->id }}">
                                             <input type="hidden" name="store_id"   value="{{ $storeId }}">
 
-                                            {{-- Active --}}
-                                            <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input" type="checkbox" value="1"
-                                                    name="status"
-                                                    id="status_{{ $courier->id }}"
-                                                    {{ $setting && $setting->status ? 'checked' : '' }}>
-                                                <label class="form-check-label fw-semibold" for="status_{{ $courier->id }}">
-                                                    Enable This Courier
-                                                </label>
+                                            <div class="mb-4 p-3 rounded-3 bg-light border">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input class="form-check-input" type="checkbox" value="1"
+                                                        name="status"
+                                                        id="status_{{ $courier->id }}"
+                                                        {{ $setting && $setting->status ? 'checked' : '' }}>
+                                                    <label class="form-check-label fw-semibold" for="status_{{ $courier->id }}">
+                                                        Enable This Courier
+                                                    </label>
+                                                </div>
                                             </div>
 
                                             {{-- Common Fields --}}
@@ -158,7 +162,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mt-3">
+                                            <div class="mt-4 d-flex flex-wrap gap-2">
                                                 <button type="submit" class="btn btn-success">
                                                     <i class="ri-save-line me-1"></i> Save Settings
                                                 </button>
@@ -167,26 +171,26 @@
                                     </div>
 
                                     {{-- RIGHT SIDE (TOKENS) --}}
-                                    <div class="col-md-5">
+                                    <div class="col-lg-5">
                                         <div class="mb-3">
                                             <label class="form-label fw-semibold">Access Token</label>
-                                            <textarea readonly class="form-control bg-light font-monospace" rows="5"
+                                            <textarea readonly class="form-control bg-light font-monospace" rows="6"
                                                 style="font-size:0.78rem">{{ $setting->access_token ?? '' }}</textarea>
                                         </div>
 
                                         <div class="mb-3">
                                             <label class="form-label fw-semibold">Refresh Token</label>
-                                            <textarea readonly class="form-control bg-light font-monospace" rows="3"
+                                            <textarea readonly class="form-control bg-light font-monospace" rows="4"
                                                 style="font-size:0.78rem">{{ $setting->refresh_token ?? '' }}</textarea>
                                         </div>
 
                                         {{-- Optional token generate --}}
                                         @if($courier->slug == 'pathao')
-                                            <form action="{{ route('courier.token.generate') }}" method="POST">
+                                            <form action="{{ route('courier.token.generate') }}" method="POST" class="mt-4">
                                                 @csrf
                                                 <input type="hidden" name="courier_id" value="{{ $courier->id }}">
                                                 <input type="hidden" name="store_id"   value="{{ $storeId }}">
-                                                <button class="btn btn-info w-100">
+                                                <button class="btn btn-info w-100 py-2">
                                                     <i class="ri-refresh-line me-1"></i> Generate Pathao Tokens
                                                 </button>
                                             </form>

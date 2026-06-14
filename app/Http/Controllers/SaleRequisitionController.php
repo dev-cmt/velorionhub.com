@@ -211,8 +211,12 @@ class SaleRequisitionController extends Controller
                 }
 
                 if (isset($itemData['id'])) {
-                    // Update existing item
-                    OrderItem::where('id', $itemData['id'])->update($itemData);
+                    // Update existing item using raw Query Builder to bypass Eloquent casting issues
+                    $itemId = $itemData['id'];
+                    unset($itemData['id']);
+                    $itemData['attributes'] = isset($itemData['attributes']) ? json_encode($itemData['attributes']) : null;
+                    $itemData['updated_at'] = now();
+                    DB::table('order_items')->where('id', $itemId)->update($itemData);
                 } else {
                     // Create new item
                     OrderItem::create($itemData);

@@ -11048,4 +11048,7 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
   .add-to-cart {
     width: 100%;
   }
+  .tf-sp-1 {
+  padding-bottom: 15px;
+  }
 }

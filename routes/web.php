@@ -140,7 +140,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/update/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{products}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::delete('/products/{product}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('/attributes/items', [ProductController::class, 'getItems'])->name('attributes.getItems');
     Route::get('/products/variants', [ProductController::class, 'getVariantCombinations'])->name('products.getItemsCombo');
@@ -156,9 +156,10 @@ Route::middleware('auth')->group(function () {
 
     // Store
     Route::get('/stores', [StoreController::class, 'index'])->name('stores.index');
+    Route::get('/stores/{store}/couriers', [StoreController::class, 'couriers'])->name('stores.couriers');
     Route::post('/stores', [StoreController::class, 'store'])->name('stores.store');
     Route::post('/stores/update', [StoreController::class, 'update'])->name('stores.update');
-    Route::delete('/stores/{stores}/delete', [StoreController::class, 'destroy'])->name('stores.destroy');
+    Route::delete('/stores/{store}/delete', [StoreController::class, 'destroy'])->name('stores.destroy');
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
@@ -243,17 +244,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-    Route::get('/orders/edit/{orders}', [OrderController::class, 'edit'])->name('orders.edit');
-    Route::put('/orders/update/{orders}', [OrderController::class, 'update'])->name('orders.update');
-    Route::delete('/orders/{orders}/delete', [OrderController::class, 'destroy'])->name('orders.destroy');
+    Route::get('/orders/fraud-check/{id}', [AdminController::class, 'fraudCheck'])->name('fraud.check');
+    Route::post('/orders/bulk-status', [OrderController::class, 'bulkStatus'])->name('orders.bulk-status');
+    Route::post('/orders/bulk-assign', [OrderController::class, 'bulkAssign'])->name('orders.bulk-assign');
+    Route::post('/orders/courier-export', [OrderController::class, 'courierExport'])->name('orders.courier-export');
+    Route::get('/orders/send-courier', [OrderController::class, 'sendToCourierIndex'])->name('orders.send-courier');
+    Route::post('/orders/send-courier/send-row', [OrderController::class, 'sendToCourierItems'])->name('courier.send.row');
+    Route::get('/orders/edit/{order}', [OrderController::class, 'edit'])->name('orders.edit');
+    Route::put('/orders/update/{order}', [OrderController::class, 'update'])->name('orders.update');
+    Route::delete('/orders/{order}/delete', [OrderController::class, 'destroy'])->name('orders.destroy');
 
     // Sale Requisition
     Route::get('/sale-requisitions', [SaleRequisitionController::class, 'index'])->name('sale-requisitions.index');
     Route::get('/sale-requisitions/create', [SaleRequisitionController::class, 'create'])->name('sale-requisitions.create');
     Route::post('/sale-requisitions', [SaleRequisitionController::class, 'store'])->name('sale-requisitions.store');
-    Route::get('/sale-requisitions/edit/{orders}', [SaleRequisitionController::class, 'edit'])->name('sale-requisitions.edit');
-    Route::put('/sale-requisitions/update/{orders}', [SaleRequisitionController::class, 'update'])->name('sale-requisitions.update');
-    Route::delete('/sale-requisitions/{orders}/delete', [SaleRequisitionController::class, 'destroy'])->name('sale-requisitions.destroy');
+    Route::get('/sale-requisitions/edit/{order}', [SaleRequisitionController::class, 'edit'])->name('sale-requisitions.edit');
+    Route::put('/sale-requisitions/update/{order}', [SaleRequisitionController::class, 'update'])->name('sale-requisitions.update');
+    Route::delete('/sale-requisitions/{order}/delete', [SaleRequisitionController::class, 'destroy'])->name('sale-requisitions.destroy');
 
     Route::get('/sale-approve', [SaleRequisitionController::class, 'indexApprove'])->name('sale-approve.index');
     Route::get('/sale-approve/{id}', [SaleRequisitionController::class, 'saleApproved'])->name('sale-approve.approved');

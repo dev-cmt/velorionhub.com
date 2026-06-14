@@ -23,6 +23,13 @@ class Order extends Model
         'payment_status',
         'status',
         'notes',
+        'remarks',
+
+        'courier_id',
+        'consignment_id',
+        'tracking_code',
+        'tracking_url',
+
         'store_id',
         'customer_id',
         'assigned_to',
@@ -45,6 +52,12 @@ class Order extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+
+    // 🔗 Belongs to courier
+    public function courier()
+    {
+        return $this->belongsTo(Courier::class);
     }
 
     // 🔗 Assigned to user

@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Courier;
 use App\Models\User; // For Customer and Assigned User
 use App\Models\Store;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -17,12 +19,42 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::latest()
-            ->where('is_requisition', false)
-            ->with(['store', 'customer', 'assignedTo', 'items.product'])
-            ->paginate(10);
+        $baseQuery = Order::where('is_requisition', false);
 
-        return view('backend.orders.index', compact('orders'));
+        $status = request('status');
+        if ($status !== null && $status !== '') {
+            $baseQuery->where('status', $status);
+        }
+
+        $search = trim((string) request('search', ''));
+        if ($search !== '') {
+            $baseQuery->where(function ($query) use ($search) {
+                $query->where('invoice_no', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%")
+                    ->orWhere('customer_address', 'like', "%{$search}%")
+                    ->orWhere('source', 'like', "%{$search}%");
+            });
+        }
+
+        $orders = (clone $baseQuery)
+            ->latest()
+            ->with(['store', 'customer', 'assignedTo', 'courier', 'items.product'])
+            ->paginate(10)
+            ->appends(request()->query());
+
+        $orderCounts = Order::where('is_requisition', false)
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $totalOrders = Order::where('is_requisition', false)->count();
+
+        $orderStatuses = $this->orderStatuses();
+        $couriers = Courier::where('status', 1)->get(['id', 'name']);
+        $employees = User::where('is_admin', false)->get(['id', 'name']);
+
+        return view('backend.orders.index', compact('orders', 'orderCounts', 'totalOrders', 'orderStatuses', 'couriers', 'employees', 'status', 'search'));
     }
 
     /**
@@ -49,9 +81,11 @@ class OrderController extends Controller
             ]];
         });
 
+        $couriers = Courier::where('status', 1)->get(['id', 'name']);
+
         return view('backend.orders.create', compact(
             'customers', 'stores', 'products', 'employees',
-            'paymentMethods', 'paymentStatuses', 'orderStatuses', 'productsVariantData'
+            'paymentMethods', 'paymentStatuses', 'orderStatuses', 'productsVariantData', 'couriers'
         ));
     }
 
@@ -166,6 +200,7 @@ class OrderController extends Controller
             ->with(['variants.variantItems.attributeItem'])
             ->get(['id', 'name', 'sale_price', 'sku', 'has_variant']);
         $employees = User::where('is_admin', false)->get(['id', 'name']);
+        $couriers = Courier::where('status', 1)->get(['id', 'name']);
 
         $paymentMethods = $this->paymentMethods();
         $paymentStatuses = $this->paymentStatuses();
@@ -180,7 +215,7 @@ class OrderController extends Controller
         });
 
         return view('backend.orders.edit', compact(
-            'order', 'customers', 'stores', 'products', 'employees',
+            'order', 'customers', 'stores', 'products', 'employees', 'couriers',
             'paymentMethods', 'paymentStatuses', 'orderStatuses', 'productsVariantData'
         ));
     }
@@ -213,6 +248,8 @@ class OrderController extends Controller
             'payment_status' => 'required|string|max:50',
             'status' => 'required|string|max:50',
             'notes' => 'nullable|string',
+            'remarks' => 'nullable|string',
+            'courier_id' => 'nullable|exists:couriers,id',
         ]);
 
         // 2. Validate Order Items Data
@@ -238,40 +275,66 @@ class OrderController extends Controller
 
             $nonVariantSeen = []; // product_id => order_item_id for deduplication
             foreach ($request->input('items') as $itemData) {
-                $itemData['order_id'] = $order->id;
-                $productId  = $itemData['product_id'];
-                $product    = Product::find($productId);
+                $productId  = $itemData['product_id'] ?? null;
+                $product    = $productId ? Product::find($productId) : null;
                 $hasVariant = $product && $product->has_variant;
 
+                // Extract and remove 'id' — never pass to ->update(), causes PDO binding mismatch
+                $itemId = $itemData['id'] ?? null;
+                unset($itemData['id']);
+
+                // Skip placeholder rows that have no product
+                if (!$productId) {
+                    continue;
+                }
+
+                // Decode attributes from JSON string to PHP array
+                $decodedAttributes = null;
                 if (isset($itemData['attributes']) && is_string($itemData['attributes'])) {
-                    $itemData['attributes'] = json_decode($itemData['attributes'], true) ?: null;
+                    $decoded = json_decode($itemData['attributes'], true);
+                    $decodedAttributes = is_array($decoded) ? $decoded : null;
                 } elseif (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
-                    // keep as array, let model cast handle it
-                } else {
-                    $itemData['attributes'] = null;
+                    $decodedAttributes = $itemData['attributes'];
                 }
 
                 if (!$hasVariant) {
                     // Non-variant: prevent duplicates by consolidating into the first row
                     if (isset($nonVariantSeen[$productId])) {
-                        // Add quantity to the already-saved item
                         OrderItem::where('id', $nonVariantSeen[$productId])
                             ->increment('quantity', (int) $itemData['quantity']);
-                        // Delete the current row if it was an existing item (avoid orphan)
-                        if (isset($itemData['id'])) {
-                            OrderItem::where('id', $itemData['id'])->delete();
+                        if ($itemId) {
+                            OrderItem::where('id', $itemId)->delete();
                         }
                         continue;
                     }
                 }
 
-                if (isset($itemData['id']) && $itemData['id']) {
-                    OrderItem::where('id', $itemData['id'])->update($itemData);
+                if ($itemId) {
+                    // Raw DB Query Builder update() to bypass Eloquent model casting issues
+                    DB::table('order_items')->where('id', $itemId)->update([
+                        'order_id'       => $order->id,
+                        'product_id'     => $productId,
+                        'sku'            => $itemData['sku'] ?? null,
+                        'quantity'       => $itemData['quantity'] ?? 1,
+                        'purchase_price' => $itemData['purchase_price'] ?? 0,
+                        'sale_price'     => $itemData['sale_price'] ?? 0,
+                        'attributes'     => $decodedAttributes !== null ? json_encode($decodedAttributes) : null,
+                        'updated_at'     => now(),
+                    ]);
                     if (!$hasVariant) {
-                        $nonVariantSeen[$productId] = $itemData['id'];
+                        $nonVariantSeen[$productId] = $itemId;
                     }
                 } else {
-                    $newItem = OrderItem::create($itemData);
+                    // Model create() — model casting handles array -> JSON automatically
+                    $newItem = OrderItem::create([
+                        'order_id'       => $order->id,
+                        'product_id'     => $productId,
+                        'sku'            => $itemData['sku'] ?? null,
+                        'quantity'       => $itemData['quantity'] ?? 1,
+                        'purchase_price' => $itemData['purchase_price'] ?? 0,
+                        'sale_price'     => $itemData['sale_price'] ?? 0,
+                        'attributes'     => $decodedAttributes,
+                    ]);
                     if (!$hasVariant) {
                         $nonVariantSeen[$productId] = $newItem->id;
                     }
@@ -312,6 +375,458 @@ class OrderController extends Controller
         }
     }
 
+    public function bulkStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'order_ids' => 'required|string',
+            'bulk_status' => 'required|integer',
+        ]);
+
+        $orderIds = $this->parseOrderIds($validated['order_ids']);
+
+        if (empty($orderIds)) {
+            return back()->withErrors(['Please select at least one order.']);
+        }
+
+        $status = (int) $validated['bulk_status'];
+        if (!array_key_exists($status, $this->orderStatuses())) {
+            return back()->withErrors(['Invalid status selected.']);
+        }
+
+        Order::whereIn('id', $orderIds)->update(['status' => $status]);
+
+        return back()->with('success', 'Selected orders updated successfully.');
+    }
+
+    public function bulkAssign(Request $request)
+    {
+        $validated = $request->validate([
+            'order_ids' => 'required|string',
+            'bulk_assign' => 'required|exists:users,id',
+        ]);
+
+        $orderIds = $this->parseOrderIds($validated['order_ids']);
+
+        if (empty($orderIds)) {
+            return back()->withErrors(['Please select at least one order.']);
+        }
+
+        Order::whereIn('id', $orderIds)->update(['assigned_to' => $validated['bulk_assign']]);
+
+        return back()->with('success', 'Selected orders assigned successfully.');
+    }
+
+    public function courierExport(Request $request)
+    {
+        $validated = $request->validate([
+            'order_ids' => 'required|string',
+            'courier_export' => 'required|exists:couriers,id',
+        ]);
+
+        $orderIds = $this->parseOrderIds($validated['order_ids']);
+
+        if (empty($orderIds)) {
+            return back()->withErrors(['Please select at least one order.']);
+        }
+
+        $courier = Courier::find($validated['courier_export']);
+        $courierName = $courier?->name ?? 'selected courier';
+
+        $orders = Order::whereIn('id', $orderIds)
+            ->with(['items.product', 'store', 'courier'])
+            ->get();
+
+        if ($orders->isEmpty()) {
+            return back()->withErrors(['Please select at least one order.']);
+        }
+
+        $successCount = 0;
+        $failedMessages = [];
+
+        foreach ($orders as $order) {
+            $order->update(['courier_id' => $courier->id]);
+
+            $result = $this->dispatchOrderToCourier($order->fresh(['items.product', 'store', 'courier']));
+
+            if (!empty($result['status'])) {
+                $successCount++;
+                continue;
+            }
+
+            $failedMessages[] = $order->invoice_no . ': ' . ($result['message'] ?? 'Courier dispatch failed');
+        }
+
+        if ($successCount > 0 && empty($failedMessages)) {
+            return back()->with('success', $successCount . ' order(s) sent to ' . $courierName . ' successfully.');
+        }
+
+        if ($successCount > 0) {
+            return back()->with('warning', $successCount . ' order(s) sent to ' . $courierName . '. ' . implode(' | ', array_slice($failedMessages, 0, 3)));
+        }
+
+        return back()->withErrors([implode(' | ', array_slice($failedMessages, 0, 3)) ?: ('Unable to send orders to ' . $courierName . '.')]);
+    }
+
+    /**---------------------------------------------------------------------------
+     * COURIER INTEGRATION METHODS
+     * (Called from OrderController and AdminController for single order dispatch)
+     *-----------------------------------------------------------------------------
+     */
+    public function sendToCourierIndex(Request $request)
+    {
+        $validated = $request->validate([
+            'order_ids' => 'required|string',
+            'courier_id' => 'required|exists:couriers,id',
+        ]);
+
+        $orderIds = $this->parseOrderIds($validated['order_ids']);
+        if (empty($orderIds)) {
+            return response()->json(['status' => false, 'message' => 'No orders found.'], 422);
+        }
+
+        $orders = Order::whereIn('id', $orderIds)
+            ->with(['items.product', 'store', 'courier'])
+            ->get();
+
+        if ($orders->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'No orders found.'], 404);
+        }
+
+        $results = [];
+        foreach ($orders as $order) {
+            $order->update(['courier_id' => (int) $validated['courier_id']]);
+            $results[] = $this->dispatchOrderToCourier($order->fresh(['items.product', 'store', 'courier']));
+        }
+
+        return response()->json([
+            'status' => collect($results)->contains('status', true),
+            'results' => $results,
+        ]);
+    }
+
+    public function sendToCourierItems(Request $request)
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'courier_id' => 'nullable|exists:couriers,id',
+        ]);
+
+        $order = Order::with(['items.product', 'store', 'courier'])->find($validated['order_id']);
+
+        if (!$order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found',
+                'courier' => null,
+                'consignment_id' => null,
+            ], 404);
+        }
+
+        if (!empty($validated['courier_id'])) {
+            $order->update(['courier_id' => (int) $validated['courier_id']]);
+            $order->refresh();
+        }
+
+        return response()->json($this->dispatchOrderToCourier($order));
+    }
+
+    private function dispatchOrderToCourier(Order $order): array
+    {
+        $order->loadMissing(['items.product', 'store', 'courier']);
+
+        if (!$order->courier_id) {
+            return [
+                'status' => false,
+                'message' => 'Courier not selected',
+                'courier' => null,
+                'consignment_id' => null,
+            ];
+        }
+
+        if ($order->consignment_id) {
+            return [
+                'status' => true,
+                'message' => 'Already sent' . ($order->consignment_id ? ' (ID: ' . $order->consignment_id . ')' : ''),
+                'courier' => $order->courier?->name ?? 'Unknown',
+                'consignment_id' => $order->consignment_id,
+            ];
+        }
+
+        $store = $order->store;
+        if (!$store) {
+            return [
+                'status' => false,
+                'message' => 'Store not found for this order',
+                'courier' => $order->courier?->name ?? 'Unknown',
+                'consignment_id' => null,
+            ];
+        }
+
+        return match ((int) $order->courier_id) {
+            1 => $this->dispatchPathaoOrder($order, $store),
+            2 => $this->dispatchSteadfastOrder($order, $store),
+            5 => $this->dispatchCarrybeeOrder($order, $store),
+            default => [
+                'status' => false,
+                'message' => 'Courier integration is not configured for this courier',
+                'courier' => $order->courier?->name ?? 'Unknown',
+                'consignment_id' => null,
+            ],
+        };
+    }
+
+    private function dispatchPathaoOrder(Order $order, Store $store): array
+    {
+        if ((int) ($store->pathao_is_active ?? 0) !== 1) {
+            return [
+                'status' => false,
+                'message' => 'Pathao is not active for this store',
+                'courier' => 'Pathao',
+                'consignment_id' => null,
+            ];
+        }
+
+        $parserResponse = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer ' . ($store->pathao_access_token ?? ''),
+        ])->post('https://merchant.pathao.com/api/v1/address-parser', [
+            'address' => $order->customer_address ?? '',
+        ]);
+
+        $parserData = $parserResponse->json();
+        $cityId = data_get($parserData, 'data.district_id');
+        $zoneId = data_get($parserData, 'data.zone_id');
+
+        if (!$parserResponse->successful() || !$cityId || !$zoneId) {
+            return [
+                'status' => false,
+                'message' => 'Unable to resolve Pathao city/zone from the customer address',
+                'courier' => 'Pathao',
+                'consignment_id' => null,
+            ];
+        }
+
+        $itemDescription = $this->buildOrderItemDescription($order);
+        $payload = [
+            'store_id' => $store->pathao_store_id,
+            'merchant_order_id' => $order->invoice_no ?? null,
+            'recipient_name' => $order->customer_name ?? null,
+            'recipient_phone' => $order->customer_phone ?? null,
+            'recipient_address' => $order->customer_address ?? null,
+            'recipient_city' => $cityId,
+            'recipient_zone' => $zoneId,
+            'recipient_area' => null,
+            'delivery_type' => 48,
+            'item_type' => 2,
+            'special_instruction' => $order->notes ?? $order->remarks ?? null,
+            'item_quantity' => (int) $order->items->sum('quantity') ?: 1,
+            'item_weight' => 0.5,
+            'amount_to_collect' => (int) round($order->due ?? 0),
+            'item_description' => $itemDescription ?: null,
+        ];
+
+        $response = Http::withHeaders([
+            'accept' => 'application/json',
+            'content-type' => 'application/json',
+            'authorization' => 'Bearer ' . ($store->pathao_access_token ?? ''),
+        ])->post('https://api-hermes.pathao.com/aladdin/api/v1/orders', $payload);
+
+        $responseData = $response->json();
+        $consignmentId = data_get($responseData, 'data.consignment_id');
+
+        if ($response->successful() && (int) data_get($responseData, 'code') === 200 && $consignmentId) {
+            $order->update([
+                'status' => 7,
+                'consignment_id' => $consignmentId,
+                'tracking_code' => data_get($responseData, 'data.tracking_code'),
+                'courier_id' => $order->courier_id,
+            ]);
+
+            return [
+                'status' => true,
+                'message' => 'Sent to Pathao' . ' (Consignment ID: ' . $consignmentId . ')',
+                'courier' => 'Pathao',
+                'consignment_id' => $consignmentId,
+            ];
+        }
+
+        return [
+            'status' => false,
+            'message' => data_get($responseData, 'message') ?? 'Pathao order creation failed',
+            'courier' => 'Pathao',
+            'consignment_id' => null,
+        ];
+    }
+
+    private function dispatchSteadfastOrder(Order $order, Store $store): array
+    {
+        if ((int) ($store->is_steadfast_active ?? 0) !== 1) {
+            return [
+                'status' => false,
+                'message' => 'Steadfast is not active for this store',
+                'courier' => 'Steadfast',
+                'consignment_id' => null,
+            ];
+        }
+
+        $payload = [[
+            'invoice' => $order->invoice_no ?? null,
+            'recipient_name' => $order->customer_name ?? null,
+            'recipient_phone' => $order->customer_phone ?? null,
+            'recipient_address' => $order->customer_address ?? null,
+            'cod_amount' => number_format((float) ($order->due ?? 0), 0, '.', ''),
+            'note' => $order->notes ?? $order->remarks ?? null,
+        ]];
+
+        $response = Http::withHeaders([
+            'Api-Key' => $store->steadfast_api_key ?? '',
+            'Secret-Key' => $store->setadfast_secret_key ?? '',
+            'Content-Type' => 'application/json',
+        ])->post('https://portal.packzy.com/api/v1/create_order/bulk-order', $payload);
+
+        $responseData = $response->json();
+        $itemData = data_get($responseData, 'data.0');
+
+        if ($response->successful() && data_get($itemData, 'status') === 'success') {
+            $consignmentId = data_get($itemData, 'consignment_id');
+            $trackingCode = data_get($itemData, 'tracking_code');
+
+            $order->update([
+                'status' => 7,
+                'consignment_id' => $consignmentId,
+                'tracking_code' => $trackingCode,
+                'courier_id' => $order->courier_id,
+            ]);
+
+            return [
+                'status' => true,
+                'message' => 'Sent to Steadfast' . ($consignmentId ? ' (Consignment ID: ' . $consignmentId . ')' : ''),
+                'courier' => 'Steadfast',
+                'consignment_id' => $consignmentId,
+            ];
+        }
+
+        return [
+            'status' => false,
+            'message' => data_get($itemData, 'message') ?? data_get($responseData, 'message') ?? 'Steadfast order creation failed',
+            'courier' => 'Steadfast',
+            'consignment_id' => null,
+        ];
+    }
+
+    private function dispatchCarrybeeOrder(Order $order, Store $store): array
+    {
+        if ((int) ($store->carrybee_is_active ?? 0) !== 1) {
+            return [
+                'status' => false,
+                'message' => 'Carrybee is not active for this store',
+                'courier' => 'Carrybee',
+                'consignment_id' => null,
+            ];
+        }
+
+        $parserResponse = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . ($store->carrybee_access_token ?? ''),
+        ])->post('https://api-merchant.carrybee.com/api/v2/businesses/206/address-parser', [
+            'query' => $order->customer_address ?? '',
+        ]);
+
+        $parserData = $parserResponse->json();
+        $cityId = data_get($parserData, 'data.city_id');
+        $zoneId = data_get($parserData, 'data.zone_id');
+
+        if (!$parserResponse->successful() || !$cityId || !$zoneId) {
+            return [
+                'status' => false,
+                'message' => 'Unable to resolve Carrybee city/zone from the customer address',
+                'courier' => 'Carrybee',
+                'consignment_id' => null,
+            ];
+        }
+
+        $itemDescription = $this->buildOrderItemDescription($order);
+        $payload = [
+            'store_id' => $store->carrybee_store_id,
+            'merchant_order_id' => $order->invoice_no ?? null,
+            'delivery_type' => 1,
+            'product_type' => 1,
+            'recipient_secendary_phone' => null,
+            'recipient_name' => $order->customer_name ?? null,
+            'recipient_phone' => $order->customer_phone ?? null,
+            'recipient_address' => $order->customer_address ?? null,
+            'city_id' => $cityId,
+            'zone_id' => $zoneId,
+            'area_id' => null,
+            'special_instruction' => $order->notes ?? $order->remarks ?? null,
+            'product_description' => $itemDescription ?: null,
+            'item_weight' => 1,
+            'item_quantity' => (int) $order->items->sum('quantity') ?: 1,
+            'collectable_amount' => (float) ($order->due ?? 0),
+        ];
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Client-ID' => $store->carrybee_client_id ?? '',
+            'Client-Secret' => $store->carrybee_client_secret ?? '',
+            'Client-Context' => $store->carrybee_client_context ?? '',
+        ])->post('https://developers.carrybee.com/api/v2/orders', $payload);
+
+        $responseData = $response->json();
+        $consignmentId = data_get($responseData, 'data.order.consignment_id');
+
+        if ($response->successful() && !data_get($responseData, 'error') && $consignmentId) {
+            $order->update([
+                'status' => 7,
+                'consignment_id' => $consignmentId,
+                'courier_id' => $order->courier_id,
+            ]);
+
+            return [
+                'status' => true,
+                'message' => 'Sent to Carrybee' . ($consignmentId ? ' (Consignment ID: ' . $consignmentId . ')' : ''),
+                'courier' => 'Carrybee',
+                'consignment_id' => $consignmentId,
+            ];
+        }
+
+        return [
+            'status' => false,
+            'message' => data_get($responseData, 'message') ?? 'Carrybee order creation failed',
+            'courier' => 'Carrybee',
+            'consignment_id' => null,
+        ];
+    }
+
+    private function buildOrderItemDescription(Order $order): string
+    {
+        return $order->items
+            ->map(function ($item) {
+                $productName = $item->product->name ?? ('SKU: ' . ($item->sku ?? 'Unknown'));
+                return $item->quantity . ' x ' . $productName;
+            })
+            ->implode("\n");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*-----------------------------------------------------------
+     * Helper methods for order management
+     * ----------------------------------------------------------
+     */
+
     private function paymentMethods()
     {
         return [
@@ -350,5 +865,15 @@ class OrderController extends Controller
             11 => 'Return',
             12 => 'Return Received',
         ];
+    }
+
+    private function parseOrderIds(string $orderIds): array
+    {
+        return collect(explode(',', $orderIds))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }

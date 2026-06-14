@@ -33,6 +33,12 @@ return new class extends Migration
             $table->tinyInteger('status')->default(0)->comment('0=pending,1=confirmed,2=hold,3=cancelled,4=delivered')->index();
 
             $table->text('notes')->nullable();
+            $table->text('remarks')->nullable();
+
+            $table->foreignId('courier_id')->nullable()->constrained('couriers')->nullOnDelete();
+            $table->string('consignment_id', 50)->nullable()->index();
+            $table->string('tracking_code', 50)->nullable()->index();
+            $table->string('tracking_url')->nullable();
 
             $table->foreignId('store_id')->nullable()->constrained('stores')->nullOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained('users')->nullOnDelete();

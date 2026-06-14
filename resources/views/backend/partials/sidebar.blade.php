@@ -196,43 +196,55 @@
                 </li>
                 @endcan
 
-                @can('comming soon')
                 <!-- Purchases -->
                 <li class="slide__category"><span class="category-name">Purchases</span></li>
-                @endcan
 
-                @can('comming soon')
                 <li class="slide">
                     <a href="#" class="side-menu__item">
                         <i class="bx bx-shopping-bag side-menu__icon"></i>
                         <span class="side-menu__label">Purchases</span>
                     </a>
                 </li>
-                @endcan
 
-                @can('comming soon')
                 <li class="slide">
                     <a href="#" class="side-menu__item">
                         <i class="bx bxs-shopping-bags side-menu__icon"></i>
-                        <span class="side-menu__label">Purchases Order</span>
+                        <span class="side-menu__label">Purchase Receive</span>
                     </a>
                 </li>
-                @endcan
 
-                @can('comming soon')
                 <li class="slide">
                     <a href="#" class="side-menu__item">
                         <i class="bx bxs-share side-menu__icon"></i>
                         <span class="side-menu__label">Purchase Return</span>
                     </a>
                 </li>
-                @endcan
 
                 <!-- Stock -->
                 <li class="slide__category"><span class="category-name">Stock</span></li>
 
+                <li class="slide">
+                    <a href="#" class="side-menu__item">
+                        <i class="bx bxs-package side-menu__icon"></i>
+                        <span class="side-menu__label">Parcel Handling</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="#" class="side-menu__item">
+                        <i class="bx bxs-package side-menu__icon"></i>
+                        <span class="side-menu__label">Returnable Stock</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="#" class="side-menu__item">
+                        <i class="bx bxs-package side-menu__icon"></i>
+                        <span class="side-menu__label">Damaged Stock</span>
+                    </a>
+                </li>
+
                 @can('view stock manage')
-                <!-- Dashboard - Always visible -->
                 <li class="slide">
                     <a href="{{ route('stock-manage.index') }}" class="side-menu__item {{ Request::is('stock-manage*') ? 'active' : '' }}">
                         <i class="bx bx-layer side-menu__icon"></i>
@@ -242,7 +254,6 @@
                 @endcan
 
                 @can('view stock adjustments')
-                <!-- Dashboard - Always visible -->
                 <li class="slide">
                     <a href="{{ route('stock-adjustment.index') }}" class="side-menu__item {{ Request::is('stock-adjustment*') ? 'active' : '' }}">
                         <i class="bx bx-equalizer side-menu__icon"></i>
@@ -252,7 +263,6 @@
                 @endcan
 
                 @can('view stock transfers')
-                <!-- Dashboard - Always visible -->
                 <li class="slide">
                     <a href="{{ route('stock-transfer.index') }}" class="side-menu__item {{ Request::is('stock-transfer*') ? 'active' : '' }}">
                         <i class="bx bx-transfer side-menu__icon"></i>
@@ -262,7 +272,6 @@
                 @endcan
 
                 @can('comming soon')
-                <!-- Finance & Accounts -->
                 <li class="slide__category"><span class="category-name">Finance & Accounts</span></li>
                 @endcan
 

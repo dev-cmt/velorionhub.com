@@ -24,9 +24,14 @@
             <div class="card custom-card">
                 <div class="card-header justify-content-between align-items-center">
                     <div class="card-title mb-0">Courier Management</div>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCourierModal">
-                        <i class="ri-add-line me-1"></i> Add Courier
-                    </button>
+                    <div>
+                        <a href="{{ route('stores.index') }}" class="btn btn-secondary btn-sm">
+                            <i class="ri-store-line me-1"></i> Stores
+                        </a>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCourierModal">
+                            <i class="ri-add-line me-1"></i> Add Courier
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">

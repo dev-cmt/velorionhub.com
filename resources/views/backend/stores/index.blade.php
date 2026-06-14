@@ -75,6 +75,9 @@
                                         </td>
                                         <td>
                                             <div class="btn-list">
+                                                <a href="{{ route('stores.couriers', $store->id) }}" class="btn btn-sm btn-info-light btn-icon" title="Manage couriers for this store">
+                                                    <i class="ri-truck-line"></i>
+                                                </a>
                                                 <button type="button" class="btn btn-sm btn-warning-light btn-icon edit-store"
                                                     data-id="{{ $store->id }}"
                                                     data-name="{{ $store->name }}"
@@ -116,7 +119,7 @@
     </div>
 
     <div class="modal fade" id="createStoreModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h6 class="modal-title">Create New Store</h6>
@@ -125,37 +128,39 @@
                 <form action="{{ route('stores.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Store Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Store Code <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="code" value="{{ old('code') }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone</label>
-                            <input type="text" class="form-control" name="phone" value="{{ old('phone') }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email" value="{{ old('email') }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <textarea class="form-control" name="address" rows="3">{{ old('address') }}</textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Logo</label>
-                            <input type="file" class="form-control" name="logo" accept="image/*">
-                            <small class="text-muted">Recommended size: 200x150 pixels</small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="status" required>
-                                <option value="1" {{ old('status') === '1' ? 'selected' : '' }}>Active</option>
-                                <option value="0" {{ old('status') === '0' ? 'selected' : '' }}>Inactive</option>
-                            </select>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Store Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" value="{{ old('name') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Store Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="code" value="{{ old('code') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" name="phone" value="{{ old('phone') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" value="{{ old('email') }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" name="address" rows="3">{{ old('address') }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Logo</label>
+                                <input type="file" class="form-control" name="logo" accept="image/*">
+                                <small class="text-muted">Recommended size: 200x150 pixels</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" name="status" required>
+                                    <option value="1" {{ old('status') === '1' ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ old('status') === '0' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -168,7 +173,7 @@
     </div>
 
     <div class="modal fade" id="editStoreModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h6 class="modal-title">Edit Store</h6>
@@ -178,38 +183,40 @@
                     @csrf
                     <input type="hidden" id="edit_id" name="id">
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Store Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit_name" name="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Store Code <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit_code" name="code" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="edit_phone" name="phone">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" id="edit_email" name="email">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <textarea class="form-control" id="edit_address" name="address" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Logo</label>
-                            <input type="file" class="form-control" id="edit_logo" name="logo" accept="image/*">
-                            <small class="text-muted">Recommended size: 200x150 pixels</small>
-                            <div id="current-logo" class="mt-2"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" id="edit_status" name="status" required>
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Store Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Store Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_code" name="code" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="edit_phone" name="phone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="edit_email" name="email">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" id="edit_address" name="address" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Logo</label>
+                                <input type="file" class="form-control" id="edit_logo" name="logo" accept="image/*">
+                                <small class="text-muted">Recommended size: 200x150 pixels</small>
+                                <div id="current-logo" class="mt-2"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" id="edit_status" name="status" required>
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -248,7 +255,7 @@
                 $('#current-logo').html('<span class="text-muted">No logo uploaded</span>');
             }
             // Clear the file input when opening the modal for editing
-            $('#edit_logo').val(''); 
+            $('#edit_logo').val('');
         });
 
         $('#createStoreModal').on('hidden.bs.modal', function () {

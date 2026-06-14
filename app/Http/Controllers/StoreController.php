@@ -20,6 +20,14 @@ class StoreController extends Controller
     }
 
     /**
+     * Open the courier settings page for a specific store.
+     */
+    public function couriers(Store $store)
+    {
+        return redirect()->route('courier-settings.index', ['store_id' => $store->id]);
+    }
+
+    /**
      * Store a newly created store.
      */
     public function store(Request $request)
@@ -81,7 +89,7 @@ class StoreController extends Controller
             // Keep the existing logo path if no new file is uploaded
             unset($validated['logo']);
         }
-        
+
         // Remove 'id' from the validated array before update
         unset($validated['id']);
 

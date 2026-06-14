@@ -28,11 +28,11 @@
                                 @endif
 
                                 <div class="row">
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Invoice No <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="invoice_no" value="{{ old('invoice_no', 'INV-' . time()) }}" required>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Store <span class="text-danger">*</span></label>
                                         <select class="form-select" name="store_id" required>
                                             @foreach($stores as $store)
@@ -40,7 +40,37 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Courier</label>
+                                        <select class="form-select" name="courier_id">
+                                            <option value="">-- No Courier --</option>
+                                            @foreach($couriers as $courier)
+                                                <option value="{{ $courier->id }}" {{ old('courier_id') == $courier->id ? 'selected' : '' }}>{{ $courier->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Existing Customer</label>
+                                        <select class="form-select" name="customer_id" id="customer_select">
+                                            <option value="">Search/Select Customer</option>
+                                            @foreach($customers as $customer)
+                                                <option value="{{ $customer->id }}" data-name="{{ $customer->name }}" data-phone="{{ $customer->phone }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }} ({{ $customer->phone }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Customer Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="customer_name" value="{{ old('customer_name') }}" required>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Customer Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="customer_phone" value="{{ old('customer_phone') }}" required>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Source</label>
                                         <select class="form-select" name="source">
                                             @php
@@ -53,26 +83,9 @@
                                             @endforeach
                                         </select>
                                     </div>
-
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Customer Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="customer_name" value="{{ old('customer_name') }}" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Customer Phone <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="customer_phone" value="{{ old('customer_phone') }}" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Existing Customer</label>
-                                        <select class="form-select" name="customer_id" id="customer_select">
-                                            <option value="">Search/Select Customer</option>
-                                            @foreach($customers as $customer)
-                                                <option value="{{ $customer->id }}" data-name="{{ $customer->name }}" data-phone="{{ $customer->phone }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }} ({{ $customer->phone }})</option>
-                                            @endforeach
-                                        </select>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Notes</label>
+                                        <textarea class="form-control" name="notes" rows="1">{{ old('notes') }}</textarea>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Address</label>
@@ -197,8 +210,8 @@
                                         </select>
                                     </div>
                                     <div class="col-md-12 mb-3">
-                                        <label class="form-label">Notes</label>
-                                        <textarea class="form-control" name="notes" rows="2">{{ old('notes') }}</textarea>
+                                        <label class="form-label">Remarks</label>
+                                        <textarea class="form-control" name="remarks" rows="2">{{ old('remarks') }}</textarea>
                                     </div>
                                 </div>
                                 <div class="d-grid">

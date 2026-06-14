@@ -29,11 +29,11 @@
                                 @endif
 
                                 <div class="row">
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Invoice No <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="invoice_no" value="{{ old('invoice_no', $order->invoice_no) }}" disabled>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Store <span class="text-danger">*</span></label>
                                         <select class="form-select" name="store_id" required>
                                             @foreach($stores as $store)
@@ -41,19 +41,16 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Source</label>
-                                        <input type="text" class="form-control" name="source" value="{{ old('source', $order->source) }}" placeholder="e.g., Facebook, Website, Walk-in">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Courier</label>
+                                        <select class="form-select" name="courier_id">
+                                            <option value="">-- No Courier --</option>
+                                            @foreach($couriers as $courier)
+                                                <option value="{{ $courier->id }}" {{ old('courier_id', $order->courier_id) == $courier->id ? 'selected' : '' }}>{{ $courier->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Customer Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="customer_name" value="{{ old('customer_name', $order->customer_name) }}" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Customer Phone <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="customer_phone" value="{{ old('customer_phone', $order->customer_phone) }}" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Existing Customer</label>
                                         <select class="form-select" name="customer_id" id="customer_select">
                                             <option value="">Search/Select Customer</option>
@@ -61,6 +58,22 @@
                                                 <option value="{{ $customer->id }}" data-name="{{ $customer->name }}" data-phone="{{ $customer->phone }}" {{ old('customer_id', $order->customer_id) == $customer->id ? 'selected' : '' }}>{{ $customer->name }} ({{ $customer->phone }})</option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Customer Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="customer_name" value="{{ old('customer_name', $order->customer_name) }}" required>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Customer Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="customer_phone" value="{{ old('customer_phone', $order->customer_phone) }}" required>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Source</label>
+                                        <input type="text" class="form-control" name="source" value="{{ old('source', $order->source) }}" placeholder="e.g., Facebook, Website, Walk-in">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Notes</label>
+                                        <textarea class="form-control" name="notes" rows="1">{{ old('notes', $order->notes) }}</textarea>
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Address</label>
@@ -74,8 +87,6 @@
                                 <div class="card-title">Products Details</div>
                             </div>
                             <div class="card-body">
-
-                                <h6 class="mt-3 mb-3">Products</h6>
                                 <div class="table-responsive">
                                     <table class="table table-bordered text-nowrap" id="order-items-table">
                                         <thead>
@@ -226,10 +237,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-12 mb-3">
-                                        <label class="form-label">Notes</label>
-                                        <textarea class="form-control" name="notes" rows="2">{{ old('notes', $order->notes) }}</textarea>
+                                        <label class="form-label">Remarks</label>
+                                        <textarea class="form-control" name="remarks" rows="2" placeholder="Internal remarks...">{{ old('remarks', $order->remarks) }}</textarea>
                                     </div>
-
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">Update Order</button>
@@ -335,10 +345,10 @@
             const qty   = parseFloat(row.find('.item-qty').val()) || 0;
             const price = parseFloat(row.find('.item-price').val()) || 0;
             row.find('.item-subtotal-display').text((qty * price).toFixed(2));
-            calculateOrderSummary();
+            calculateOrderSummary(false);
         }
 
-        function calculateOrderSummary() {
+        function calculateOrderSummary(updatePaymentStatus = true) {
             let subTotal = 0;
             $('#order-items-body tr').each(function () {
                 subTotal += (parseFloat($(this).find('.item-qty').val()) || 0)
@@ -352,9 +362,12 @@
             $('#sub_total').val(subTotal.toFixed(2));
             $('#total').val(total.toFixed(2));
             $('#due').val(due.toFixed(2));
-            if (total <= 0 || due <= 0)    $('select[name="payment_status"]').val('Paid');
-            else if (due > 0 && paid > 0)  $('select[name="payment_status"]').val('Partial');
-            else                           $('select[name="payment_status"]').val('Pending');
+            // Only auto-update payment_status when user actively changes financial fields
+            if (updatePaymentStatus) {
+                if (total <= 0 || due <= 0)    $('select[name="payment_status"]').val('2');  // Paid
+                else if (due > 0 && paid > 0)  $('select[name="payment_status"]').val('1');  // Partial
+                else                           $('select[name="payment_status"]').val('0');  // Pending
+            }
         }
 
         function openVariantModal(row, productId, productName) {
@@ -395,7 +408,7 @@
 
             $('#order-items-body').on('click', '.remove-item-btn', function () {
                 $(this).closest('tr').remove();
-                calculateOrderSummary();
+                calculateOrderSummary(false);
             });
 
             $('#order-items-body').on('change', '.product-select', function () {
@@ -455,7 +468,7 @@
             });
 
             $('#shipping_cost, #discount, #paid').on('input', function () {
-                calculateOrderSummary();
+                calculateOrderSummary(true);
             });
 
             $('#customer_select').on('change', function () {
@@ -465,7 +478,7 @@
                 $('input[name="customer_phone"]').val(opt.data('phone') || '');
             });
 
-            calculateOrderSummary();
+            calculateOrderSummary(false);
         });
     </script>
     @endpush

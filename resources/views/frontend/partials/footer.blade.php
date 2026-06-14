@@ -18,7 +18,7 @@
                             <h6 class="ft-heading footer-heading-mobile fw-semibold">Get help</h6>
                             <div class="tf-collapse-content">
                                 <ul class="ft-menu-list">
-                                    <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>>
+                                    <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>
                                     <li><a href="{{ route('privacy.policy') }}" class="link">Privacy Policy</a></li>
                                     <li><a href="{{ route('return.policy') }}" class="link">Return Policy</a></li>
                                     <li><a href="{{ route('terms.conditions') }}" class="link">Terms & Conditions</a></li>
