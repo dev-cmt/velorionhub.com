@@ -33,16 +33,15 @@ class RolePermissionSeeder extends Seeder
             'categories',
             'brands',
             'tags',
-            'attributes',
             'units',
+            'attributes',
             'warranties',
             'orders',
-            'sale requisition',
             'customers',
             'stores',
             'employees',
-            'developer api',
-            'seo',
+            'tickets',
+            'blogs',
             'users',
             'roles',
         ];
@@ -62,9 +61,28 @@ class RolePermissionSeeder extends Seeder
         // 🟢 Add extra single permission's
         $extraPermissions = [
             'view dashboard',
+            'view expired products',
+            'view low stocks',
+            'view label print',
+            'view sale requisition',
             'view sale approve',
-            'action sale approve',
-            'view settings'
+
+            'view stock manage',
+            'view stock adjustments',
+            'view stock transfers',
+
+            'view sliders',
+            'view banners',
+            'view pages',
+            'view seo',
+
+            'view settings',
+            'view settings website',
+            'view settings system',
+            'view settings financial',
+            'view settings other',
+            'view developer api',
+            'comming soon',
         ];
         foreach ($extraPermissions as $perm) {
             Permission::firstOrCreate(['name' => $perm]);

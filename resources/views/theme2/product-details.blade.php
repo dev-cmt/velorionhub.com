@@ -18,7 +18,7 @@
     } catch (\Exception $e) {}
 
     // Approved reviews
-    $reviews      = $product->reviews()->where('status', 1)->latest()->get();
+    $reviews      = $product->reviews()->where('status', 1)->with('media')->latest()->get();
     $reviewCount  = $reviews->count();
     $avgRating    = $reviewCount > 0 ? round($reviews->avg('rating'), 1) : 0;
 @endphp
@@ -317,6 +317,15 @@
                                                                     <div class="review__content typography">
                                                                         {{ $review->comment }}
                                                                     </div>
+                                                                    @if($review->media && $review->media->count() > 0)
+                                                                        <div class="review-images mt-2 d-flex flex-wrap" style="gap:8px;">
+                                                                            @foreach($review->media as $media)
+                                                                                <a href="{{ asset('uploads/reviews/' . $media->name) }}" target="_blank">
+                                                                                    <img src="{{ asset('uploads/reviews/' . $media->name) }}" alt="Review Image" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">
+                                                                                </a>
+                                                                            @endforeach
+                                                                        </div>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </li>
@@ -326,7 +335,7 @@
                                                 </ol>
                                                     </div>
                                                 </div>
-                                                <form class="reviews-view__form" id="comment-form" method="post" action="{{ route('review.store', $product->id) }}">
+                                                <form class="reviews-view__form" id="comment-form" method="post" action="{{ route('review.store', $product->id) }}" enctype="multipart/form-data">
                                                     @csrf
                                                     <input type="hidden" name="product_id" value="{{ $product->id }}"/>
                                                     <h3 class="reviews-view__header">Write A Review</h3>
@@ -371,6 +380,13 @@
                                                             <div class="form-group">
                                                                 <label for="review-text">Your Review</label>
                                                                 <textarea class="form-control" id="review-text" rows="6" name="text" required></textarea>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="review-images">Images (optional)</label>
+                                                                <input type="file" class="form-control" id="review-images" name="images[]" multiple accept="image/*" style="padding:6px;">
+                                                                <small class="text-muted">Up to 5 images (jpg, png, gif, webp). Max 2MB each.</small>
+                                                                @error('images.*')<p class="text-danger">{{ $message }}</p>@enderror
+                                                                <div id="review-image-preview" class="d-flex flex-wrap mt-2" style="gap:8px;"></div>
                                                             </div>
                                                             <div class="form-group mb-0 mt-4">
                                                                 <button type="submit" class="btn btn-primary">Post Your Review</button>
@@ -435,6 +451,25 @@ C-0.1,9.8-0.1,10.4,0.3,10.7z" />
                     var rating = $(this).data('title');
                     $('#rating-input').val(rating);
                     $('.rating__current').css('width', (rating * 20) + '%');
+                });
+
+                // ── Review image preview ─────────────────────────────────────────
+                $('#review-images').on('change', function () {
+                    const preview = $('#review-image-preview');
+                    preview.empty();
+                    const files = this.files;
+                    for (let i = 0; i < Math.min(files.length, 5); i++) {
+                        const file = files[i];
+                        if (!file.type.startsWith('image/')) continue;
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.append(
+                                $('<img>').attr('src', e.target.result)
+                                         .css({width:'70px',height:'70px','object-fit':'cover','border-radius':'6px',border:'1px solid #ddd'})
+                            );
+                        };
+                        reader.readAsDataURL(file);
+                    }
                 });
 
                 // ── Wishlist / Compare button text update after toggle ────────────

@@ -18,6 +18,7 @@ use App\Models\Tag;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductReview;
+use App\Models\Media;
 use Darryldecode\Cart\Facades\CartFacade as Cart;
 use Illuminate\Support\Facades\Auth;
 
@@ -375,9 +376,10 @@ class Theme2Controller extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'text' => 'required|string|max:1000',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        ProductReview::create([
+        $review = ProductReview::create([
             'product_id' => $product->id,
             'user_id' => Auth::id(), // Nullable if guest
             'name' => $request->name,
@@ -386,6 +388,25 @@ class Theme2Controller extends Controller
             'comment' => $request->text,
             'status' => 0, // Pending approval by default
         ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                if ($file->isValid()) {
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('uploads/reviews'), $filename);
+
+                    Media::create([
+                        'name' => $filename,
+                        'path' => 'uploads/reviews/' . $filename,
+                        'model_type' => ProductReview::class,
+                        'model_id' => $review->id,
+                        'type' => 'image',
+                        'size' => $file->getSize(),
+                        'user_id' => Auth::id(),
+                    ]);
+                }
+            }
+        }
 
         return redirect()->back()->with('success', 'Your review has been submitted and is waiting for approval.');
     }
@@ -398,59 +419,50 @@ class Theme2Controller extends Controller
         }
 
         $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'payment_method' => 'required|string',
+            'full_name' => 'required|string|max:255',
+            'phone'     => 'required|string|max:20',
+            'address'   => 'required|string',
         ]);
 
-        $payment_method = 3; // cod
-        if ($request->payment_method == 'cash') {
-            $payment_method = 0;
-        } elseif ($request->payment_method == 'cod') {
-            $payment_method = 3;
-        }
+        $shippingCost = floatval($request->input('shipping_method', 0));
+        $subtotal     = $cart->getSubTotal();
+        $total        = $subtotal + $shippingCost;
 
         $order = Order::create([
-            'invoice_no' => 'INV-' . strtoupper(uniqid()),
-            'source' => 'web',
-            'customer_name' => $request->first_name . ' ' . $request->last_name,
-            'customer_phone' => $request->phone,
-            'customer_address' => $request->address . ', ' . $request->city,
-            'sub_total' => $cart->getSubTotal(),
-            'shipping_cost' => 0, // Placeholder
-            'discount' => 0,
-            'total' => $cart->getTotal(),
-            'paid' => 0,
-            'due' => $cart->getTotal(),
-            'payment_method' => $payment_method,
-            'payment_status' => 0, // pending
-            'status' => 0, // pending
-            'notes' => $request->note,
-            'customer_id' => Auth::id(),
+            'invoice_no'       => 'INV-' . strtoupper(uniqid()),
+            'source'           => 'web',
+            'customer_name'    => $request->full_name,
+            'customer_phone'   => $request->phone,
+            'customer_address' => $request->address,
+            'sub_total'        => $subtotal,
+            'shipping_cost'    => $shippingCost,
+            'discount'         => 0,
+            'total'            => $total,
+            'paid'             => 0,
+            'due'              => $total,
+            'payment_method'   => 3, // COD
+            'payment_status'   => 0, // pending
+            'status'           => 0, // pending
+            'notes'            => $request->note,
+            'customer_id'      => Auth::id(),
         ]);
 
         foreach ($cart->getContent() as $item) {
-            // Need product ID from associated model or attribute if available, fallback to 0
             $productId = $item->associatedModel->id ?? $item->id;
 
             OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $productId,
-                'sku' => $item->id,
-                'quantity' => $item->quantity,
-                'purchase_price' => 0, // Fallback if unknown
-                'sale_price' => $item->price,
-                'attributes' => $item->attributes->toArray() ?? [],
+                'order_id'       => $order->id,
+                'product_id'     => $productId,
+                'sku'            => $item->id,
+                'quantity'       => $item->quantity,
+                'purchase_price' => 0,
+                'sale_price'     => $item->price,
+                'attributes'     => $item->attributes->toArray() ?? [],
             ]);
         }
 
         $cart->clear();
 
-        // Redirect to order confirmation page
         return redirect()->route('order.confirm', ['invoice' => $order->invoice_no]);
     }
 
@@ -569,6 +581,17 @@ class Theme2Controller extends Controller
             return response()->json(['success' => true, 'count' => $count]);
         }
         return back()->with('success', 'Item removed from compare list.');
+    }
+
+    public function clearCompare()
+    {
+        $cart = Cart::session((Auth::id() ?? session()->getId()) . '_compare');
+        $cart->clear();
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true, 'count' => 0]);
+        }
+        return back()->with('success', 'Compare list cleared.');
     }
 
 

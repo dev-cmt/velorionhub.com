@@ -107,14 +107,34 @@
                             </td>
                             @foreach($compare as $item)
                             <td class="tf-compare-col">
+                                @php
+                                    $product = \App\Models\Product::find($item->id);
+                                    $hasVariant = $product && $product->has_variant ? '1' : '0';
+
+                                    $inCart = false;
+                                    $cartItemId = null;
+                                    try {
+                                        $cartItems = \Cart::session(Auth::id() ?? session()->getId())->getContent();
+                                        foreach ($cartItems as $cItem) {
+                                            if (($cItem->attributes->product_id ?? null) == $item->id) {
+                                                $inCart = true;
+                                                $cartItemId = $cItem->id;
+                                                break;
+                                            }
+                                        }
+                                    } catch (\Exception $e) {}
+                                @endphp
                                 <button type="button"
-                                    class="tf-btn btn-gray text-nowrap add-to-cart"
+                                    class="tf-btn btn-gray text-nowrap add-to-cart {{ $inCart ? 'in-cart active' : '' }}"
                                     data-id="{{ $item->id }}"
                                     data-name="{{ $item->name }}"
                                     data-price="{{ $item->price }}"
                                     data-image="{{ $item->attributes->image }}"
-                                    data-url="{{ $item->attributes->url }}">
-                                    <span class="text-white">Add To Cart</span>
+                                    data-url="{{ $item->attributes->url }}"
+                                    data-has-variant="{{ $hasVariant }}"
+                                    data-product-url="{{ $item->attributes->url }}"
+                                    @if($inCart) data-cart-id="{{ $cartItemId }}" @endif>
+                                    <span class="text-white">{{ $inCart ? 'Remove from Cart' : 'Add To Cart' }}</span>
                                 </button>
                             </td>
                             @endforeach

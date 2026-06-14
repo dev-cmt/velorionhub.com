@@ -24,16 +24,18 @@ class Setting extends Model
         'map_url',
         'description',
         'copyright_text',
-        'facebook',
-        'twitter',
-        'instagram',
-        'linkedin',
-        'youtube',
-        'whatsapp',
-        'telegram',
+        'social_links',
 
         'currency_rates',
         'currency_symbols',
+
+        'shipping_inside',
+        'shipping_outside',
+        'shipping_active',
+
+        'fb_pixel',
+        'gtm_head',
+        'gtm_body',
 
         'is_loading',
         'is_slider',
@@ -43,5 +45,6 @@ class Setting extends Model
     protected $casts = [
         'currency_symbols' => 'array',
         'currency_rates' => 'array',
+        'social_links' => 'array',
     ];
 }

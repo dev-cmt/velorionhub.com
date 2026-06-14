@@ -25,11 +25,11 @@
                 <div class="col-lg-3 d-none d-lg-block">
                     <div class="wrap-sidebar-account ">
                         <ul class="my-account-nav content-append">
-                            <li><span class="my-account-nav-item active">Dashboard</span></li>
-                            <li><a href="my-account-orders.html" class="my-account-nav-item">Orders</a></li>
-                            <li><a href="my-account-edit.html" class="my-account-nav-item">Account Details</a></li>
-                            <li><a href="wishlist.html" class="my-account-nav-item">Wishlist</a></li>
-                            <li><a href="index.html" class="my-account-nav-item">Logout</a></li>
+                            <li><a href="{{ route('my.account') }}" class="my-account-nav-item">Dashboard</a></li>
+                            <li><span class="my-account-nav-item active">Orders</span></li>
+                            <li><a href="{{ route('account.edit') }}" class="my-account-nav-item">Account Details</a></li>
+                            <li><a href="{{ route('wishlist') }}" class="my-account-nav-item">Wishlist</a></li>
+                            <li><a href="{{ route('logout') }}" class="my-account-nav-item">Logout</a></li>
                         </ul>
                     </div>
                 </div>

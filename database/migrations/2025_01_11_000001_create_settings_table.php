@@ -27,16 +27,18 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->text('copyright_text')->nullable();
 
-            $table->string('facebook')->nullable();
-            $table->string('twitter')->nullable();
-            $table->string('instagram')->nullable();
-            $table->string('linkedin')->nullable();
-            $table->string('youtube')->nullable();
-            $table->string('whatsapp')->nullable();
-            $table->string('telegram')->nullable();
+            $table->json('social_links')->nullable();
 
             $table->json('currency_rates')->nullable();
             $table->json('currency_symbols')->nullable();
+
+            $table->decimal('shipping_inside', 10, 2)->default(0);
+            $table->decimal('shipping_outside', 10, 2)->default(0);
+            $table->boolean('shipping_active')->default(false);
+
+            $table->text('fb_pixel')->nullable();
+            $table->text('gtm_head')->nullable();
+            $table->text('gtm_body')->nullable();
 
             $table->boolean('is_loading')->default(true);
             $table->boolean('is_slider')->default(false);

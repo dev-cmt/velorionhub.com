@@ -29,13 +29,20 @@
     <link rel="stylesheet" href="{{asset($filePath)}}/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{asset($filePath)}}/css/swiper-bundle.min.css">
     <link rel="stylesheet" href="{{asset($filePath)}}/css/animate.css">
+    <link rel="stylesheet" href="{{asset($filePath)}}/css/toastr.min.css">
 
-    <!-- Toastr CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     @stack('css')
     <link rel="stylesheet" href="{{asset($filePath)}}/css/styles.css" type="text/css">
+
+    <!-- FACEBOOK PIXEL -->
+    {!! $settings->fb_pixel ?? null !!}
+    <!-- GTM HEAD -->
+    {!! $settings->gtm_head ?? null !!}
 </head>
 <body class="preload-wrapper popup-loader">
+    <!-- GTM BODY -->
+    {!! $settings->gtm_body ?? null !!}
+
     <!-- Scroll Top -->
     <button id="goTop">
         <span class="border-progress"></span>
@@ -81,6 +88,7 @@
     <script src="{{asset($filePath)}}/js/wow.min.js"></script>
     <script src="{{asset($filePath)}}/js/multiple-modal.js"></script>
     <script src="{{asset($filePath)}}/js/infinityslide.js"></script>
+    <script src="{{asset($filePath)}}/js/toastr.min.js"></script>
     <script>
         window.VelorionRoutes = {
             cartAdd: "{{ route('cart.add') }}",
@@ -90,6 +98,7 @@
             compareAdd: "{{ route('compare.add') }}",
             wishlistRemove: "{{ route('wishlist.remove', ':id') }}",
             compareRemove: "{{ route('compare.remove', ':id') }}",
+            compareClear: "{{ route('compare.clear') }}",
             shop: "{{ route('shop') }}",
             cart: "{{ route('cart') }}",
             checkout: "{{ route('checkout') }}",
@@ -102,36 +111,49 @@
     <script src="{{asset($filePath)}}/js/main.js"></script>
     <script src="{{asset($filePath)}}/js/storefront.js"></script>
     <script src="{{asset($filePath)}}/js/sibforms.js" defer></script>
-
-    <script>
-        window.REQUIRED_CODE_ERROR_MESSAGE = 'Please choose a country code';
-        window.LOCALE = 'en';
-        window.EMAIL_INVALID_MESSAGE = window.SMS_INVALID_MESSAGE = "The information provided is invalid. Please review the field format and try again.";
-
-        window.REQUIRED_ERROR_MESSAGE = "This field cannot be left blank. ";
-
-        window.GENERIC_INVALID_MESSAGE = "The information provided is invalid. Please review the field format and try again.";
-
-        window.translation = {
-            common: {
-                selectedList: '{quantity} list selected',
-                selectedLists: '{quantity} lists selected'
-            }
-        };
-        var AUTOHIDE = Boolean(0);
-    </script>
-    <!-- Toastr JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
         toastr.options = {
             closeButton: true,
             progressBar: true,
-            positionClass: 'toast-top-right',
+            positionClass: 'toast-bottom-left',
             timeOut: 3000,
             showMethod: 'slideDown',
             hideMethod: 'slideUp',
         };
     </script>
+
+    @if (session()->has('add_to_cart_event'))
+        <script>
+            (function() {
+                var eventData = @json(session('add_to_cart_event'));
+                dataLayer.push({ ecommerce: null });
+                dataLayer.push({
+                    'event': 'add_to_cart',
+                    'ecommerce': {
+                        'currency': 'BDT',
+                        'value': eventData.price * eventData.quantity,
+                        'items': [{
+                            'item_id': String(eventData.id),
+                            'item_name': eventData.name,
+                            'item_category': eventData.category,
+                            'price': eventData.price,
+                            'quantity': eventData.quantity
+                        }]
+                    }
+                });
+
+                fbq('track', 'AddToCart', {
+                    content_name: eventData.name,
+                    content_category: eventData.category,
+                    content_ids: [String(eventData.id)],
+                    content_type: 'product',
+                    value: eventData.price * eventData.quantity,
+                    currency: 'BDT'
+                });
+            })();
+        </script>
+    @endif
+
     @stack('js')
 </body>
 </html>

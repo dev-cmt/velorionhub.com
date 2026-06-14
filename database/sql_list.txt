@@ -5,3 +5,14 @@ ALTER TABLE settings
 ADD COLUMN telegram VARCHAR(255) NULL AFTER whatsapp,
 ADD COLUMN currency_rates JSON NULL AFTER telegram,
 ADD COLUMN currency_symbols JSON NULL AFTER currency_rates;
+
+ALTER TABLE settings
+ADD shipping_inside DECIMAL(10,2) DEFAULT 0 AFTER currency_rates,
+ADD shipping_outside DECIMAL(10,2) DEFAULT 0 AFTER shipping_inside,
+ADD shipping_active TINYINT(1) DEFAULT 1 AFTER shipping_outside;
+
+
+ALTER TABLE settings
+ADD COLUMN fb_pixel TEXT NULL AFTER shipping_active,
+ADD COLUMN gtm_head TEXT NULL AFTER fb_pixel,
+ADD COLUMN gtm_body TEXT NULL AFTER gtm_head;

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('sku')->nullable();
-            $table->text('description')->nullable();
+            $table->longText('description')->nullable();
             $table->json('specification')->nullable(); // JSON for structured specs
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('brand_id')->nullable()->constrained()->onDelete('set null');

@@ -1,3 +1,13 @@
+@php
+    $cartSessionKey = Auth::id() ?? session()->getId();
+    $cart = Darryldecode\Cart\Facades\CartFacade::session($cartSessionKey);
+    $cartItems = $cart->getContent();
+    $cartSubtotal = $cart->getSubTotal();
+
+    $compareSessionKey = $cartSessionKey . '_compare';
+    $compareItems = Darryldecode\Cart\Facades\CartFacade::session($compareSessionKey)->getContent();
+@endphp
+
 <!-- Product Compare -->
 <div class="offcanvas offcanvas-bottom offcanvas-compare" id="compare">
     <div class="offcanvas-content">
@@ -11,188 +21,34 @@
                         Compare <br class="d-none d-md-block">
                         Products
                     </h5>
-                    <div class="mini-compare-empty w-100 text-center">
+                    <div class="mini-compare-empty w-100 text-center" style="{{ $compareItems->isEmpty() ? '' : 'display: none;' }}">
                         <h6>
                             Your compare is curently empty
                         </h6>
                     </div>
-                    <div class="tf-compare-wrap">
-                        <div class="tf-compare-item">
-                            <span class="btns-repeat">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g clip-path="url(#clip0_5628_27)">
-                                        <path d="M11.334 1.33301L14.0007 3.99967L11.334 6.66634" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M2 7.99951V6.66618C2 5.95893 2.28095 5.28066 2.78105 4.78056C3.28115 4.28046 3.95942 3.99951 4.66667 3.99951H14"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                        <path d="M4.66667 15.9996L2 13.3329L4.66667 10.6663" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M14 9.33301V10.6663C14 11.3736 13.719 12.0519 13.219 12.552C12.7189 13.0521 12.0406 13.333 11.3333 13.333H2"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                    </g>
-                                    <defs>
-                                        <clipPath>
-                                            <rect width=" 16" height="16" fill="white"
-                                                transform="translate(0 0.66626)">
-                                            </rect>
-                                        </clipPath>
-                                    </defs>
-                                </svg>
-                            </span>
-                            <span class="icon-close remove"></span>
-                            <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-165.jpg"
-                                    data-src="{{asset($filePath)}}/images/product/product-165.jpg" alt="">
-                            </a>
-                            <div class="content">
-                                <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
-                                    href="product-detail.html">
-                                    Samsung Galaxy S10+, 128GB, Ceramic Black - Unlocked
+                    <div class="tf-compare-wrap" style="{{ $compareItems->isEmpty() ? 'display: none;' : '' }}">
+                        @foreach($compareItems as $item)
+                            @php
+                                $image = ($item->attributes && isset($item->attributes['image'])) ? $item->attributes['image'] : asset('images/no-image.jpg');
+                                $url = ($item->attributes && isset($item->attributes['url'])) ? $item->attributes['url'] : '#';
+                            @endphp
+                            <div class="tf-compare-item" data-id="{{ $item->id }}">
+                                <span class="icon-close remove" data-compare-id="{{ $item->id }}"></span>
+                                <a href="{{ $url }}" class="image">
+                                    <img class="lazyload" src="{{ $image }}"
+                                        data-src="{{ $image }}" alt="{{ $item->name }}">
                                 </a>
-                                <p class="price-wrap fw-medium">
-                                    <span class="new-price price-text fw-medium">$80.000</span>
-                                </p>
+                                <div class="content">
+                                    <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
+                                        href="{{ $url }}">
+                                        {{ $item->name }}
+                                    </a>
+                                    <p class="price-wrap fw-medium">
+                                        <span class="new-price price-text fw-medium">TK {{ number_format($item->price, 2) }}</span>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="tf-compare-item">
-                            <span class="btns-repeat">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g clip-path="url(#clip0_5628_27)">
-                                        <path d="M11.334 1.33301L14.0007 3.99967L11.334 6.66634" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M2 7.99951V6.66618C2 5.95893 2.28095 5.28066 2.78105 4.78056C3.28115 4.28046 3.95942 3.99951 4.66667 3.99951H14"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                        <path d="M4.66667 15.9996L2 13.3329L4.66667 10.6663" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M14 9.33301V10.6663C14 11.3736 13.719 12.0519 13.219 12.552C12.7189 13.0521 12.0406 13.333 11.3333 13.333H2"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                    </g>
-                                    <defs>
-                                        <clipPath>
-                                            <rect width=" 16" height="16" fill="white"
-                                                transform="translate(0 0.66626)">
-                                            </rect>
-                                        </clipPath>
-                                    </defs>
-                                </svg>
-                            </span>
-                            <span class="icon-close remove"></span>
-                            <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-43.jpg"
-                                    data-src="{{asset($filePath)}}/images/product/product-43.jpg" alt="">
-                            </a>
-                            <div class="content">
-                                <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
-                                    href="product-detail.html">
-                                    TCL 32-inch 3-Series 720p Roku Smart TV - 32S335, 2021 Model
-                                </a>
-                                <p class="price-wrap fw-medium">
-                                    <span class="new-price price-text fw-medium">$80.000</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="tf-compare-item">
-                            <span class="btns-repeat">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g clip-path="url(#clip0_5628_27)">
-                                        <path d="M11.334 1.33301L14.0007 3.99967L11.334 6.66634" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M2 7.99951V6.66618C2 5.95893 2.28095 5.28066 2.78105 4.78056C3.28115 4.28046 3.95942 3.99951 4.66667 3.99951H14"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                        <path d="M4.66667 15.9996L2 13.3329L4.66667 10.6663" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M14 9.33301V10.6663C14 11.3736 13.719 12.0519 13.219 12.552C12.7189 13.0521 12.0406 13.333 11.3333 13.333H2"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                    </g>
-                                    <defs>
-                                        <clipPath>
-                                            <rect width=" 16" height="16" fill="white"
-                                                transform="translate(0 0.66626)">
-                                            </rect>
-                                        </clipPath>
-                                    </defs>
-                                </svg>
-                            </span>
-                            <span class="icon-close remove"></span>
-                            <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-137.jpg"
-                                    data-src="{{asset($filePath)}}/images/product/product-137.jpg" alt="">
-                            </a>
-                            <div class="content">
-                                <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
-                                    href="product-detail.html">
-                                    NEW Microsoft Surface Mobile Mouse - Ice Blue
-                                </a>
-                                <p class="price-wrap fw-medium">
-                                    <span class="new-price price-text fw-medium">$80.000</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="tf-compare-item">
-                            <span class="btns-repeat">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g clip-path="url(#clip0_5628_27)">
-                                        <path d="M11.334 1.33301L14.0007 3.99967L11.334 6.66634" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M2 7.99951V6.66618C2 5.95893 2.28095 5.28066 2.78105 4.78056C3.28115 4.28046 3.95942 3.99951 4.66667 3.99951H14"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                        <path d="M4.66667 15.9996L2 13.3329L4.66667 10.6663" stroke="#181818"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        </path>
-                                        <path
-                                            d="M14 9.33301V10.6663C14 11.3736 13.719 12.0519 13.219 12.552C12.7189 13.0521 12.0406 13.333 11.3333 13.333H2"
-                                            stroke="#181818" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                    </g>
-                                    <defs>
-                                        <clipPath>
-                                            <rect width=" 16" height="16" fill="white"
-                                                transform="translate(0 0.66626)">
-                                            </rect>
-                                        </clipPath>
-                                    </defs>
-                                </svg>
-                            </span>
-                            <span class="icon-close remove"></span>
-                            <a href="product-detail.html" class="image">
-                                <img class=" lazyload" src="{{asset($filePath)}}/images/product/product-86.jpg"
-                                    data-src="{{asset($filePath)}}/images/product/product-86.jpg" alt="">
-                            </a>
-                            <div class="content">
-                                <a class="text-line-clamp-2 body-md-2 fw-semibold text-secondary link"
-                                    href="product-detail.html">
-                                    YSSOA FNGAMECHAIR01 Gaming Office High Back Computer
-                                </a>
-                                <p class="price-wrap fw-medium">
-                                    <span class="new-price price-text fw-medium">$80.000</span>
-                                </p>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                     <div class="tf-compare-buttons">
                         <div class="tf-compare-btn">
@@ -218,7 +74,7 @@
             <h5 class="title fw-semibold">Shopping cart</h5>
             <span class="icon-close icon-close-popup link" data-bs-dismiss="offcanvas"></span>
         </div>
-        <div class="minicart-empty text-center">
+        <div class="minicart-empty text-center" style="{{ $cartItems->isEmpty() ? '' : 'display: none;' }}">
             <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M80.6344 72.6641H33.3641C32.8541 72.6646 32.3525 72.5345 31.907 72.2864C31.4615 72.0383 31.0869 71.6803 30.8188 71.2465C30.5507 70.8127 30.398 70.3176 30.3753 69.8081C30.3526 69.2987 30.4606 68.7919 30.6891 68.336L33.4656 62.7844C33.6401 62.4347 33.678 62.0325 33.5719 61.6563L22.0563 21.361C21.7786 20.4019 21.1977 19.5587 20.4005 18.9575C19.6033 18.3564 18.6328 18.0298 17.6344 18.0266H7.78282C7.36822 18.0266 6.97059 18.1913 6.67742 18.4845C6.38425 18.7777 6.21954 19.1753 6.21954 19.5899C6.21954 20.0045 6.38425 20.4021 6.67742 20.6953C6.97059 20.9885 7.36822 21.1532 7.78282 21.1532H17.6359C17.9554 21.1542 18.2658 21.2587 18.5208 21.4511C18.7758 21.6436 18.9615 21.9135 19.05 22.2204L30.3984 61.9313L27.8922 66.9391C27.4257 67.8717 27.2054 68.9081 27.2523 69.9497C27.2991 70.9914 27.6115 72.0038 28.1598 72.8908C28.7081 73.7777 29.4741 74.5098 30.3849 75.0173C31.2958 75.5249 32.3213 75.7911 33.3641 75.7907H80.6344C81.0488 75.7907 81.4462 75.6261 81.7392 75.333C82.0323 75.04 82.1969 74.6426 82.1969 74.2282C82.1969 73.8138 82.0323 73.4163 81.7392 73.1233C81.4462 72.8303 81.0488 72.6641 80.6344 72.6641Z"
@@ -227,7 +83,7 @@
                     d="M93.175 25.3828C92.8884 24.9852 92.5114 24.6615 92.0751 24.4382C91.6388 24.2149 91.1557 24.0984 90.6656 24.0984H27.7266C27.3122 24.0984 26.9147 24.263 26.6217 24.556C26.3287 24.8491 26.1641 25.2465 26.1641 25.6609C26.1641 26.0753 26.3287 26.4727 26.6217 26.7657C26.9147 27.0588 27.3122 27.2234 27.7266 27.2234L90.625 27.1718L85.5781 42.3125H32.9312C32.5168 42.3125 32.1194 42.4771 31.8264 42.7701C31.5334 43.0631 31.3687 43.4606 31.3687 43.875C31.3687 44.2894 31.5334 44.6868 31.8264 44.9798C32.1194 45.2728 32.5168 45.4375 32.9312 45.4375H84.5359L79.5078 60.5234H38.1375C37.7229 60.5234 37.3253 60.6881 37.0321 60.9813C36.7389 61.2744 36.5742 61.6721 36.5742 62.0867C36.5742 62.5013 36.7389 62.8989 37.0321 63.1921C37.3253 63.4852 37.7229 63.6499 38.1375 63.6499H80.6344C80.9624 63.65 81.2822 63.5468 81.5484 63.355C81.8145 63.1632 82.0135 62.8925 82.1172 62.5812L93.5875 28.1671C93.7438 27.7037 93.7879 27.2099 93.7162 26.7261C93.6445 26.2423 93.459 25.7809 93.175 25.3828ZM32.0672 78.7343C21.9781 79.0562 21.9797 93.6843 32.0672 94.0031C42.1562 93.6828 42.1531 79.0515 32.0672 78.7343ZM32.0672 90.8765C30.8716 90.8765 29.7251 90.4016 28.8797 89.5562C28.0343 88.7108 27.5594 87.5642 27.5594 86.3687C27.5594 85.1732 28.0343 84.0266 28.8797 83.1812C29.7251 82.3358 30.8716 81.8609 32.0672 81.8609C33.2627 81.8609 34.4093 82.3358 35.2547 83.1812C36.1001 84.0266 36.575 85.1732 36.575 86.3687C36.575 87.5642 36.1001 88.7108 35.2547 89.5562C34.4093 90.4016 33.2627 90.8765 32.0672 90.8765ZM74.5625 78.7343C64.4734 79.0546 64.475 93.6843 74.5625 94.0031C84.6531 93.6828 84.65 79.0531 74.5625 78.7343ZM74.5625 90.8765C73.367 90.8765 72.2204 90.4016 71.375 89.5562C70.5296 88.7108 70.0547 87.5642 70.0547 86.3687C70.0547 85.1732 70.5296 84.0266 71.375 83.1812C72.2204 82.3358 73.367 81.8609 74.5625 81.8609C75.758 81.8609 76.9046 82.3358 77.75 83.1812C78.5954 84.0266 79.0703 85.1732 79.0703 86.3687C79.0703 87.5642 78.5954 88.7108 77.75 89.5562C76.9046 90.4016 75.758 90.8765 74.5625 90.8765Z"
                     fill="#73787D"></path>
                 <path
-                    d="M57.8016 15.375C58.216 15.375 58.6134 15.2103 58.9064 14.9173C59.1995 14.6243 59.3641 14.2269 59.3641 13.8125V7.55933C59.3641 7.14492 59.1995 6.7475 58.9064 6.45447C58.6134 6.16145 58.216 5.99683 57.8016 5.99683C57.3872 5.99683 56.9897 6.16145 56.6967 6.45447C56.4037 6.7475 56.2391 7.14492 56.2391 7.55933V13.8125C56.2391 14.2269 56.4037 14.6243 56.6967 14.9173C56.9897 15.2103 57.3872 15.375 57.8016 15.375ZM43.4328 20.4109C43.578 20.5561 43.7503 20.6712 43.94 20.7498C44.1297 20.8284 44.333 20.8688 44.5383 20.8688C44.7436 20.8688 44.9469 20.8284 45.1366 20.7498C45.3262 20.6712 45.4986 20.5561 45.6438 20.4109C45.7889 20.2657 45.9041 20.0934 45.9827 19.9037C46.0612 19.714 46.1017 19.5107 46.1017 19.3054C46.1017 19.1001 46.0612 18.8968 45.9827 18.7071C45.9041 18.5175 45.7889 18.3451 45.6438 18.2L41.2219 13.7796C40.9287 13.4867 40.5311 13.3221 40.1166 13.3223C39.7022 13.3224 39.3047 13.4872 39.0117 13.7804C38.7188 14.0736 38.5542 14.4712 38.5544 14.8857C38.5545 15.3001 38.7193 15.6976 39.0125 15.9906L43.4328 20.4109ZM71.0656 20.8687C71.2708 20.8689 71.4741 20.8286 71.6637 20.75C71.8532 20.6714 72.0254 20.5562 72.1703 20.4109L76.5922 15.989C76.8852 15.6958 77.0497 15.2983 77.0495 14.8838C77.0494 14.4693 76.8846 14.0718 76.5914 13.7789C76.2982 13.4859 75.9007 13.3214 75.4862 13.3215C75.0717 13.3217 74.6742 13.4865 74.3813 13.7796L69.9594 18.2015C69.746 18.4221 69.6018 18.7002 69.5445 19.0017C69.4872 19.3032 69.5194 19.6148 69.6369 19.8983C69.7545 20.1817 69.9524 20.4246 70.2062 20.597C70.4601 20.7695 70.7588 20.8639 71.0656 20.8687Z"
+                    d="M57.8016 15.375C58.216 15.375 58.6134 15.2103 58.9064 14.9173C59.1995 14.6243 59.3641 14.2269 59.3641 13.8125V7.55933C59.3641 7.14492 59.1995 6.7475 58.9064 6.45447C58.6134 6.16145 58.216 5.99683 57.8016 5.99683C57.3872 5.99683 56.9897 6.16145 56.6967 6.45447C56.4037 6.7475 56.2391 7.14492 56.2391 7.55933V13.8125C56.2391 14.2269 56.4037 14.6243 56.6967 14.9173C56.9897 15.2103 57.3872 15.375 57.8016 15.375ZM43.4328 20.4109C43.578 20.5561 43.7503 20.6712 43.94 20.7498C44.1297 20.8284 44.333 20.8688 44.5383 20.8688C44.7436 20.8688 44.9469 20.8284 45.1366 20.7498C45.3262 20.6712 45.4986 20.5561 45.4986 20.4109L41.2219 13.7796C40.9287 13.4867 40.5311 13.3221 40.1166 13.3223C39.7022 13.3224 39.3047 13.4872 39.0117 13.7804C38.7188 14.0736 38.5542 14.4712 38.5544 14.8857C38.5545 15.3001 38.7193 15.6976 39.0125 15.9906L43.4328 20.4109ZM71.0656 20.8687C71.2708 20.8689 71.4741 20.8286 71.6637 20.75C71.8532 20.6714 72.0254 20.5562 72.1703 20.4109L76.5922 15.989C76.8852 15.6958 77.0497 15.2983 77.0495 14.8838C77.0494 14.4693 76.8846 14.0718 76.5914 13.7789C76.2982 13.4859 75.9007 13.3214 75.4862 13.3215C75.0717 13.3217 74.6742 13.4865 74.3813 13.7796L69.9594 18.2015C69.746 18.4221 69.6018 18.7002 69.5445 19.0017C69.4872 19.3032 69.5194 19.6148 69.6369 19.8983C69.7545 20.1817 69.9524 20.4246 70.2062 20.597C70.4601 20.7695 70.7588 20.8639 71.0656 20.8687Z"
                     fill="#73787D"></path>
             </svg>
             <h6>
@@ -238,137 +94,49 @@
                 <span class="text-white">Show All Shop</span>
             </a>
         </div>
-        <ul class="popup-body product-list-wrap">
-            <li class="file-delete">
-                <div class="card-product style-row row-small-2 align-items-center">
-                    <div class="card-product-wrapper">
-                        <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-75.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-75.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-65.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-65.jpg" alt="image-product">
-                        </a>
-                    </div>
-                    <div class="card-product-info">
-                        <div class="box-title">
-                            <a href="product-detail.html"
-                                class="name-product body-md-2 fw-semibold text-secondary link">
-                                Beats Studio3 Wireless Noise Cancelling Over-Ear Headphones
+        <ul class="popup-body product-list-wrap" style="{{ $cartItems->isEmpty() ? 'display: none;' : '' }}">
+            @foreach($cartItems as $item)
+                @php
+                    $associatedModel = $item->associatedModel;
+                    $image = ($associatedModel && $associatedModel->main_image)
+                        ? asset($associatedModel->main_image)
+                        : (($item->attributes && isset($item->attributes['image'])) ? $item->attributes['image'] : asset('images/no-image.jpg'));
+                    $url = ($associatedModel)
+                        ? route('product.show', $associatedModel->slug)
+                        : (($item->attributes && isset($item->attributes['url'])) ? $item->attributes['url'] : '#');
+                @endphp
+                <li class="file-delete" data-cart-id="{{ $item->id }}">
+                    <div class="card-product style-row row-small-2 align-items-center">
+                        <div class="card-product-wrapper">
+                            <a href="{{ $url }}" class="product-img">
+                                <img class="img-product lazyload" src="{{ $image }}"
+                                    data-src="{{ $image }}" alt="{{ $item->name }}">
                             </a>
-                            <p class="price-wrap fw-medium">
-                                <span class="new-price price-text fw-medium">$80.000</span>
-                            </p>
-                            <p class="body-md-2">X1</p>
                         </div>
-                    </div>
-                    <span class="icon-close remove link"></span>
-                </div>
-            </li>
-            <li class="file-delete">
-                <div class="card-product style-row row-small-2 align-items-center">
-                    <div class="card-product-wrapper">
-                        <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-3.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-3.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-59.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-59.jpg" alt="image-product">
-                        </a>
-                    </div>
-                    <div class="card-product-info">
-                        <div class="box-title">
-                            <a href="product-detail.html"
-                                class="name-product body-md-2 fw-semibold text-secondary link">
-                                Samsung Galaxy S10+, 128GB, Ceramic Black - Unlocked
-                            </a>
-                            <p class="price-wrap fw-medium">
-                                <span class="new-price price-text fw-medium">$45.100</span>
-                            </p>
-                            <p class="body-md-2">X1</p>
+                        <div class="card-product-info">
+                            <div class="box-title">
+                                <a href="{{ $url }}"
+                                    class="name-product body-md-2 fw-semibold text-secondary link">
+                                    {{ $item->name }}
+                                </a>
+                                @if(!empty($item->attributes['variant_label']))
+                                    <span class="variant-label text-muted d-block small">{{ $item->attributes['variant_label'] }}</span>
+                                @endif
+                                <p class="price-wrap fw-medium">
+                                    <span class="new-price price-text fw-medium">TK {{ number_format($item->price, 2) }}</span>
+                                </p>
+                                <p class="body-md-2">X{{ $item->quantity }}</p>
+                            </div>
                         </div>
+                        <span class="icon-close remove link" data-cart-id="{{ $item->id }}"></span>
                     </div>
-                    <span class="icon-close remove link"></span>
-                </div>
-            </li>
-            <li class="file-delete">
-                <div class="card-product style-row row-small-2 align-items-center">
-                    <div class="card-product-wrapper">
-                        <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-169.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-169.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-67.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-67.jpg" alt="image-product">
-                        </a>
-                    </div>
-                    <div class="card-product-info">
-                        <div class="box-title">
-                            <a href="product-detail.html"
-                                class="name-product body-md-2 fw-semibold text-secondary link">
-                                Apple iPhone 11 Pro Max, 256GB, Space Gray
-                            </a>
-                            <p class="price-wrap fw-medium">
-                                <span class="new-price price-text fw-medium">$11.000</span>
-                            </p>
-                            <p class="body-md-2">X1</p>
-                        </div>
-                    </div>
-                    <span class="icon-close remove link"></span>
-                </div>
-            </li>
-            <li class="file-delete">
-                <div class="card-product style-row row-small-2 align-items-center">
-                    <div class="card-product-wrapper">
-                        <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-92.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-92.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-100.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-100.jpg" alt="image-product">
-                        </a>
-                    </div>
-                    <div class="card-product-info">
-                        <div class="box-title">
-                            <a href="product-detail.html"
-                                class="name-product body-md-2 fw-semibold text-secondary link">
-                                MSI Katana GF66 11UC-068SG Gaming Laptop i7-11800H/...
-                            </a>
-                            <p class="price-wrap fw-medium">
-                                <span class="new-price price-text fw-medium">$28.000</span>
-                            </p>
-                            <p class="body-md-2">X1</p>
-                        </div>
-                    </div>
-                    <span class="icon-close remove link"></span>
-                </div>
-            </li>
-            <li class="file-delete">
-                <div class="card-product style-row row-small-2 align-items-center">
-                    <div class="card-product-wrapper">
-                        <a href="product-detail.html" class="product-img">
-                            <img class="img-product lazyload" src="{{asset($filePath)}}/images/product/product-46.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-46.jpg" alt="image-product">
-                            <img class="img-hover lazyload" src="{{asset($filePath)}}/images/product/product-45.jpg"
-                                data-src="{{asset($filePath)}}/images/product/product-45.jpg" alt="image-product">
-                        </a>
-                    </div>
-                    <div class="card-product-info">
-                        <div class="box-title">
-                            <a href="product-detail.html"
-                                class="name-product body-md-2 fw-semibold text-secondary link">
-                                IINE PS5 Controller Case Cover Silicone Case Protective ...
-                            </a>
-                            <p class="price-wrap fw-medium">
-                                <span class="new-price price-text fw-medium">$74.000</span>
-                            </p>
-                            <p class="body-md-2">X1</p>
-                        </div>
-                    </div>
-                    <span class="icon-close remove link"></span>
-                </div>
-            </li>
+                </li>
+            @endforeach
         </ul>
-        <div class="popup-footer">
+        <div class="popup-footer" style="{{ $cartItems->isEmpty() ? 'display: none;' : '' }}">
             <p class="cart-total fw-semibold">
                 <span>Subtotal:</span>
-                <span class="price-amount product-title text-primary">$1637</span>
+                <span class="price-amount product-title text-primary">TK {{ number_format($cartSubtotal, 2) }}</span>
             </p>
             <div class="box-btn">
                 <a href="{{ route('cart') }}" class="tf-btn btn-gray">
@@ -519,9 +287,8 @@
                                 <li>
                                     <p class="caption text-main-2">Sold: 349</p>
                                 </li>
-                                <li class="d-flex">
-                                    <a href="shop-default.html" class="caption text-secondary link">View
-                                        shop</a>
+                                <li>
+                                    <a href="shop-default.html" class="caption text-secondary link">View shop</a>
                                 </li>
                             </ul>
                         </div>
@@ -592,19 +359,44 @@
                             </ul>
                         </div>
                     </div>
+                    
+                    <div class="quickview-variants-container mb-3" style="display:none;">
+                        <style>
+                            .quickview-variants-container .product-form__item { margin-bottom: 12px; }
+                            .quickview-variants-container .product-form__title { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #333; }
+                            .quickview-variants-container .variant-swatch-item { position: relative; user-select: none; }
+                            .quickview-variants-container .variant-swatch-label {
+                                display: inline-flex; align-items: center; justify-content: center;
+                                min-width: 40px; height: 40px; padding: 4px;
+                                border: 1.5px solid #ddd; border-radius: 4px; cursor: pointer;
+                                transition: all 0.2s ease-in-out; background: #fff; margin-bottom: 0; overflow: hidden;
+                            }
+                            .quickview-variants-container .variant-swatch-label:hover { border-color: #004EC3; }
+                            .quickview-variants-container .variant-option:checked + .variant-swatch-label { border-color: #004EC3; background: #f0f7ff; font-weight: 600; }
+                            .quickview-variants-container .swatch-image { width: 34px; height: 34px; object-fit: cover; border-radius: 2px; }
+                            .quickview-variants-container .swatch-text { font-size: 12px; color: #333; padding: 0 8px; white-space: nowrap; }
+                            .quickview-variants-container .variant-option:checked + .variant-swatch-label .swatch-text { color: #004EC3; }
+                        </style>
+                    </div>
+
                     <div class="box-quantity-wrap">
                         <div class="wg-quantity">
                             <span class="btn-quantity minus-btn">
                                 <i class="icon-minus"></i>
                             </span>
-                            <input class="quantity-product" type="text" name="number" value="1">
+                            <input class="quantity-product" type="text" name="number" value="1" min="1">
                             <span class="btn-quantity plus-btn">
                                 <i class="icon-plus"></i>
                             </span>
                         </div>
-                        <a href="#shoppingCart" class="tf-btn btn-gray btn-add-quickview" data-bs-toggle="offcanvas">
-                            <span class="text-white">Add To Cart</span>
-                        </a>
+                        <div class="d-flex gap-2 flex-wrap" style="flex: 1;">
+                            <a href="#shoppingCart" class="tf-btn btn-gray btn-add-quickview flex-grow-1" data-bs-toggle="offcanvas">
+                                <span class="text-white">Add To Cart</span>
+                            </a>
+                            <button type="button" class="tf-btn btn-add-quickview-buynow flex-grow-1" style="background: #004EC3;">
+                                <span class="text-white">Buy Now</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -612,6 +404,8 @@
     </div>
 </div>
 <!-- /Quick View -->
+
+
 
 <!-- Newsletter -->
 {{-- <div class="modal modalCentered fade auto-popup modal-def modal-newleter" aria-modal="false" role="dialog">
@@ -744,281 +538,41 @@
                 <div class="tab-content">
                     <div class="tab-pane active show" id="main-menu" role="tabpanel">
                         <div class="mb-content-top">
-                            <form class="form-search">
+                            <form class="form-search" action="{{ route('shop') }}" method="GET">
                                 <fieldset>
-                                    <input class="" type="text" placeholder="Search for anything" name="text"
-                                        tabindex="2" value="" aria-required="true" required="">
+                                    <input class="" type="text" placeholder="Search for anything" name="search"
+                                        tabindex="2" value="{{ request('search') }}" aria-required="true" required="">
                                 </fieldset>
                                 <button type="submit" class="button-submit">
                                     <i class="icon-search"></i>
                                 </button>
                             </form>
                             <ul class="nav-ul-mb" id="wrapper-menu-navigation">
-                                <li class="nav-mb-item active">
-                                    <a href="#dropdown-menu-home" class="collapsed mb-menu-link"
-                                        data-bs-toggle="collapse" aria-expanded="true"
-                                        aria-controls="dropdown-menu-home">
+                                <li class="nav-mb-item">
+                                    <a href="{{ route('home') }}" class="mb-menu-link">
                                         <span>Home</span>
-                                        <span class="btn-open-sub"></span>
                                     </a>
-                                    <div id="dropdown-menu-home" class="collapse">
-                                        <ul class="sub-nav-menu">
-                                            <li><a href="index.html" class="sub-nav-link">Home 1</a></li>
-                                            <li><a href="home-2.html" class="sub-nav-link active">Home 2</a></li>
-                                            <li><a href="home-3.html" class="sub-nav-link">Home 3</a></li>
-                                            <li><a href="home-4.html" class="sub-nav-link">Home 4</a></li>
-                                            <li><a href="home-5.html" class="sub-nav-link">Home 5</a></li>
-                                            <li><a href="home-6.html" class="sub-nav-link">Home 6</a></li>
-                                            <li><a href="home-7.html" class="sub-nav-link">Home 7</a></li>
-                                            <li><a href="home-8.html" class="sub-nav-link">Home 8</a></li>
-                                            <li><a href="home-9.html" class="sub-nav-link">Home 9</a></li>
-                                            <li><a href="home-10.html" class="sub-nav-link">Home 10</a></li>
-                                            <li><a href="home-11.html" class="sub-nav-link">Home 11</a></li>
-                                        </ul>
-                                    </div>
                                 </li>
                                 <li class="nav-mb-item">
-                                    <a href="#dropdown-menu-shop" class="collapsed mb-menu-link"
-                                        data-bs-toggle="collapse" aria-expanded="true"
-                                        aria-controls="dropdown-menu-shop">
+                                    <a href="{{ route('shop') }}" class="mb-menu-link">
                                         <span>Shop</span>
-                                        <span class="btn-open-sub"></span>
                                     </a>
-                                    <div id="dropdown-menu-shop" class="collapse">
-                                        <ul class="sub-nav-menu">
-                                            <li>
-                                                <a href="#shop_layout" class="sub-nav-link collapsed"
-                                                    data-bs-toggle="collapse" aria-expanded="true"
-                                                    aria-controls="shop_layout">
-                                                    Shop Layout
-                                                    <span class="btn-open-sub"></span>
-                                                </a>
-                                                <div id="shop_layout" class="collapse">
-                                                    <ul class="sub-nav-menu sub-menu-level-2">
-                                                        <li>
-                                                            <a href="shop-default.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Shop Default</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="shop-right-sidebar.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Shop Right Sidebar</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="shop-fullwidth.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Shop Full Width</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="shop-cart.html" class="sub-nav-link body-md-2">
-                                                                <span>Shop Cart</span>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                            <li>
-
-                                                <a href="#woo_page" class="sub-nav-link collapsed"
-                                                    data-bs-toggle="collapse" aria-expanded="true"
-                                                    aria-controls="woo_page">
-                                                    Woo Page
-                                                    <span class="btn-open-sub"></span>
-                                                </a>
-                                                <div class="collapse" id="woo_page">
-                                                    <ul class="sub-nav-menu sub-menu-level-2">
-                                                        <li>
-                                                            <a href="compare.html" class="sub-nav-link body-md-2">
-                                                                <span>Compare</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="wishlist.html" class="sub-nav-link body-md-2">
-                                                                <span>Wishlist</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="checkout.html" class="sub-nav-link body-md-2">
-                                                                <span>Check Out</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="order-details.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Order Detail</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="track-your-order.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Track Your Order</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="my-account.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>My Account</span>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </li>
                                 <li class="nav-mb-item">
-                                    <a href="#dropdown-menu-product" class="collapsed mb-menu-link"
-                                        data-bs-toggle="collapse" aria-expanded="true"
-                                        aria-controls="dropdown-menu-product">
-                                        <span>Product</span>
-                                        <span class="btn-open-sub"></span>
+                                    <a href="{{ route('about.us') }}" class="mb-menu-link">
+                                        <span>About Us</span>
                                     </a>
-                                    <div id="dropdown-menu-product" class="collapse">
-                                        <ul class="sub-nav-menu">
-                                            <li>
-                                                <a href="#product_layout" class="sub-nav-link collapsed"
-                                                    data-bs-toggle="collapse" aria-expanded="true"
-                                                    aria-controls="product_layout">
-                                                    Product Layout
-                                                    <span class="btn-open-sub"></span>
-                                                </a>
-                                                <div class="collapse" id="product_layout">
-                                                    <ul class="sub-nav-menu sub-menu-level-2">
-                                                        <li>
-                                                            <a href="product-detail.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Detail</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="product-thumbs-right.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Right Thumbnail</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="product-thumbs-left.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Left Thumbnail</span>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <a href="#product_detail" class="sub-nav-link collapsed"
-                                                    data-bs-toggle="collapse" aria-expanded="true"
-                                                    aria-controls="product_detail">
-                                                    Product Detail
-                                                    <span class="btn-open-sub"></span>
-                                                </a>
-                                                <div class="collapse" id="product_detail">
-                                                    <ul class="sub-nav-menu sub-menu-level-2">
-                                                        <li>
-                                                            <a href="product-detail-2.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Detail Style 2</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="product-detail-3.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Detail Style 3</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="product-detail-4.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Detail Style 4</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="product-inner-zoom.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Inner Zoom</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="product-inner-circle-zoom.html"
-                                                                class="sub-nav-link body-md-2">
-                                                                <span>Product Inner Circle Zoom</span>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </li>
                                 <li class="nav-mb-item">
-                                    <a href="#dropdown-menu-blog" class="collapsed mb-menu-link"
-                                        data-bs-toggle="collapse" aria-expanded="true"
-                                        aria-controls="dropdown-menu-blog">
+                                    <a href="{{ route('blog') }}" class="mb-menu-link">
                                         <span>Blog</span>
-                                        <span class="btn-open-sub"></span>
                                     </a>
-                                    <div id="dropdown-menu-blog" class="collapse">
-                                        <ul class="sub-nav-menu">
-                                            <li>
-                                                <a href="blog-list.html" class="sub-nav-link">
-                                                    Blog List
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="blog-grid.html" class="sub-nav-link">
-                                                    Blog Grid
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="blog-detail.html" class="sub-nav-link">
-                                                    Blog Details
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </li>
                                 <li class="nav-mb-item">
-                                    <a href="#dropdown-menu-page" class="collapsed mb-menu-link"
-                                        data-bs-toggle="collapse" aria-expanded="true"
-                                        aria-controls="dropdown-menu-page">
-                                        <span>Pages</span>
-                                        <span class="btn-open-sub"></span>
+                                    <a href="{{ route('contacts') }}" class="mb-menu-link">
+                                        <span>Contact Us</span>
                                     </a>
-                                    <div id="dropdown-menu-page" class="collapse">
-                                        <ul class="sub-nav-menu">
-                                            <li>
-                                                <a href="contact.html" class="sub-nav-link body-md-2">
-                                                    <span>Contact</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="about.html" class="sub-nav-link body-md-2">
-                                                    <span>About</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="privacy.html" class="sub-nav-link body-md-2">
-                                                    <span>Privacy</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="faq.html" class="sub-nav-link body-md-2">
-                                                    <span>FAQs</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="404.html" class="sub-nav-link body-md-2">
-                                                    <span>404</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </li>
-
                             </ul>
                         </div>
                         <div class="mb-other-content">
@@ -1026,27 +580,22 @@
                                 <li>
                                     <p>
                                         Address:
-                                        <a target="_blank"
-                                            href="https://www.google.com/maps?q=8500LoremStreetChicago,IL55030Dolorsitamet">
-                                            <span class="fw-medium">
-                                                8500 Lorem Street Chicago, IL 55030 Dolor
-                                            </span>
-                                        </a>
+                                        <span class="fw-medium">{{ $settings->address ?? '8500 Lorem Street Chicago, IL 55030 Dolor' }}</span>
                                     </p>
                                 </li>
                                 <li>
                                     <p>
                                         Phone:
-                                        <a href="tel:+88001234567">
-                                            <span class="fw-medium">+8(800) 123 4567</span>
+                                        <a href="tel:{{ $settings->phone ?? '+8801XXXXXXXXX' }}">
+                                            <span class="fw-medium">{{ $settings->phone ?? '+8801XXXXXXXXX' }}</span>
                                         </a>
                                     </p>
                                 </li>
                                 <li>
                                     <p>
                                         Email:
-                                        <a href="mailto:onsus@support.com">
-                                            <span class="fw-medium">onsus@support.com</span>
+                                        <a href="mailto:{{ $settings->email ?? 'onsus@support.com' }}">
+                                            <span class="fw-medium">{{ $settings->email ?? 'onsus@support.com' }}</span>
                                         </a>
                                     </p>
                                 </li>
@@ -1251,7 +800,7 @@
 <!-- Toolbar -->
 <div class="tf-toolbar-bottom d-xl-none">
     <div class="toolbar-item">
-        <a href="index.html">
+        <a href="{{ route('home') }}">
             <span class="toolbar-icon">
                 <svg width="20" height="20" viewBox="0 0 22 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -1273,7 +822,11 @@
         </a>
     </div>
     <div class="toolbar-item">
+        @auth
+        <a href="{{ route('my.account') }}">
+        @else
         <a href="#log" data-bs-toggle="modal">
+        @endauth
             <span class="toolbar-icon">
                 <svg width="20" height="20" viewBox="0 0 22 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -1301,7 +854,7 @@
         </a>
     </div>
     <div class="toolbar-item">
-        <a href="wishlist.html">
+        <a href="{{ route('wishlist') }}">
             <span class="toolbar-icon">
                 <svg width="20" height="20" viewBox="0 0 24 26" stroke-width="0.3" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -1309,7 +862,7 @@
                         d="M17.1949 2.23732C15.1929 2.22573 13.2896 3.17827 12 4.83729C10.7184 3.16693 8.80988 2.21168 6.80503 2.23732C3.0467 2.23732 0 5.53791 0 9.60943C0 16.5867 11.2405 23.3993 11.6962 23.6626C11.8801 23.7957 12.1199 23.7957 12.3038 23.6626C12.7595 23.3993 24 16.6854 24 9.60943C24 5.53791 20.9532 2.23732 17.1949 2.23732ZM12 22.3461C10.238 21.2272 1.21519 15.2702 1.21519 9.60943C1.21519 6.26499 3.71785 3.55371 6.80508 3.55371C8.69561 3.52682 10.4648 4.55986 11.4836 6.28534C11.6904 6.59433 12.0893 6.66318 12.3746 6.43905C12.4291 6.39621 12.477 6.34437 12.5164 6.28534C14.206 3.48618 17.6702 2.70077 20.2541 4.53107C21.8358 5.65155 22.7879 7.56199 22.7848 9.60937C22.7848 15.336 13.762 21.2601 12 22.3461Z"
                         fill="#333E48"></path>
                 </svg>
-                <span class="toolbar-count">04</span>
+                <span class="toolbar-count wishlist-count">{{ Cart::session((Auth::id() ?? session()->getId()) . '_wishlist')->getTotalQuantity() }}</span>
             </span>
             <span class="toolbar-label">Wishlist</span>
         </a>
@@ -1329,7 +882,7 @@
                         d="M20.512 19.1096C18.8017 19.1096 17.4153 20.496 17.4153 22.2064C17.4153 23.9165 18.8017 25.3029 20.512 25.3029C22.2221 25.3029 23.6085 23.9165 23.6085 22.2064C23.6068 20.4969 22.2215 19.1114 20.512 19.1096ZM20.512 24.1644C19.4305 24.1644 18.5537 23.2877 18.5537 22.2064C18.5537 21.1248 19.4305 20.2481 20.512 20.2481C21.5933 20.2481 22.4701 21.1248 22.4701 22.2064C22.4701 23.2877 21.5933 24.1644 20.512 24.1644Z"
                         fill="#333E48"></path>
                 </svg>
-                <span class="toolbar-count">10</span>
+                <span class="toolbar-count cart-count">{{ Darryldecode\Cart\Facades\CartFacade::session(Auth::id() ?? session()->getId())->getTotalQuantity() }}</span>
             </span>
             <span class="toolbar-label">Cart</span>
         </a>
@@ -1349,10 +902,10 @@
                 <div class="col-lg-8">
                     <div class="looking-for-wrap">
                         <h3 class="heading fw-semibold text-center">What are you looking for?</h3>
-                        <form class="form-search">
+                        <form class="form-search" action="{{ route('shop') }}" method="GET">
                             <fieldset>
-                                <input class="" type="text" placeholder="Search for anything" name="text"
-                                    tabindex="2" value="" aria-required="true" required="">
+                                <input class="" type="text" placeholder="Search for anything" name="search"
+                                    tabindex="2" value="{{ request('search') }}" aria-required="true" required="">
                             </fieldset>
                             <button type="submit" class="button-submit">
                                 <i class="icon-search"></i>
@@ -1745,4 +1298,13 @@
     </div>
 </div>
 <!-- /Search -->
+
+<script>
+    window.CartItemsInSession = @json(\Cart::session(Auth::id() ?? session()->getId())->getContent()->mapWithKeys(function($item) {
+        return [$item->id => [
+            'product_id' => $item->attributes->product_id,
+            'variant_id' => $item->attributes->variant_id,
+        ]];
+    })->toArray());
+</script>
 

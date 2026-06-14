@@ -104,8 +104,7 @@ class SaleRequisitionController extends Controller
                     'quantity' => $item['quantity'],
                     'purchase_price' => $item['purchase_price'],
                     'sale_price' => $item['sale_price'],
-                    // Convert attributes array to JSON string for the DB (or let the Model cast handle it)
-                    'attributes' => isset($item['attributes']) ? json_encode($item['attributes']) : null, 
+                    'attributes' => isset($item['attributes']) ? (is_string($item['attributes']) ? json_decode($item['attributes'], true) : $item['attributes']) : null, 
                 ]);
             }
             $order->items()->saveMany($orderItems);
@@ -202,9 +201,13 @@ class SaleRequisitionController extends Controller
             // Create/Update items
             foreach ($request->input('items') as $itemData) {
                 $itemData['order_id'] = $order->id;
-                // Encode attributes if present
-                if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
-                    $itemData['attributes'] = json_encode($itemData['attributes']);
+                // Decode attributes if present, let Eloquent cast handle it
+                if (isset($itemData['attributes'])) {
+                    if (is_string($itemData['attributes'])) {
+                        $itemData['attributes'] = json_decode($itemData['attributes'], true);
+                    }
+                } else {
+                    $itemData['attributes'] = null;
                 }
 
                 if (isset($itemData['id'])) {

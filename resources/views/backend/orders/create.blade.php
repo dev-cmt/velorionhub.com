@@ -35,7 +35,6 @@
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Store <span class="text-danger">*</span></label>
                                         <select class="form-select" name="store_id" required>
-                                            <option value="">Select Store</option>
                                             @foreach($stores as $store)
                                                 <option value="{{ $store->id }}" {{ old('store_id') == $store->id ? 'selected' : '' }}>{{ $store->name }}</option>
                                             @endforeach
@@ -56,7 +55,7 @@
                                     </div>
 
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Customer Name <span class="text-danger">*</span></label>
@@ -90,11 +89,12 @@
                                     <table class="table table-bordered text-nowrap" id="order-items-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 40%;">Product</th>
-                                                <th style="width: 15%;">SKU</th>
-                                                <th style="width: 10%;">Qty</th>
-                                                <th style="width: 15%;">Sale Price</th>
-                                                <th style="width: 15%;">Subtotal</th>
+                                                <th style="width: 35%;">Product</th>
+                                                <th style="width: 20%;">Variant</th>
+                                                <th style="width: 10%;">SKU</th>
+                                                <th style="width: 8%;">Qty</th>
+                                                <th style="width: 12%;">Sale Price</th>
+                                                <th style="width: 10%;">Subtotal</th>
                                                 <th style="width: 5%;">Action</th>
                                             </tr>
                                         </thead>
@@ -111,12 +111,12 @@
                                     </table>
                                 </div>
                                 <div class="d-none">
-                                    {{-- Hidden inputs for purchase price and attributes. 
+                                    {{-- Hidden inputs for purchase price and attributes.
                                         In a real app, purchase price would be looked up server-side on store. --}}
                                     <input type="hidden" name="items[0][purchase_price]" value="0">
                                     <input type="hidden" name="items[0][attributes]" value="[]">
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -150,8 +150,8 @@
                                         <label class="form-label">Due Amount</label>
                                         <input type="number" class="form-control" name="due" id="due" value="{{ old('due', 0) }}" readonly>
                                     </div>
-                                    
-                                    <hr>
+
+                                    <hr> <!-- Separator -->
 
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Payment Method <span class="text-danger">*</span></label>
@@ -212,169 +212,243 @@
         </div>
     </div>
 
+    {{-- Variant Picker Modal --}}
+    <div class="modal fade" id="variantPickerModal" tabindex="-1" aria-labelledby="variantPickerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="variantPickerModalLabel">Select Variant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="variant-product-name" class="fw-semibold mb-3"></p>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered" id="variant-options-table">
+                            <thead>
+                                <tr>
+                                    <th>Variant</th>
+                                    <th>SKU</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Select</th>
+                                </tr>
+                            </thead>
+                            <tbody id="variant-options-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('js')
     <script>
-        const productsData = @json($products->keyBy('id'));
+        const productsData    = @json($products->keyBy('id'));
+        const productsVariant = @json($productsVariantData);
         let itemIndex = 0;
+        let pendingVariantRow = null; // the <tr> waiting for variant selection
 
-        // --- Core Functions ---
+        // Build a product option string once
+        function buildProductOptions(selectedId = '') {
+            let html = '<option value="">Select Product</option>';
+            @foreach($products as $p)
+            html += `<option value="{{ $p->id }}"
+                data-price="{{ $p->sale_price }}"
+                data-sku="{{ $p->sku }}"
+                data-has-variant="{{ $p->has_variant ? '1' : '0' }}"
+                ${selectedId == '{{ $p->id }}' ? 'selected' : ''}>{{ $p->name }}</option>`;
+            @endforeach
+            return html;
+        }
 
-        // Function to create an item row HTML
         function createItemRow(item = {}) {
-            const index = item.id ? 'existing-' + item.id : itemIndex++;
-            const productId = item.product_id || '';
-            const productName = item.product ? item.product.name : 'Select Product';
-            const sku = item.sku || '';
-            const quantity = item.quantity || 1;
-            const salePrice = item.sale_price || 0;
-            const subtotal = (quantity * salePrice).toFixed(2);
-            
-            // Hidden fields for what's not in the table view
-            const purchasePrice = item.purchase_price || 0; 
-            const attributes = item.attributes ? JSON.stringify(item.attributes) : '[]';
+            const index       = item.id ? 'existing-' + item.id : itemIndex++;
+            const productId   = item.product_id || '';
+            const variantLabel = item.variantLabel || '';
+            const sku         = item.sku || '';
+            const quantity    = item.quantity || 1;
+            const salePrice   = item.sale_price || 0;
+            const subtotal    = (quantity * salePrice).toFixed(2);
+            const purchasePrice = item.purchase_price || 0;
+            const attributes  = item.attributes ? JSON.stringify(item.attributes) : '{}';
 
-            let itemInputId = item.id ? `items[${index}][id]` : '';
+            const product      = productsData[productId];
+            const hasVariant   = product && (product.has_variant == '1' || product.has_variant == true);
 
             return `
                 <tr data-index="${index}">
                     ${item.id ? `<input type="hidden" name="items[${index}][id]" value="${item.id}">` : ''}
                     <input type="hidden" name="items[${index}][purchase_price]" value="${purchasePrice}" class="item-purchase-price">
-                    <input type="hidden" name="items[${index}][attributes]" value='${attributes}'>
-                    
+                    <input type="hidden" name="items[${index}][attributes]" value='${attributes}' class="item-attributes">
                     <td>
                         <select class="form-select product-select" name="items[${index}][product_id]" required data-index="${index}">
-                            <option value="">${productName}</option>
-                            @foreach($products as $product)
-                                <option 
-                                    value="{{ $product->id }}" 
-                                    data-price="{{ $product->sale_price }}" 
-                                    data-sku="{{ $product->sku }}" >
-                                    {{ $product->name }}
-                                </option>
-                            @endforeach
+                            ${buildProductOptions(productId)}
                         </select>
                     </td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm item-sku" name="items[${index}][sku]" value="${sku}" readonly>
+                    <td class="item-variant-cell">
+                        <span class="text-muted item-variant-label">${variantLabel}</span>
+                        <button type="button" class="btn btn-sm btn-light py-0 px-1 ms-1 edit-variant-btn ${hasVariant ? '' : 'd-none'}" title="Change Variant">
+                            <i class="ri-edit-line"></i>
+                        </button>
                     </td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm item-qty" name="items[${index}][quantity]" value="${quantity}" min="1" required data-index="${index}">
-                    </td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm item-price" name="items[${index}][sale_price]" value="${salePrice}" step="0.01" min="0" required data-index="${index}">
-                    </td>
+                    <td><input type="text" class="form-control form-control-sm item-sku" name="items[${index}][sku]" value="${sku}" readonly></td>
+                    <td><input type="number" class="form-control form-control-sm item-qty" name="items[${index}][quantity]" value="${quantity}" min="1" required data-index="${index}"></td>
+                    <td><input type="number" class="form-control form-control-sm item-price" name="items[${index}][sale_price]" value="${salePrice}" step="0.01" min="0" required data-index="${index}"></td>
                     <td class="item-subtotal-display">${subtotal}</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-danger-light remove-item-btn"><i class="ri-delete-bin-line"></i></button>
-                    </td>
-                    
+                    <td><button type="button" class="btn btn-sm btn-danger-light remove-item-btn"><i class="ri-delete-bin-line"></i></button></td>
                 </tr>
             `;
         }
 
-        // Function to update the subtotal for an item row
         function updateItemSubtotal(row) {
-            const qty = parseFloat(row.find('.item-qty').val()) || 0;
+            const qty   = parseFloat(row.find('.item-qty').val()) || 0;
             const price = parseFloat(row.find('.item-price').val()) || 0;
-            const subtotal = (qty * price).toFixed(2);
-            row.find('.item-subtotal-display').text(subtotal);
+            row.find('.item-subtotal-display').text((qty * price).toFixed(2));
             calculateOrderSummary();
         }
 
-        // Function to calculate and update the order summary
         function calculateOrderSummary() {
             let subTotal = 0;
-            $('#order-items-body tr').each(function() {
-                const row = $(this);
-                const qty = parseFloat(row.find('.item-qty').val()) || 0;
-                const price = parseFloat(row.find('.item-price').val()) || 0;
-                subTotal += (qty * price);
+            $('#order-items-body tr').each(function () {
+                subTotal += (parseFloat($(this).find('.item-qty').val()) || 0)
+                          * (parseFloat($(this).find('.item-price').val()) || 0);
             });
-
-            const shippingCost = parseFloat($('#shipping_cost').val()) || 0;
+            const shipping = parseFloat($('#shipping_cost').val()) || 0;
             const discount = parseFloat($('#discount').val()) || 0;
-            const paid = parseFloat($('#paid').val()) || 0;
-
-            const total = (subTotal + shippingCost - discount);
-            const due = (total - paid);
-
+            const paid     = parseFloat($('#paid').val()) || 0;
+            const total    = Math.max(0, subTotal + shipping - discount);
+            const due      = total - paid;
             $('#sub_total').val(subTotal.toFixed(2));
-            $('#total').val(Math.max(0, total).toFixed(2)); // Ensure total is not negative
+            $('#total').val(total.toFixed(2));
             $('#due').val(due.toFixed(2));
-            
-            // Update payment status based on due amount
-            if (total <= 0 || due <= 0) {
-                $('select[name="payment_status"]').val('2'); // Paid
-            } else if (paid > 0 && due > 0) {
-                $('select[name="payment_status"]').val('1'); // Partial
-            } else {
-                $('select[name="payment_status"]').val('0'); // Pending
-            }
-
-
+            if (total <= 0 || due <= 0)      $('select[name="payment_status"]').val('2');
+            else if (paid > 0 && due > 0)    $('select[name="payment_status"]').val('1');
+            else                             $('select[name="payment_status"]').val('0');
         }
 
-        // --- Event Listeners ---
+        function openVariantModal(row, productId, productName) {
+            pendingVariantRow = row;
+            const vdata = productsVariant[productId];
+            $('#variant-product-name').text(productName);
+            const tbody = $('#variant-options-body').empty();
+            if (!vdata || !vdata.variants || !vdata.variants.length) {
+                tbody.html('<tr><td colspan="5" class="text-center text-muted">No variants available.</td></tr>');
+            } else {
+                vdata.variants.forEach(function (v) {
+                    tbody.append(`
+                        <tr>
+                            <td>${v.label}</td>
+                            <td>${v.sku}</td>
+                            <td>TK ${parseFloat(v.price).toFixed(2)}</td>
+                            <td>${v.stock > 0 ? v.stock : '<span class="text-danger">Out</span>'}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary select-variant-btn"
+                                    data-sku="${v.sku}"
+                                    data-price="${v.price}"
+                                    data-label="${v.label}"
+                                    data-attrs='${JSON.stringify({variant_label: v.label, variant_sku: v.sku})}'>
+                                    Select
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+            new bootstrap.Modal(document.getElementById('variantPickerModal')).show();
+        }
 
-        $(document).ready(function() {
-            // Initial load: add one empty item row for new order
+        $(document).ready(function () {
             if ($('#order-items-body tr').length === 0) {
-                 $('#order-items-body').append(createItemRow());
+                $('#order-items-body').append(createItemRow());
             }
 
-            // Add Item Button
-            $('#add-item-btn').on('click', function() {
+            $('#add-item-btn').on('click', function () {
                 $('#order-items-body').append(createItemRow());
             });
 
-            // Remove Item Button
-            $('#order-items-body').on('click', '.remove-item-btn', function() {
+            $('#order-items-body').on('click', '.remove-item-btn', function () {
                 $(this).closest('tr').remove();
                 calculateOrderSummary();
             });
 
-            // Product Selection Change
-            $('#order-items-body').on('change', '.product-select', function() {
-                const select = $(this);
-                const row = select.closest('tr');
-                const selectedOption = select.find('option:selected');
-                const price = parseFloat(selectedOption.data('price')) || 0;
-                const sku = selectedOption.data('sku') || '';
+            // Product Selection Change — open variant modal if product has variants
+            $('#order-items-body').on('change', '.product-select', function () {
+                const select   = $(this);
+                const row      = select.closest('tr');
+                const opt      = select.find('option:selected');
+                const productId   = opt.val();
+                const price    = parseFloat(opt.data('price')) || 0;
+                const sku      = opt.data('sku') || '';
+                const hasVariant = opt.data('has-variant') == '1';
 
                 row.find('.item-price').val(price.toFixed(2));
                 row.find('.item-sku').val(sku);
-                row.find('.item-qty').val(1); // Reset quantity on product change
-                
-                updateItemSubtotal(row);
-            });
+                row.find('.item-qty').val(1);
+                row.find('.item-variant-label').text('');
+                row.find('.item-attributes').val('{}');
 
-            // Quantity or Price Change
-            $('#order-items-body').on('input', '.item-qty, .item-price', function() {
-                updateItemSubtotal($(this).closest('tr'));
-            });
-
-            // Summary Field Change
-            $('#shipping_cost, #discount, #paid').on('input', function() {
-                calculateOrderSummary();
-            });
-            
-            // Customer Select Change (Pre-fill name and phone)
-            $('#customer_select').on('change', function() {
-                const selectedOption = $(this).find('option:selected');
-                const name = selectedOption.data('name');
-                const phone = selectedOption.data('phone');
-                
-                if (name) {
-                    $('input[name="customer_name"]').val(name);
-                    $('input[name="customer_phone"]').val(phone);
+                if (hasVariant) {
+                    row.find('.edit-variant-btn').removeClass('d-none');
                 } else {
-                    // Clear fields if 'Select Customer' is chosen
-                    $('input[name="customer_name"]').val('');
-                    $('input[name="customer_phone"]').val('');
+                    row.find('.edit-variant-btn').addClass('d-none');
+                }
+
+                updateItemSubtotal(row);
+
+                if (hasVariant && productId) {
+                    const productName = opt.text().trim();
+                    openVariantModal(row, productId, productName);
                 }
             });
 
-            // Initial calculation on page load (in case of old input errors)
+            $('#order-items-body').on('click', '.edit-variant-btn', function () {
+                const btn = $(this);
+                const row = btn.closest('tr');
+                const select = row.find('.product-select');
+                const opt = select.find('option:selected');
+                const productId = opt.val();
+                if (productId) {
+                    openVariantModal(row, productId, opt.text().trim());
+                }
+            });
+
+            // Variant selection inside modal
+            $(document).on('click', '#variant-options-body .select-variant-btn', function () {
+                const btn   = $(this);
+                const sku   = btn.data('sku');
+                const price = parseFloat(btn.data('price')) || 0;
+                const label = btn.data('label');
+                const attrs = btn.attr('data-attrs');
+
+                if (pendingVariantRow) {
+                    pendingVariantRow.find('.item-sku').val(sku);
+                    pendingVariantRow.find('.item-price').val(price.toFixed(2));
+                    pendingVariantRow.find('.item-variant-label').text(label);
+                    pendingVariantRow.find('.item-attributes').val(attrs);
+                    updateItemSubtotal(pendingVariantRow);
+                    pendingVariantRow = null;
+                }
+                bootstrap.Modal.getInstance(document.getElementById('variantPickerModal')).hide();
+            });
+
+            $('#order-items-body').on('input', '.item-qty, .item-price', function () {
+                updateItemSubtotal($(this).closest('tr'));
+            });
+
+            $('#shipping_cost, #discount, #paid').on('input', function () {
+                calculateOrderSummary();
+            });
+
+            $('#customer_select').on('change', function () {
+                const opt = $(this).find('option:selected');
+                const name = opt.data('name');
+                $('input[name="customer_name"]').val(name || '');
+                $('input[name="customer_phone"]').val(opt.data('phone') || '');
+            });
+
             calculateOrderSummary();
         });
     </script>

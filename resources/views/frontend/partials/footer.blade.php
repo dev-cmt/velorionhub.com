@@ -12,26 +12,16 @@
                                 <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="Logo">
                             @endif
                         </a>
-                        <div class="method-payment">
-                            <p>We accept:</p>
-                            <ul class="method-list">
-                                <li><img src="{{asset($filePath)}}/images/payment/visa.svg" alt="Payment"></li>
-                                <li><img src="{{asset($filePath)}}/images/payment/paypal.svg" alt="Payment"></li>
-                                <li><img src="{{asset($filePath)}}/images/payment/discover.svg" alt="Payment"></li>
-                                <li><img src="{{asset($filePath)}}/images/payment/master.svg" alt="Payment"></li>
-                            </ul>
-                        </div>
                     </div>
                     <ul class="ft-link-wrap w-100 tf-grid-layout md-col-2 lg-col-4">
                         <li class="footer-col-block">
                             <h6 class="ft-heading footer-heading-mobile fw-semibold">Get help</h6>
                             <div class="tf-collapse-content">
                                 <ul class="ft-menu-list">
-                                    <li><a href="privacy.html" class="link">Delivery Information</a></li>
-                                    <li><a href="faq.html" class="link">Sale Terms & Conditions</a></li>
-                                    <li><a href="privacy.html" class="link">Returns & Refunds</a></li>
-                                    <li><a href="privacy.html" class="link">Privacy Notice</a></li>
-                                    <li><a href="faq.html" class="link">Shopping FAQs</a></li>
+                                    <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>>
+                                    <li><a href="{{ route('privacy.policy') }}" class="link">Privacy Policy</a></li>
+                                    <li><a href="{{ route('return.policy') }}" class="link">Return Policy</a></li>
+                                    <li><a href="{{ route('terms.conditions') }}" class="link">Terms & Conditions</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -39,11 +29,9 @@
                             <h6 class="ft-heading footer-heading-mobile fw-semibold">Popular categories</h6>
                             <div class="tf-collapse-content">
                                 <ul class="ft-menu-list">
-                                    <li><a href="shop-default.html" class="link">Laptops & Computers</a></li>
-                                    <li><a href="shop-default.html" class="link">Cameras & Photography</a></li>
-                                    <li><a href="shop-default.html" class="link">Smart Phones & Tablets</a></li>
-                                    <li><a href="shop-default.html" class="link">Video Games & Consoles</a></li>
-                                    <li><a href="shop-default.html" class="link">TV & Audio</a></li>
+                                    @foreach($categories->take(4) as $category)
+                                        <li><a href="{{ route('shop', ['category' => $category->slug]) }}" class="link">{{ $category->name }}</a></li>
+                                    @endforeach
                                 </ul>
                             </div>
                         </li>
@@ -51,11 +39,10 @@
                             <h6 class="ft-heading footer-heading-mobile fw-semibold">Customer Care</h6>
                             <div class="tf-collapse-content">
                                 <ul class="ft-menu-list">
-                                    <li><a href="my-account.html" class="link">My Account</a></li>
-                                    <li><a href="track-your-order.html" class="link">Track your Order</a></li>
-                                    <li><a href="contact.html" class="link">Customer Service</a></li>
-                                    <li><a href="privacy.html" class="link">Returns/Exchange</a></li>
-                                    <li><a href="faq.html" class="link">FAQs</a></li>
+                                    <li><a href="{{ route('my.account') }}" class="link">My Account</a></li>
+                                    <li><a href="{{ route('track.order') }}" class="link">Track your Order</a></li>
+                                    <li><a href="{{ route('contacts') }}" class="link">Customer Service</a></li>
+                                    <li><a href="{{ route('faq') }}" class="link">FAQs</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -77,7 +64,7 @@
                                         </span>
                                         <a href="tel:{{ $settings->phone ?? '' }}" class="product-title">
                                             <span class="product-title text-primary">
-                                                {{ $settings->phone ?? '+8(800) 123 4567' }}
+                                                {{ $settings->phone ?? '+8801700000000' }}
                                             </span>
                                         </a>
                                     </li>
@@ -206,28 +193,28 @@
             <div class="container">
                 <div class="ft-bottom">
                     <ul class="social-list">
-                        @if($settings && $settings->facebook)
-                        <li><a href="{{ $settings->facebook }}"><i class="icon-facebook"></i></a></li>
+                        @if($settings && isset($settings->social_links['facebook']) && $settings->social_links['facebook'])
+                        <li><a href="{{ $settings->social_links['facebook'] }}"><i class="icon-facebook"></i></a></li>
                         @else
                         <li><a href="https://www.facebook.com/"><i class="icon-facebook"></i></a></li>
                         @endif
-                        @if($settings && $settings->twitter)
-                        <li><a href="{{ $settings->twitter }}"><i class="icon-x"></i></a></li>
+                        @if($settings && isset($settings->social_links['twitter']) && $settings->social_links['twitter'])
+                        <li><a href="{{ $settings->social_links['twitter'] }}"><i class="icon-x"></i></a></li>
                         @else
                         <li><a href="https://x.com/"><i class="icon-x"></i></a></li>
                         @endif
-                        @if($settings && $settings->instagram)
-                        <li><a href="{{ $settings->instagram }}"><i class="icon-instagram"></i></a></li>
+                        @if($settings && isset($settings->social_links['instagram']) && $settings->social_links['instagram'])
+                        <li><a href="{{ $settings->social_links['instagram'] }}"><i class="icon-instagram"></i></a></li>
                         @else
                         <li><a href="https://www.instagram.com/"><i class="icon-instagram"></i></a></li>
                         @endif
-                        @if($settings && $settings->linkedin)
-                        <li><a href="{{ $settings->linkedin }}"><i class="icon-linkin"></i></a></li>
+                        @if($settings && isset($settings->social_links['linkedin']) && $settings->social_links['linkedin'])
+                        <li><a href="{{ $settings->social_links['linkedin'] }}"><i class="icon-linkin"></i></a></li>
                         @else
                         <li><a href="https://www.linkedin.com/"><i class="icon-linkin"></i></a></li>
                         @endif
-                        @if($settings && $settings->whatsapp)
-                        <li><a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->whatsapp) }}"><i class="icon-whatapp"></i></a></li>
+                        @if($settings && isset($settings->social_links['whatsapp']) && $settings->social_links['whatsapp'])
+                        <li><a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->social_links['whatsapp']) }}"><i class="icon-whatapp"></i></a></li>
                         @else
                         <li><a href="https://web.whatsapp.com/"><i class="icon-whatapp"></i></a></li>
                         @endif

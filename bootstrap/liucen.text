@@ -1,0 +1,9 @@
+# Allowed domain list for this project (one host per line)
+# Examples:
+# velorionhub.com
+# www.velorionhub.com
+
+velorionhub.com
+localhost
+127.0.0.1
+::1

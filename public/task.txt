@@ -1,0 +1,43 @@
+
+CREATE TABLE couriers (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) UNIQUE,
+    status TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+CREATE TABLE courier_settings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    store_id BIGINT UNSIGNED NOT NULL,
+    courier_id BIGINT UNSIGNED NOT NULL,
+
+    store_code VARCHAR(255) NULL,
+    phone VARCHAR(20) NULL,
+    email VARCHAR(255) NULL,
+
+    -- login / api credentials
+    password VARCHAR(255) NULL,
+    api_key TEXT NULL,
+    secret_key TEXT NULL,
+
+    -- oauth tokens (optional)
+    access_token TEXT NULL,
+    refresh_token TEXT NULL,
+
+    client_id VARCHAR(255) NULL,
+    client_secret VARCHAR(255) NULL,
+
+    client_context TEXT NULL,
+
+    status TINYINT(1) DEFAULT 1,
+
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+
+    UNIQUE KEY unique_store_courier (store_id, courier_id),
+    INDEX(store_id),
+    INDEX(courier_id)
+);

@@ -17,6 +17,7 @@ use App\Models\Tag;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductReview;
+use App\Models\Media;
 use Darryldecode\Cart\Facades\CartFacade as Cart;
 use Illuminate\Support\Facades\Auth;
 
@@ -425,7 +426,6 @@ class HomeController extends Controller
         return view($this->filePath . '.blog-details', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'post', 'jsonld'));
     }
 
-
     public function catalog()
     {
         $categories = Category::with('media')
@@ -480,9 +480,10 @@ class HomeController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'text' => 'required|string|max:1000',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        ProductReview::create([
+        $review = ProductReview::create([
             'product_id' => $product->id,
             'user_id' => Auth::id(), // Nullable if guest
             'name' => $request->name,
@@ -491,6 +492,31 @@ class HomeController extends Controller
             'comment' => $request->text,
             'status' => 0, // Pending approval by default
         ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                if ($file && $file->isValid()) {
+                    // ✅ GET BEFORE MOVE
+                    $size = $file->getSize();
+                    $mime = $file->getMimeType();
+
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    // ✅ MOVE AFTER
+                    $file->move(public_path('uploads/reviews'), $filename);
+
+                    Media::create([
+                        'name'       => $filename,
+                        'path'       => 'uploads/reviews/' . $filename,
+                        'model_type' => ProductReview::class,
+                        'model_id'   => $review->id,
+                        'type'       => Media::getTypeFromMime($mime),
+                        'size'       => $size, // ✅ now safe
+                        'user_id'    => Auth::id(),
+                    ]);
+                }
+            }
+        }
 
         return redirect()->back()->with('success', 'Your review has been submitted and is waiting for approval.');
     }
@@ -503,35 +529,24 @@ class HomeController extends Controller
         }
 
         $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'payment_method' => 'required|string',
+            'full_name' => 'required|string|max:255',
+            'phone'     => 'required|string|max:20',
+            'address'   => 'required|string',
         ]);
-
-        $payment_method = 3; // cod
-        if ($request->payment_method == 'cash') {
-            $payment_method = 0;
-        } elseif ($request->payment_method == 'cod') {
-            $payment_method = 3;
-        }
 
         $order = Order::create([
             'invoice_no' => 'INV-' . strtoupper(uniqid()),
             'source' => 'web',
-            'customer_name' => $request->first_name . ' ' . $request->last_name,
+            'customer_name' => $request->full_name,
             'customer_phone' => $request->phone,
-            'customer_address' => $request->address . ', ' . $request->city,
+            'customer_address' => $request->address,
             'sub_total' => $cart->getSubTotal(),
-            'shipping_cost' => 0, // Placeholder
+            'shipping_cost' => 0,
             'discount' => 0,
             'total' => $cart->getTotal(),
             'paid' => 0,
             'due' => $cart->getTotal(),
-            'payment_method' => $payment_method,
+            'payment_method' => 3, // COD
             'payment_status' => 0, // pending
             'status' => 0, // pending
             'notes' => $request->note,
@@ -568,10 +583,8 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        $theme = config('theme.frontend.views_path');
-        return view($theme . '.order-confirm', compact('order', 'breadcrumbs', 'breadcrumb_list'));
+        return view($this->filePath . '.order-confirm', compact('order', 'breadcrumbs', 'breadcrumb_list'));
     }
-
 
     public function aboutUs()
     {
@@ -629,6 +642,49 @@ class HomeController extends Controller
         return view($this->filePath . '.faq', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
+    public function privacyPolicy()
+    {
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'privacy-policy')->first();
+        $seotags = $this->applySeo($page, 'Privacy Policy - ' . config('app.name'));
+
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'Privacy Policy', 'url' => route('privacy.policy')],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
+        return view($this->filePath . '.privacy-policy', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
+    }
+
+    public function returnPolicy()
+    {
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'return-policy')->first();
+        $seotags = $this->applySeo($page, 'Return Policy - ' . config('app.name'));
+
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'Return Policy', 'url' => route('return.policy')],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
+        return view($this->filePath . '.return-policy', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
+    }
+
+    public function termsConditions()
+    {
+        $page = Page::with(['seo', 'activeSections'])->where('slug', 'terms-conditions')->first();
+        $seotags = $this->applySeo($page, 'Terms & Conditions - ' . config('app.name'));
+
+        $breadcrumb_list = [
+            ['name' => 'Home', 'url' => url('/')],
+            ['name' => 'Terms & Conditions', 'url' => route('terms.conditions')],
+        ];
+        $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
+
+        return view($this->filePath . '.terms-conditions', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
+    }
+
+
     /**
      * My Account page - shows user details and order history
      */
@@ -643,7 +699,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.my-account', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
+        return view($this->filePath . '.profile.my-account', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 
     public function orderList()
@@ -657,7 +713,7 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.order-list', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
+        return view($this->filePath . '.profile.order-list', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
     public function accountEdit()
     {
@@ -670,6 +726,6 @@ class HomeController extends Controller
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
-        return view($this->filePath . '.account-edit', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
+        return view($this->filePath . '.profile.account-edit', compact('seotags', 'breadcrumbs', 'breadcrumb_list', 'page'));
     }
 }

@@ -25,6 +25,12 @@ class ProductReview extends Model
         return $this->belongsTo(Product::class);
     }
 
+    // Polymorphic media relationship
+    public function media()
+    {
+        return $this->morphMany(Media::class, 'model');
+    }
+
     // Relationship to User (optional)
     public function user()
     {

@@ -65,9 +65,9 @@
                 </div>
                 <div class="col-md-6 d-none d-md-block">
                     <div class="header-center justify-content-end">
-                        <form class="form-search-product style-3">
+                        <form class="form-search-product style-3" action="{{ route('shop') }}" method="GET">
                             <fieldset>
-                                <input type="text" placeholder="Search for products">
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search for products">
                             </fieldset>
                             <button type="submit" class="btn-submit-form">
                                 <i class="icon-search"></i>
@@ -94,11 +94,12 @@
                                 <a href="#shoppingCart" data-bs-toggle="offcanvas" class="nav-icon-item">
                                     <span class="icon position-relative">
                                         <i class="icon-cart"></i>
-                                        <span class="count-box cart-count">{{ Cart::session((Auth::id() ?? session()->getId()) . '_cart')->getTotalQuantity() }}</span>
+                                        <span class="count-box cart-count">{{ Darryldecode\Cart\Facades\CartFacade::session(Auth::id() ?? session()->getId())->getTotalQuantity() }}</span>
                                     </span>
                                     <div class="infor text-start d-none d-xxl-flex">
                                         <span class="body-text-3 text-main-2">Your cart:</span>
-                                        <h6 class="number-item text-primary fw-semibold text-main-2">$238,100
+                                        <h6 class="number-item text-primary fw-semibold text-main-2">
+                                            TK {{ number_format(Darryldecode\Cart\Facades\CartFacade::session(Auth::id() ?? session()->getId())->getTotal(), 2) }}
                                         </h6>
                                     </div>
                                 </a>
@@ -169,118 +170,41 @@
                     <nav class="category-menu active-item">
                         <div class="menu-category-menu-container">
                             <ul id="primary-menu" class="megamenu">
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-clothing fs-20"></i>
-                                        <span>Apparel</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <span class="icon">
-                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <g clip-path="url(#clip0_1739_24868)">
-                                                    <mask id="mask0_1739_24868" style="mask-type:luminance"
-                                                        maskUnits="userSpaceOnUse" x="0" y="0" width="20"
-                                                        height="20">
-                                                        <path d="M19.4999 19.5V0.500059H0.5V19.5H19.4999Z"
-                                                            fill="white" stroke="white" />
-                                                    </mask>
-                                                    <g mask="url(#mask0_1739_24868)">
-                                                        <path
-                                                            d="M17.5037 10.9552C17.5037 15.6269 13.7165 19.4141 9.04482 19.4141C4.37311 19.4141 0.585938 15.6269 0.585938 10.9552C0.585938 6.28348 4.37311 2.49634 9.04482 2.49634"
-                                                            stroke="black" stroke-miterlimit="10" />
-                                                        <path
-                                                            d="M10.336 10.9553C10.336 11.6694 9.75791 12.2483 9.04483 12.2483C8.33171 12.2483 7.75366 11.6694 7.75366 10.9553C7.75366 10.2412 8.33171 9.66232 9.04483 9.66232C9.75791 9.66232 10.336 10.2412 10.336 10.9553Z"
-                                                            stroke="black" stroke-miterlimit="10"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <path
-                                                            d="M14.6223 10.9551C14.6223 7.82548 12.2025 5.35873 9.03296 5.35873L9.04491 0.585891C14.5859 0.585891 19.4141 4.94236 19.4141 10.9551H14.6223Z"
-                                                            stroke="black" stroke-miterlimit="10"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <path
-                                                            d="M12.5154 10.9552C12.5154 12.8813 10.9562 14.4426 9.03282 14.4426C7.10939 14.4426 5.55017 12.8813 5.55017 10.9552C5.55017 9.02913 7.10939 7.46777 9.03282 7.46777C10.9562 7.46777 12.5154 9.02913 12.5154 10.9552Z"
-                                                            stroke="black" stroke-miterlimit="10"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <path d="M9.0448 16.6132V17.3433" stroke="black"
-                                                            stroke-miterlimit="10" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
-                                                        <path d="M2.6283 10.9551H3.35837" stroke="black"
-                                                            stroke-miterlimit="10" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
-                                                        <path d="M4.50122 15.3274L5.01747 14.8111"
-                                                            stroke="black" stroke-miterlimit="10"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <path d="M13.1156 14.8111L13.6318 15.3274"
-                                                            stroke="black" stroke-miterlimit="10"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
-                                                        <path d="M5.16481 6.86035L4.64856 6.3441" stroke="black"
-                                                            stroke-miterlimit="10" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
-                                                    </g>
-                                                </g>
-                                                <defs>
-                                                    <clipPath id="clip0_1739_24868">
-                                                        <rect width="20" height="20" fill="white" />
-                                                    </clipPath>
-                                                </defs>
-                                            </svg>
-                                        </span>
-                                        <span>Automotive parts</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-beauti fs-20"></i>
-                                        <span>Beauty & personal care</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-computer fs-20"></i>
-                                        <span>Consumer Electronics</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-sofa fs-20"></i>
-                                        <span>Furniture</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-computer-wifi fs-20"></i>
-                                        <span>Home products</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-machine fs-20"></i>
-                                        <span>Machinery</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-jewelry fs-20"></i>
-                                        <span>Timepieces, jewelry & eyewear</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-tool fs-20"></i>
-                                        <span>Tool & hardware</span>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#">
-                                        <i class="icon-best-seller fs-20"></i>
-                                        <span>Bestseller</span>
-                                    </a>
-                                </li>
+                                @php
+                                    $iconsMap = [
+                                        'apparel' => 'icon-clothing',
+                                        'clothing' => 'icon-clothing',
+                                        'automotive' => 'icon-machine',
+                                        'beauty' => 'icon-beauti',
+                                        'electronic' => 'icon-computer',
+                                        'furniture' => 'icon-sofa',
+                                        'home' => 'icon-computer-wifi',
+                                        'machinery' => 'icon-machine',
+                                        'jewelry' => 'icon-jewelry',
+                                        'tool' => 'icon-tool',
+                                        'bestseller' => 'icon-best-seller',
+                                    ];
+                                @endphp
+                                @foreach($categories as $category)
+                                    @php
+                                        $iconClass = 'icon-clothing';
+                                        $lowercaseName = strtolower($category->name);
+                                        foreach ($iconsMap as $key => $icon) {
+                                            if (str_contains($lowercaseName, $key)) {
+                                                $iconClass = $icon;
+                                                break;
+                                            }
+                                        }
+                                    @endphp
+                                    <li class="menu-item">
+                                        <a href="{{ route('shop', ['category' => $category->slug]) }}">
+                                            <i class="{{ $iconClass }} fs-20"></i>
+                                            <span>{{ $category->name }}</span>
+                                        </a>
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
-
                     </nav>
                 </div>
                 <nav class="main-nav-menu style-white">
@@ -295,66 +219,14 @@
                                 <span>Shop</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="#" class="item-link body-md-2 fw-semibold">
-                                <span>Product</span>
-                                <i class="icon icon-arrow-down"></i>
+                        <li class="nav-item pst-unset">
+                            <a href="{{ route('blog') }}" class="item-link body-md-2 fw-semibold">
+                                <span>Blog</span>
                             </a>
-                            <div class="sub-menu-container mega-menu text-nowrap">
-                                <div class="wrapper-sub-menu">
-                                    <!--Top products (5)-->
-                                    <div class="mega-menu-item">
-                                        <p class="menu-heading body-small">TOP PRODUCTS</p>
-                                        <ul class="menu-list">
-                                            <li>
-                                                <a href="product-detail.html" class="body-md-2 link">
-                                                    <span>Product Detail</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="product-thumbs-right.html" class="body-md-2 link">
-                                                    <span>Product Right Thumbnail</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="product-thumbs-left.html" class="body-md-2 link">
-                                                    <span>Product Left Thumbnail</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <!--New Products (5) -->
-                                    <div class="mega-menu-item">
-                                        <p class="menu-heading body-small">NEW PRODUCTS</p>
-                                        <ul class="menu-list">
-                                            <li>
-                                                <a href="product-detail-2.html" class="body-md-2 link">
-                                                    <span>Product Detail Style 2</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="product-detail-3.html" class="body-md-2 link">
-                                                    <span>Product Detail Style 3</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="product-detail-4.html" class="body-md-2 link">
-                                                    <span>Product Detail Style 4</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
                         </li>
                         <li class="nav-item pst-unset">
                             <a href="{{ route('about.us') }}" class="item-link body-md-2 fw-semibold">
                                 <span>About Us</span>
-                            </a>
-                        </li>
-                        <li class="nav-item pst-unset">
-                            <a href="{{ route('blog') }}" class="item-link body-md-2 fw-semibold">
-                                <span>Blog</span>
                             </a>
                         </li>
                         <li class="nav-item pst-unset">

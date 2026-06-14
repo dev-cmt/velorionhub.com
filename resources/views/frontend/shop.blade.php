@@ -165,32 +165,6 @@
                                     </fieldset>
                                 </div>
                             </div>
-                            <div class="widget-facet facet-fieldset">
-                                <p class="facet-title title-sidebar fw-semibold">Condition</p>
-                                <div class="box-fieldset-item">
-                                    <fieldset class="fieldset-item">
-                                        <input type="radio" name="condition" class="tf-check" id="inNew">
-                                        <label for="inNew">New</label>
-                                    </fieldset>
-                                    <fieldset class="fieldset-item">
-                                        <input type="radio" name="condition" class="tf-check" id="inUsed">
-                                        <label for="inUsed">Used</label>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="widget-facet facet-fieldset">
-                                <p class="facet-title title-sidebar fw-semibold">Deals & Discounts</p>
-                                <div class="box-fieldset-item">
-                                    <fieldset class="fieldset-item">
-                                        <input type="radio" name="deal" class="tf-check" id="dealAll">
-                                        <label for="dealAll">All Discounts</label>
-                                    </fieldset>
-                                    <fieldset class="fieldset-item">
-                                        <input type="radio" name="deal" class="tf-check" id="dealToday">
-                                        <label for="dealToday">Today’s Deals</label>
-                                    </fieldset>
-                                </div>
-                            </div>
                         </div>
                         <div class="canvas-bottom d-flex d-xl-none">
                             <button id="reset-filter" class="tf-btn btn-reset w-100">
@@ -213,11 +187,21 @@
                                 </span>
                                 <span class="body-md-2 fw-medium">Filter</span>
                             </button>
-                            <p class="body-text-3 d-none d-lg-block">1-16 of 66 results for "
-                                <span class="title-sidebar fw-bold">
-                                    macbook m1
-                                </span>"
-                            </p>
+                            @if($products->total() > 0)
+                                <p class="body-text-3 d-none d-lg-block">
+                                    {{ $products->firstItem() }}-{{ $products->lastItem() }} of {{ $products->total() }} results
+                                    @if(request()->filled('search'))
+                                        for "<span class="title-sidebar fw-bold">{{ request()->get('search') }}</span>"
+                                    @endif
+                                </p>
+                            @else
+                                <p class="body-text-3 d-none d-lg-block">
+                                    0 results
+                                    @if(request()->filled('search'))
+                                        for "<span class="title-sidebar fw-bold">{{ request()->get('search') }}</span>"
+                                    @endif
+                                </p>
+                            @endif
                         </div>
                         <div class="tf-control-view flat-title-tab-product flex-wrap">
                             <ul class="tf-control-layout menu-tab-line" role="tablist">

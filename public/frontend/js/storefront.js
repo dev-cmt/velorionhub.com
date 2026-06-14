@@ -50,18 +50,22 @@
 
         if (!res.count || !res.items || res.items.length === 0) {
             empty.show();
+            list.hide();
             footer.hide();
             updateCartCount(0);
+            $('a[href="#shoppingCart"] .number-item').text(formatPrice(0));
             return;
         }
 
         empty.hide();
+        list.show();
         footer.show();
         updateCartCount(res.count);
 
         res.items.forEach(function (item) {
             const image = (item.attributes && item.attributes.image) ? item.attributes.image : (routes.noImage || '');
             const url = (item.attributes && item.attributes.url) ? item.attributes.url : '#';
+            const variantLabel = (item.attributes && item.attributes.variant_label) ? item.attributes.variant_label : '';
 
             list.append(`
                 <li class="file-delete" data-cart-id="${item.id}">
@@ -74,6 +78,7 @@
                         <div class="card-product-info">
                             <div class="box-title">
                                 <a href="${url}" class="name-product body-md-2 fw-semibold text-secondary link">${item.name}</a>
+                                ${variantLabel ? `<span class="variant-label text-muted d-block small">${variantLabel}</span>` : ''}
                                 <p class="price-wrap fw-medium">
                                     <span class="new-price price-text fw-medium">${formatPrice(item.price)}</span>
                                 </p>
@@ -87,6 +92,7 @@
         });
 
         cart.find('.price-amount.product-title').text(formatPrice(res.subtotal));
+        $('a[href="#shoppingCart"] .number-item').text(formatPrice(res.subtotal));
     }
 
     function appendCompareItem(product) {
@@ -158,6 +164,60 @@
         };
     }
 
+    function updateQuickViewVariantDetails() {
+        const modal = $('#quickView');
+        const variants = modal.data('variants');
+        if (!variants || !variants.length) return;
+
+        const selectedAttributes = [];
+        modal.find('.variant-option:checked').each(function () {
+            selectedAttributes.push(parseInt($(this).val()));
+        });
+
+        // Find matched variant
+        const matchedVariant = variants.find(function (v) {
+            return selectedAttributes.every(function (attrId) {
+                return v.attributes.indexOf(attrId) !== -1;
+            }) && v.attributes.length === selectedAttributes.length;
+        });
+
+        const addBtn = modal.find('.btn-add-quickview');
+
+        if (matchedVariant) {
+            // Update SKU inside modal
+            modal.find('#qv-display-sku').text(matchedVariant.sku);
+
+            // Update Price inside modal
+            const salePrice = parseFloat(matchedVariant.price);
+            const regularPrice = parseFloat(matchedVariant.regular_price);
+
+            modal.find('.product-info-price h4').text(formatPrice(salePrice));
+            if (regularPrice > salePrice) {
+                modal.find('.product-info-price .old-price').text(formatPrice(regularPrice)).show();
+            } else {
+                modal.find('.product-info-price .old-price').hide();
+            }
+
+            // Update Stock Status inside modal
+            const stockStatusContainer = modal.find('#qv-display-stock-status');
+            if (matchedVariant.stock > 0) {
+                stockStatusContainer.html('<span class="badge bg-success">In Stock (' + matchedVariant.stock + ' available)</span>');
+                addBtn.prop('disabled', false).css({ opacity: 1, 'cursor': 'pointer' }).html('<span class="text-white">Add To Cart</span>');
+            } else {
+                stockStatusContainer.html('<span class="badge bg-secondary">Out of Stock</span>');
+                addBtn.prop('disabled', true).css({ opacity: 0.6, 'cursor': 'not-allowed' }).html('<span class="text-white">Out of Stock</span>');
+            }
+
+            // Update addBtn payload price
+            addBtn.attr('data-price', matchedVariant.price)
+                .data('price', matchedVariant.price);
+        } else {
+            // No matching variant?
+            modal.find('#qv-display-stock-status').html('<span class="badge bg-secondary">Unavailable</span>');
+            addBtn.prop('disabled', true).css({ opacity: 0.6, 'cursor': 'not-allowed' }).html('<span class="text-white">Unavailable</span>');
+        }
+    }
+
     function openQuickView(url) {
         const modal = $('#quickView');
         if (!modal.length || !url) return;
@@ -167,16 +227,28 @@
 
         $.get(url).done(function (html) {
             const doc = $(html);
-            const title = doc.find('.product__title').text().trim();
-            const price = doc.find('.product__price--new, .product__price--current').first().text().trim()
-                || doc.find('.product__prices').text().trim();
-            const oldPrice = doc.find('.product__price--old').text().trim();
-            const description = doc.find('.product__excerpt, .product__description').first().text().trim();
-            const productId = doc.find('input[name="id"]').val() || '';
-            const images = [];
+            const title = doc.find('.product-info-name').first().text().trim()
+                || doc.find('.product__title').first().text().trim()
+                || 'Product';
 
-            doc.find('.product-gallery__featured img, .product__gallery img, .image__tag').each(function () {
-                const src = $(this).attr('src');
+            const price = doc.find('#display-product-price h4').first().text().trim()
+                || doc.find('.product__price--new, .product__price--current').first().text().trim()
+                || doc.find('.product__prices').first().text().trim();
+
+            const oldPrice = doc.find('#display-product-price .old-price').first().text().trim()
+                || doc.find('.product__price--old').first().text().trim();
+
+            const description = doc.find('.tab-des .body-text-3').first().text().trim()
+                || doc.find('.product__excerpt, .product__description').first().text().trim()
+                || '';
+
+            const productId = doc.find('.add-to-cart, .order-now').first().attr('data-id')
+                || doc.find('input[name="id"]').val()
+                || '';
+
+            const images = [];
+            doc.find('.tf-product-media-main img, .product-gallery__featured img, .product__gallery img, .image__tag').each(function () {
+                const src = $(this).attr('src') || $(this).attr('data-src') || $(this).attr('data-zoom');
                 if (src && images.indexOf(src) === -1) {
                     images.push(src);
                 }
@@ -204,6 +276,68 @@
                 modal.find('.product-about-list').html(`<li><p class="body-text-3">${description.substring(0, 200)}</p></li>`);
             }
 
+            // Rate wrap & SKU
+            const rateWrap = doc.find('.product-info-rate-wrap').html();
+            if (rateWrap) {
+                modal.find('.product-info-rate-wrap').html(rateWrap);
+                modal.find('#display-sku').attr('id', 'qv-display-sku');
+            }
+
+            // Brand & features
+            const featureList = doc.find('.product-fearture-list').html();
+            if (featureList) {
+                modal.find('.product-fearture-list').html(featureList);
+            }
+
+            // Stock status
+            modal.find('#qv-display-stock-status').remove();
+            const stockEl = doc.find('#display-stock-status');
+            if (stockEl.length) {
+                modal.find('.product-info-price').after(stockEl.clone().attr('id', 'qv-display-stock-status'));
+            }
+
+            // Reset quantity input
+            modal.find('.quantity-product').val(1);
+
+            // Variants JSON handling
+            const variantsJsonEl = doc.find('#product-variants-json');
+            let variants = [];
+            if (variantsJsonEl.length) {
+                try {
+                    variants = JSON.parse(variantsJsonEl.html());
+                } catch (e) {
+                    console.error("Failed to parse variants JSON", e);
+                }
+            }
+            modal.data('variants', variants);
+
+            // Clone and insert variants picker HTML
+            const qvVariantsContainer = modal.find('.quickview-variants-container');
+            const productFormItems = doc.find('.product-form__item');
+            if (productFormItems.length) {
+                const clonedItems = productFormItems.clone();
+                clonedItems.find('input.variant-option').each(function () {
+                    const id = $(this).attr('id');
+                    if (id) {
+                        $(this).attr('id', 'qv-' + id);
+                    }
+                    const name = $(this).attr('name');
+                    if (name) {
+                        $(this).attr('name', 'qv-' + name);
+                    }
+                });
+                clonedItems.find('label.variant-swatch-label').each(function () {
+                    const forAttr = $(this).attr('for');
+                    if (forAttr) {
+                        $(this).attr('for', 'qv-' + forAttr);
+                    }
+                });
+                qvVariantsContainer.html(clonedItems).show();
+                updateQuickViewVariantDetails();
+            } else {
+                qvVariantsContainer.empty().hide();
+            }
+
             modal.find('.btn-add-quickview')
                 .attr('data-id', productId)
                 .attr('data-name', title)
@@ -217,11 +351,58 @@
                         this.swiper.destroy(true, true);
                     }
                 });
+
+                const $slider = modal.find('.product-thumb-slider');
+                const $thumbs = $slider.find('.tf-product-view-thumbs');
+                const $main = $slider.find('.tf-product-view-main');
+                const direction = $thumbs.data('direction') || 'horizontal';
+
+                const thumbsSwiper = new Swiper($thumbs[0], {
+                    direction: 'horizontal',
+                    spaceBetween: 10,
+                    slidesPerView: 'auto',
+                    freeMode: true,
+                    watchSlidesProgress: true,
+                    observer: true,
+                    observeParents: true,
+                    nested: true,
+                    breakpoints: {
+                        0: {
+                            direction: 'horizontal',
+                        },
+                        576: {
+                            direction: direction,
+                        },
+                    },
+                });
+
+                const mainSwiper = new Swiper($main[0], {
+                    spaceBetween: 10,
+                    observer: true,
+                    observeParents: true,
+                    speed: 800,
+                    thumbs: {
+                        swiper: thumbsSwiper,
+                    },
+                    navigation: {
+                        nextEl: $slider.find('.single-slide-next')[0],
+                        prevEl: $slider.find('.single-slide-prev')[0],
+                    },
+                });
+
+                $thumbs.find('.swiper-slide').on('mouseenter', function () {
+                    let index = $(this).index();
+                    mainSwiper.slideTo(index);
+                });
             }
         }).fail(function () {
             window.location.href = url;
         });
     }
+
+    window.ajaxOpenQuickView = function (url) {
+        openQuickView(url);
+    };
 
     $(function () {
         $.ajaxSetup({
@@ -236,6 +417,24 @@
         $(document).on('click', '.add-to-cart', function (e) {
             e.preventDefault();
             const btn = $(this);
+
+            // If product has variants and we're on a product card (not product detail page)
+            // redirect to the product page so the user can select a variant first
+            if (btn.data('has-variant') == '1' && !btn.closest('#quickView, .tf-product-info-list, form').length) {
+                const productUrl = btn.data('product-url') || btn.data('url');
+                if (productUrl) {
+                    window.location.href = productUrl;
+                    return;
+                } else {
+                    const offcanvasEl = document.getElementById('shoppingCart');
+                    if (offcanvasEl) {
+                        const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
+                        offcanvas.show();
+                    }
+                    return;
+                }
+            }
+
             // Respect qty input if present (e.g. product details page)
             const qtyInput = btn.closest('form, .tf-product-info-list, .card-product').find('.quantity-product, input[name="qty"], input[name="quantity"]');
             const qty = qtyInput.length ? (parseInt(qtyInput.val()) || 1) : 1;
@@ -249,7 +448,7 @@
                 qty: qty,
             };
 
-            const selectedAttributes = btn.closest('form, .tf-product-info-list').find('.variant-option:checked').map(function() {
+            const selectedAttributes = btn.closest('form, .tf-product-info-list').find('.variant-option:checked').map(function () {
                 return parseInt($(this).val());
             }).get();
 
@@ -277,6 +476,16 @@
         $(document).on('click', '.order-now', function (e) {
             e.preventDefault();
             const btn = $(this);
+
+            // If product has variants and we're on a product card, redirect to product page
+            if (btn.data('has-variant') == '1' && !btn.closest('#quickView, .tf-product-info-list, form').length) {
+                const productUrl = btn.data('product-url') || btn.data('url');
+                if (productUrl) {
+                    window.location.href = productUrl;
+                    return;
+                }
+            }
+
             const qtyInput = btn.closest('form, .tf-product-info-list, .card-product').find('.quantity-product, input[name="qty"], input[name="quantity"]');
             const qty = qtyInput.length ? (parseInt(qtyInput.val()) || 1) : 1;
 
@@ -289,7 +498,7 @@
                 qty: qty,
             };
 
-            const selectedAttributes = btn.closest('form, .tf-product-info-list').find('.variant-option:checked').map(function() {
+            const selectedAttributes = btn.closest('form, .tf-product-info-list').find('.variant-option:checked').map(function () {
                 return parseInt($(this).val());
             }).get();
 
@@ -421,21 +630,159 @@
             }
         });
 
+        // ─── Quick View Variant Selection Change ─────────────────────────────
+        $(document).on('change', '#quickView .variant-option', function () {
+            updateQuickViewVariantDetails();
+
+            // Update main image if selected option has data-image
+            const label = $('#quickView').find('label[for="' + this.id + '"]');
+            const imageUrl = label.attr('data-image');
+            if (imageUrl) {
+                const mainImg = $('#quickView').find('.tf-product-view-main .swiper-slide:first-child img');
+                if (mainImg.length) {
+                    mainImg.attr('src', imageUrl);
+                    mainImg.attr('data-src', imageUrl);
+                }
+                const mainAnchor = $('#quickView').find('.tf-product-view-main .swiper-slide:first-child a');
+                if (mainAnchor.length) {
+                    mainAnchor.attr('href', imageUrl);
+                }
+
+                const thumbImg = $('#quickView').find('.tf-product-view-thumbs .swiper-slide:first-child img');
+                if (thumbImg.length) {
+                    thumbImg.attr('src', imageUrl);
+                }
+
+                // Update addBtn payload image
+                $('#quickView').find('.btn-add-quickview').attr('data-image', imageUrl).data('image', imageUrl);
+
+                // Slide both main & thumbs swiper to 0
+                const swiperMain = $('#quickView').find('.tf-product-view-main')[0];
+                if (swiperMain && swiperMain.swiper) {
+                    swiperMain.swiper.slideTo(0);
+                }
+                const swiperThumbs = $('#quickView').find('.tf-product-view-thumbs')[0];
+                if (swiperThumbs && swiperThumbs.swiper) {
+                    swiperThumbs.swiper.slideTo(0);
+                }
+            }
+        });
+
+        // ─── Quick View Quantity ───────────────────────────────────────────
+        $(document).on('click', '#quickView .plus-btn', function () {
+            const input = $(this).closest('.wg-quantity').find('.quantity-product');
+            const maxVal = parseInt(input.attr('max')) || 9999;
+            let val = parseInt(input.val()) || 1;
+            if (val < maxVal) {
+                input.val(val + 1);
+            }
+        });
+
+        $(document).on('click', '#quickView .minus-btn', function () {
+            const input = $(this).closest('.wg-quantity').find('.quantity-product');
+            let val = parseInt(input.val()) || 1;
+            if (val > 1) {
+                input.val(val - 1);
+            }
+        });
+
         // ─── Quick View — Add to Cart ─────────────────────────────────────────
         $(document).on('click', '.btn-add-quickview', function (e) {
             e.preventDefault();
             const btn = $(this);
-            cartAjax(routes.cartAdd, {
+            const modal = $('#quickView');
+            const qtyInput = modal.find('.quantity-product');
+            const qty = qtyInput.length ? (parseInt(qtyInput.val()) || 1) : 1;
+
+            const payload = {
                 id: btn.data('id'),
                 name: btn.data('name'),
                 price: btn.data('price'),
                 image: btn.data('image'),
                 url: btn.data('url'),
-                qty: 1,
-            }).done(function (res) {
+                qty: qty,
+            };
+
+            const selectedAttributes = modal.find('.variant-option:checked').map(function () {
+                return parseInt($(this).val());
+            }).get();
+
+            if (selectedAttributes && selectedAttributes.length) {
+                payload.attributes = selectedAttributes;
+            }
+
+            cartAjax(routes.cartAdd, payload).done(function (res) {
                 renderMiniCart(res);
                 if (typeof toastr !== 'undefined') {
                     toastr.success('Product added to cart!');
+                }
+                modal.modal('hide');
+                const offcanvas = document.getElementById('shoppingCart');
+                if (offcanvas && typeof bootstrap !== 'undefined') {
+                    bootstrap.Offcanvas.getOrCreateInstance(offcanvas).show();
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not add to cart. Please try again.');
+                }
+            });
+        });
+
+        // ─── Compare Offcanvas — Clear All Products ──────────────────────────
+        $(document).on('click', '.tf-compapre-button-clear-all, .tf-compare-button-clear-all', function (e) {
+            e.preventDefault();
+            if (!routes.compareClear) return;
+
+            cartAjax(routes.compareClear, { _method: 'POST' }).done(function (res) {
+                if (res && res.success) {
+                    $('.offcanvas-compare .tf-compare-wrap').empty().hide();
+                    $('.offcanvas-compare .mini-compare-empty').show();
+                    updateCompareCount(0);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.info('Compare list cleared.');
+                    }
+                }
+            });
+        });
+
+        // ─── Quick View — Buy Now ─────────────────────────────────────────────
+        $(document).on('click', '.btn-add-quickview-buynow', function (e) {
+            e.preventDefault();
+            const addBtn = $('#quickView').find('.btn-add-quickview');
+            const modal = $('#quickView');
+            const qtyInput = modal.find('.quantity-product');
+            const qty = qtyInput.length ? (parseInt(qtyInput.val()) || 1) : 1;
+
+            const payload = {
+                id: addBtn.data('id'),
+                name: addBtn.data('name'),
+                price: addBtn.data('price'),
+                image: addBtn.data('image'),
+                url: addBtn.data('url'),
+                qty: qty,
+            };
+
+            const selectedAttributes = modal.find('.variant-option:checked').map(function () {
+                return parseInt($(this).val());
+            }).get();
+
+            if (selectedAttributes && selectedAttributes.length) {
+                payload.attributes = selectedAttributes;
+            }
+
+            cartAjax(routes.cartAdd, payload).done(function (res) {
+                if (res.success) {
+                    renderMiniCart(res);
+                    modal.modal('hide');
+                    window.location.href = routes.checkout || '/checkout';
+                } else {
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(res.message || 'Could not place order. Please try again.');
+                    }
+                }
+            }).fail(function () {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Could not place order. Please try again.');
                 }
             });
         });
@@ -448,6 +795,12 @@
                 $('.mini-compare-empty').show();
                 $('.tf-compare-wrap').hide();
             }
+            // Deactivate the matching product card button
+            $('[data-action="compare"][data-id="' + id + '"]').each(function () {
+                $(this).removeClass('active wd-action-btn--active');
+                $(this).find('.icon').removeClass('icon-compare1').addClass('icon-compare');
+                $(this).attr('title', 'Add to Compare');
+            });
             if (id && routes.compareRemove) {
                 const url = routes.compareRemove.replace(':id', id);
                 cartAjax(url, { _method: 'DELETE' }).done(function (res) {

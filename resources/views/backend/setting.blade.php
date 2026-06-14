@@ -17,7 +17,7 @@
     </div>
     <form action="{{ route('setting.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <div class="row">
+        <div class="row mb-3">
             <div class="col-xl-7">
                 <div class="card custom-card">
                     <div class="card-header justify-content-between">
@@ -80,51 +80,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="card custom-card">
-                    <div class="card-header justify-content-between">
-                        <div class="card-title">
-                            Currency Settings
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Currency</th>
-                                    <th>Symbol</th>
-                                    <th>Rate (BDT)</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @php
-                                    $currencies = ['BDT','USD','EUR'];
-                                @endphp
-
-                                @foreach($currencies as $code)
-                                    <tr>
-                                        <td>{{ $code }}</td>
-
-                                        <td>
-                                            <input type="text"
-                                                name="currency_symbols[{{ $code }}]"
-                                                class="form-control"
-                                                value="{{ $settings->currency_symbols[$code] ?? '' }}">
-                                        </td>
-
-                                        <td>
-                                            <input type="text"
-                                                name="currency_rates[{{ $code }}]"
-                                                class="form-control"
-                                                value="{{ $settings->currency_rates[$code] ?? '' }}">
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
             </div>
             <div class="col-xl-5">
                 <div class="row">
@@ -136,24 +91,34 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
-                                        <label for="facebook" class="form-label">Facebook</label>
-                                        <input type="text" name="facebook" class="form-control" id="facebook"
-                                            value="{{ $settings ? $settings->facebook : '' }}">
+                                        <label for="whatsapp" class="form-label">Whatsapp</label>
+                                        <input type="text" name="social_links[whatsapp]" class="form-control" id="whatsapp"
+                                            value="{{ $settings && isset($settings->social_links['whatsapp']) ? $settings->social_links['whatsapp'] : '' }}">
                                     </div>
                                     <div class="col-md-6 mb-2">
-                                        <label for="twitter" class="form-label">Twitter</label>
-                                        <input type="text" name="twitter" class="form-control" id="twitter"
-                                            value="{{ $settings ? $settings->twitter : '' }}">
+                                        <label for="facebook" class="form-label">Facebook</label>
+                                        <input type="text" name="social_links[facebook]" class="form-control" id="facebook"
+                                            value="{{ $settings && isset($settings->social_links['facebook']) ? $settings->social_links['facebook'] : '' }}">
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <label for="instagram" class="form-label">Instagram</label>
-                                        <input type="text" name="instagram" class="form-control" id="instagram"
-                                            value="{{ $settings ? $settings->instagram : '' }}">
+                                        <input type="text" name="social_links[instagram]" class="form-control" id="instagram"
+                                            value="{{ $settings && isset($settings->social_links['instagram']) ? $settings->social_links['instagram'] : '' }}">
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <label for="linkedin" class="form-label">Linkedin</label>
-                                        <input type="text" name="linkedin" class="form-control" id="linkedin"
-                                            value="{{ $settings ? $settings->linkedin : '' }}">
+                                        <input type="text" name="social_links[linkedin]" class="form-control" id="linkedin"
+                                            value="{{ $settings && isset($settings->social_links['linkedin']) ? $settings->social_links['linkedin'] : '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="twitter" class="form-label">Twitter</label>
+                                        <input type="text" name="social_links[twitter]" class="form-control" id="twitter"
+                                            value="{{ $settings && isset($settings->social_links['twitter']) ? $settings->social_links['twitter'] : '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="telegram" class="form-label">Telegram</label>
+                                        <input type="text" name="social_links[telegram]" class="form-control" id="telegram"
+                                            value="{{ $settings && isset($settings->social_links['telegram']) ? $settings->social_links['telegram'] : '' }}">
                                     </div>
                                 </div>
                             </div>

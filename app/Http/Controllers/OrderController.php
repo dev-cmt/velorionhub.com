@@ -19,7 +19,7 @@ class OrderController extends Controller
     {
         $orders = Order::latest()
             ->where('is_requisition', false)
-            ->with(['store', 'customer', 'assignedTo'])
+            ->with(['store', 'customer', 'assignedTo', 'items.product'])
             ->paginate(10);
 
         return view('backend.orders.index', compact('orders'));
@@ -30,19 +30,28 @@ class OrderController extends Controller
      */
     public function create()
     {
-        // Fetch necessary data for dropdowns
         $customers = User::get(['id', 'name', 'phone']);
         $stores = Store::where('status', 1)->get(['id', 'name']);
-        $products = Product::where('status', 1)->get(['id', 'name', 'sale_price', 'sku']);
+        $products = Product::where('status', 1)
+            ->with(['variants.variantItems.attributeItem'])
+            ->get(['id', 'name', 'sale_price', 'sku', 'has_variant']);
         $employees = User::where('is_admin', false)->get(['id', 'name']);
 
-        $paymentMethods = [0=>'Cash',1=>'Card',2=>'Mobile Banking',3=>'COD',4=>'Bank Transfer'];
-        $paymentStatuses = [0=>'Pending',1=>'Partial',2=>'Paid',3=>'Cancelled'];
-        $orderStatuses = [0=>'Pending',1=>'Confirmed',2=>'Hold',3=>'Cancelled',4=>'Delivered'];
+        $paymentMethods = $this->paymentMethods();
+        $paymentStatuses = $this->paymentStatuses();
+        $orderStatuses = $this->orderStatuses();
+
+        // Build variant map for JS: productId => [variants...]
+        $productsVariantData = $products->mapWithKeys(function ($p) {
+            return [$p->id => [
+                'has_variant' => (bool) $p->has_variant,
+                'variants'    => $p->has_variant ? $p->variant_summary : [],
+            ]];
+        });
 
         return view('backend.orders.create', compact(
-            'customers', 'stores', 'products', 'employees', 
-            'paymentMethods', 'paymentStatuses', 'orderStatuses'
+            'customers', 'stores', 'products', 'employees',
+            'paymentMethods', 'paymentStatuses', 'orderStatuses', 'productsVariantData'
         ));
     }
 
@@ -61,7 +70,7 @@ class OrderController extends Controller
             'customer_address' => 'nullable|string|max:500',
             'store_id' => 'required|exists:stores,id',
             'assigned_to' => 'nullable|exists:users,id',
-            
+
             // Financials (calculated on front-end, validated here)
             'sub_total' => 'required|numeric|min:0',
             'shipping_cost' => 'required|numeric|min:0',
@@ -69,13 +78,13 @@ class OrderController extends Controller
             'total' => 'required|numeric|min:0',
             'paid' => 'required|numeric|min:0',
             'due' => 'required|numeric|min:0',
-            
+
             'payment_method' => 'required|string|max:50',
             'payment_status' => 'required|string|max:50',
             'status' => 'required|string|max:50',
             'notes' => 'nullable|string',
         ]);
-        
+
         // 2. Validate Order Items Data
         $request->validate([
             'items' => 'required|array|min:1',
@@ -93,22 +102,47 @@ class OrderController extends Controller
             // 3. Create the Order
             $order = Order::create($orderValidated);
 
-            // 4. Create Order Items
+            // 4. Create Order Items (variant products: allow duplicates; non-variant: consolidate)
+            $nonVariantSeen = []; // product_id => row index for deduplication
             $orderItems = [];
             foreach ($request->input('items') as $item) {
-                $orderItems[] = new OrderItem([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'sku' => $item['sku'],
-                    'quantity' => $item['quantity'],
-                    'purchase_price' => $item['purchase_price'],
-                    'sale_price' => $item['sale_price'],
-                    // Convert attributes array to JSON string for the DB (or let the Model cast handle it)
-                    'attributes' => isset($item['attributes']) ? json_encode($item['attributes']) : null, 
-                ]);
+                $productId  = $item['product_id'];
+                $variantSku = trim($item['sku'] ?? '');
+                $product    = Product::find($productId);
+                $hasVariant = $product && $product->has_variant;
+
+                if ($hasVariant) {
+                    // Variant products: always add as a new line (keyed by SKU)
+                    $orderItems[] = new OrderItem([
+                        'order_id'       => $order->id,
+                        'product_id'     => $productId,
+                        'sku'            => $variantSku ?: ($product->sku ?? ''),
+                        'quantity'       => $item['quantity'],
+                        'purchase_price' => $item['purchase_price'],
+                        'sale_price'     => $item['sale_price'],
+                        'attributes'     => isset($item['attributes']) ? (is_string($item['attributes']) ? json_decode($item['attributes'], true) : $item['attributes']) : null,
+                    ]);
+                } else {
+                    // Non-variant products: consolidate duplicates (sum quantities)
+                    if (isset($nonVariantSeen[$productId])) {
+                        $idx = $nonVariantSeen[$productId];
+                        $orderItems[$idx]->quantity += (int) $item['quantity'];
+                    } else {
+                        $nonVariantSeen[$productId] = count($orderItems);
+                        $orderItems[] = new OrderItem([
+                            'order_id'       => $order->id,
+                            'product_id'     => $productId,
+                            'sku'            => $variantSku ?: ($product->sku ?? ''),
+                            'quantity'       => $item['quantity'],
+                            'purchase_price' => $item['purchase_price'],
+                            'sale_price'     => $item['sale_price'],
+                            'attributes'     => null,
+                        ]);
+                    }
+                }
             }
             $order->items()->saveMany($orderItems);
-            
+
             DB::commit();
 
             return redirect()->route('orders.index')->with('success', 'Order placed successfully. Invoice No: ' . $order->invoice_no);
@@ -124,22 +158,30 @@ class OrderController extends Controller
      */
     public function edit($order)
     {
-        // Eager load items for the edit view
         $order = Order::with('items.product')->find($order);
 
-        // Fetch necessary data for dropdowns
         $customers = User::get(['id', 'name', 'phone']);
         $stores = Store::where('status', 1)->get(['id', 'name']);
-        $products = Product::where('status', 1)->get(['id', 'name', 'sale_price', 'sku']);
+        $products = Product::where('status', 1)
+            ->with(['variants.variantItems.attributeItem'])
+            ->get(['id', 'name', 'sale_price', 'sku', 'has_variant']);
         $employees = User::where('is_admin', false)->get(['id', 'name']);
 
-        $paymentMethods = [0=>'Cash',1=>'Card',2=>'Mobile Banking',3=>'COD',4=>'Bank Transfer'];
-        $paymentStatuses = [0=>'Pending',1=>'Partial',2=>'Paid',3=>'Cancelled'];
-        $orderStatuses = [0=>'Pending',1=>'Confirmed',2=>'Hold',3=>'Cancelled',4=>'Delivered'];
+        $paymentMethods = $this->paymentMethods();
+        $paymentStatuses = $this->paymentStatuses();
+        $orderStatuses = $this->orderStatuses();
+
+        // Build variant map for JS
+        $productsVariantData = $products->mapWithKeys(function ($p) {
+            return [$p->id => [
+                'has_variant' => (bool) $p->has_variant,
+                'variants'    => $p->has_variant ? $p->variant_summary : [],
+            ]];
+        });
 
         return view('backend.orders.edit', compact(
-            'order', 'customers', 'stores', 'products', 'employees', 
-            'paymentMethods', 'paymentStatuses', 'orderStatuses'
+            'order', 'customers', 'stores', 'products', 'employees',
+            'paymentMethods', 'paymentStatuses', 'orderStatuses', 'productsVariantData'
         ));
     }
 
@@ -148,10 +190,9 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
+        // dd($request->all());
         // 1. Validate Order Data
         $orderValidated = $request->validate([
-            // Exclude the current order ID from the unique check
-            'invoice_no' => 'required|string|max:50|unique:orders,invoice_no,' . $order->id,
             'source' => 'nullable|string|max:255',
             'customer_id' => 'nullable|exists:users,id',
             'customer_name' => 'required|string|max:255',
@@ -159,7 +200,7 @@ class OrderController extends Controller
             'customer_address' => 'nullable|string|max:500',
             'store_id' => 'required|exists:stores,id',
             'assigned_to' => 'nullable|exists:users,id',
-            
+
             // Financials
             'sub_total' => 'required|numeric|min:0',
             'shipping_cost' => 'required|numeric|min:0',
@@ -167,24 +208,23 @@ class OrderController extends Controller
             'total' => 'required|numeric|min:0',
             'paid' => 'required|numeric|min:0',
             'due' => 'required|numeric|min:0',
-            
+
             'payment_method' => 'required|string|max:50',
             'payment_status' => 'required|string|max:50',
             'status' => 'required|string|max:50',
             'notes' => 'nullable|string',
         ]);
-        
+
         // 2. Validate Order Items Data
-        $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.id' => 'nullable|exists:order_items,id', // Exists for update, null for new item
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.sku' => 'required|string|max:50',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.purchase_price' => 'required|numeric|min:0',
-            'items.*.sale_price' => 'required|numeric|min:0',
-            // 'items.*.attributes' => 'nullable|array',
-        ]);
+        // $request->validate([
+        //     'items'                  => 'required|array|min:1',
+        //     'items.*.id'             => 'nullable|exists:order_items,id',
+        //     'items.*.product_id'     => 'required|exists:products,id',
+        //     'items.*.sku'            => 'nullable|string|max:100',
+        //     'items.*.quantity'       => 'required|integer|min:1',
+        //     'items.*.purchase_price' => 'required|numeric|min:0',
+        //     'items.*.sale_price'     => 'required|numeric|min:0',
+        // ]);
 
         try {
             DB::beginTransaction();
@@ -192,29 +232,52 @@ class OrderController extends Controller
             // 3. Update the Order
             $order->update($orderValidated);
 
-            // 4. Sync Order Items
+            // 4. Sync Order Items (variant = allow duplicates; non-variant = consolidate)
             $submittedItemIds = collect($request->input('items'))->pluck('id')->filter()->toArray();
-            
-            // Delete items not in the submission
             $order->items()->whereNotIn('id', $submittedItemIds)->delete();
 
-            // Create/Update items
+            $nonVariantSeen = []; // product_id => order_item_id for deduplication
             foreach ($request->input('items') as $itemData) {
                 $itemData['order_id'] = $order->id;
-                // Encode attributes if present
-                if (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
-                    $itemData['attributes'] = json_encode($itemData['attributes']);
+                $productId  = $itemData['product_id'];
+                $product    = Product::find($productId);
+                $hasVariant = $product && $product->has_variant;
+
+                if (isset($itemData['attributes']) && is_string($itemData['attributes'])) {
+                    $itemData['attributes'] = json_decode($itemData['attributes'], true) ?: null;
+                } elseif (isset($itemData['attributes']) && is_array($itemData['attributes'])) {
+                    // keep as array, let model cast handle it
+                } else {
+                    $itemData['attributes'] = null;
                 }
 
-                if (isset($itemData['id'])) {
-                    // Update existing item
+                if (!$hasVariant) {
+                    // Non-variant: prevent duplicates by consolidating into the first row
+                    if (isset($nonVariantSeen[$productId])) {
+                        // Add quantity to the already-saved item
+                        OrderItem::where('id', $nonVariantSeen[$productId])
+                            ->increment('quantity', (int) $itemData['quantity']);
+                        // Delete the current row if it was an existing item (avoid orphan)
+                        if (isset($itemData['id'])) {
+                            OrderItem::where('id', $itemData['id'])->delete();
+                        }
+                        continue;
+                    }
+                }
+
+                if (isset($itemData['id']) && $itemData['id']) {
                     OrderItem::where('id', $itemData['id'])->update($itemData);
+                    if (!$hasVariant) {
+                        $nonVariantSeen[$productId] = $itemData['id'];
+                    }
                 } else {
-                    // Create new item
-                    OrderItem::create($itemData);
+                    $newItem = OrderItem::create($itemData);
+                    if (!$hasVariant) {
+                        $nonVariantSeen[$productId] = $newItem->id;
+                    }
                 }
             }
-            
+
             DB::commit();
 
             return redirect()->route('orders.index')->with('success', 'Order updated successfully. Invoice No: ' . $order->invoice_no);
@@ -232,13 +295,13 @@ class OrderController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             // Delete all associated order items first
             $order->items()->delete();
-            
+
             // Then delete the order itself
             $order->delete();
-            
+
             DB::commit();
 
             return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
@@ -247,5 +310,45 @@ class OrderController extends Controller
             DB::rollBack();
             return back()->withErrors(['An error occurred while deleting the order.']);
         }
+    }
+
+    private function paymentMethods()
+    {
+        return [
+            0 => 'Cash',
+            1 => 'Card',
+            2 => 'Mobile Banking',
+            3 => 'COD',
+            4 => 'Bank Transfer'
+        ];
+    }
+
+    private function paymentStatuses()
+    {
+        return [
+            0 => 'Pending',
+            1 => 'Partial',
+            2 => 'Paid',
+            3 => 'Cancelled'
+        ];
+    }
+
+    private function orderStatuses()
+    {
+        return [
+            0 => 'Pending',
+            1 => 'Confirmed',
+            2 => 'Hold',
+            3 => 'Cancelled',
+            4 => 'Stockout',
+            5 => 'Packaged',
+            6 => 'Courier Entry',
+            7 => 'On Delivery',
+            8 => 'Delivered',
+            9 => 'Partial Delivered',
+            10 => 'Exchange',
+            11 => 'Return',
+            12 => 'Return Received',
+        ];
     }
 }

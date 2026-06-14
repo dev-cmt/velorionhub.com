@@ -50,19 +50,24 @@
             @php
                 $cart = \Cart::session(Auth::id() ?? session()->getId());
                 $items = $cart->getContent();
+                $settings = \App\Models\Setting::first();
+                $shippingActive = $settings && $settings->shipping_active;
+                $shippingInside = $settings ? floatval($settings->shipping_inside) : 60;
+                $shippingOutside = $settings ? floatval($settings->shipping_outside) : 100;
+                $cartSubtotal = $cart->getSubTotal();
             @endphp
+
 
             @if($items->count() > 0)
             <form action="{{ route('place.order') }}" method="POST" id="checkout-form">
                 @csrf
                 <div class="tf-checkout-wrap flex-lg-nowrap">
                     <div class="page-checkout">
-                        <div class="wrap">
+                        {{-- <div class="wrap">
                             <h5 class="title has-account">
                                 <span class="fw-semibold">Contact</span>
                                 @guest
-                                <span class="body-text-3">Have an account? <a href="#register" data-bs-toggle="modal"
-                                        class="body-text-3 text-secondary link">Login</a></span>
+                                    <span class="body-text-3">Have an account? <a href="#register" data-bs-toggle="modal" class="body-text-3 text-secondary link">Login</a></span>
                                 @endguest
                             </h5>
                             @if(session('error'))
@@ -87,7 +92,7 @@
                                     <input class="def" type="text" name="phone" value="{{ old('phone') }}" placeholder="e.g. +8801700000000" required>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="wrap">
                             <h5 class="title fw-semibold">
                                 Delivery Details
@@ -95,62 +100,48 @@
                             <div class="def">
                                 <div class="cols">
                                     <fieldset>
-                                        <label>First name <span class="text-danger">*</span></label>
-                                        <input type="text" name="first_name" value="{{ old('first_name') }}" placeholder="e.g. Jonn" required>
+                                        <label>Full name <span class="text-danger">*</span></label>
+                                        <input type="text" name="full_name" value="{{ old('full_name') }}" placeholder="e.g. Jonn" required>
                                     </fieldset>
                                     <fieldset>
-                                        <label>Last name <span class="text-danger">*</span></label>
-                                        <input type="text" name="last_name" value="{{ old('last_name') }}" placeholder="e.g. Doe" required>
-                                    </fieldset>
-                                </div>
-                                <div class="cols">
-                                    <fieldset style="flex: 2;">
-                                        <label>City <span class="text-danger">*</span></label>
-                                        <input type="text" name="city" value="{{ old('city') }}" placeholder="e.g. Dhaka" required>
-                                    </fieldset>
-                                    <fieldset style="flex: 1;">
-                                        <label>ZIP code</label>
-                                        <input type="text" name="zip" value="{{ old('zip') }}" placeholder="e.g. 1200">
+                                        <label>Phone number <span class="text-danger">*</span></label>
+                                        <input type="text" name="phone" value="{{ old('phone') }}" placeholder="e.g. +8801700000000" required>
                                     </fieldset>
                                 </div>
                                 <fieldset>
                                     <label>Street Address <span class="text-danger">*</span></label>
-                                    <input type="text" name="address" value="{{ old('address') }}" placeholder="Your detailed street address" required>
+                                    <textarea name="address" placeholder="Your detailed street address">{{ old('address') }}</textarea>
+                                </fieldset>
+                                @if($shippingActive)
+                                <fieldset>
+                                    <label>Shipping <span class="text-danger">*</span></label>
+                                    <div class="d-flex flex-column gap-0 border rounded-1 overflow-hidden">
+                                        <!-- Option 1: Inside Dhaka -->
+                                        <label class="d-flex justify-content-between align-items-center bg-white px-3 py-2 border-bottom checkout-shipping-option" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                <input class="form-check-input my-0 me-3 shipping-radio" type="radio" name="shipping_method" id="inside_dhaka" value="{{ $shippingInside }}" checked style="width: 1.15rem; height: 1.15rem;">
+                                                <span class="text-secondary" style="font-size: 0.95rem;">ঢাকার ভিতরে:</span>
+                                            </div>
+                                            <span class="fw-normal text-success" style="font-size: 0.95rem;">TK {{ number_format($shippingInside, 2) }}</span>
+                                        </label>
+
+                                        <!-- Option 2: Outside Dhaka -->
+                                        <label class="d-flex justify-content-between align-items-center bg-white px-3 py-2 checkout-shipping-option" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                <input class="form-check-input my-0 me-3 shipping-radio" type="radio" name="shipping_method" id="outside_dhaka" value="{{ $shippingOutside }}" style="width: 1.15rem; height: 1.15rem;">
+                                                <span class="text-secondary" style="font-size: 0.95rem;">ঢাকার বাহিরে:</span>
+                                            </div>
+                                            <span class="fw-normal text-success" style="font-size: 0.95rem;">TK {{ number_format($shippingOutside, 2) }}</span>
+                                        </label>
+                                    </div>
+                                    @else
+                                        <input type="hidden" name="shipping_method" value="0">
+                                    @endif
                                 </fieldset>
                                 <fieldset>
                                     <label>Order note</label>
                                     <textarea name="note" placeholder="Note on your order (optional)">{{ old('note') }}</textarea>
                                 </fieldset>
-                            </div>
-                        </div>
-                        <div class="wrap">
-                            <h5 class="title">
-                                Payment Method
-                            </h5>
-                            <div class="form-payment">
-                                <div class="payment-box" id="payment-box">
-                                    <div class="payment-item payment-choose-card active">
-                                        <label for="delivery-method" class="payment-header radio-item d-flex align-items-center cursor-pointer w-100"
-                                            data-bs-toggle="collapse" data-bs-target="#delivery-payment" aria-controls="delivery-payment" aria-expanded="true">
-                                            <input type="radio" name="payment_method" value="cod" class="tf-check-rounded mr-2"
-                                                id="delivery-method" checked>
-                                            <span class="body-text-3 fw-semibold">Cash on delivery</span>
-                                        </label>
-                                    </div>
-                                    <div class="payment-item">
-                                        <label for="pickup-method" class="payment-header radio-item collapsed d-flex align-items-center cursor-pointer w-100"
-                                            data-bs-toggle="collapse" data-bs-target="#pickup-payment" aria-controls="pickup-payment" aria-expanded="false">
-                                            <input type="radio" name="payment_method" value="cash" class="tf-check-rounded mr-2"
-                                                id="pickup-method">
-                                            <span class="body-text-3 fw-semibold">Cash Pickup</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="box-btn">
-                                    <button type="submit" class="tf-btn w-100">
-                                        <span class="text-white">Place order</span>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -215,13 +206,35 @@
                                 </div>
                             </div>
                             <ul class="sec-total-price">
-                                <li><span class="body-text-3">Subtotal</span><span class="body-text-3">TK {{ number_format($cart->getSubTotal(), 2) }}</span>
-                                </li>
-                                <li><span class="body-text-3">Shipping</span><span class="body-text-3">Free shipping</span></li>
-                                <li><span class="body-md-2 fw-semibold">Total</span><span
-                                        class="body-md-2 fw-semibold text-primary">TK {{ number_format($cart->getTotal(), 2) }}</span>
-                                </li>
+                                <li><span class="body-text-3">Subtotal</span><span class="body-text-3" id="checkout-subtotal">TK {{ number_format($cartSubtotal, 2) }}</span></li>
+                                <li><span class="body-text-3">Shipping</span><span class="body-text-3" id="checkout-shipping">@if($shippingActive) TK {{ number_format($shippingInside, 2) }} @else Free Shipping @endif</span></li>
+                                <li><span class="body-md-2 fw-semibold">Total</span><span class="body-md-2 fw-semibold text-primary" id="checkout-total">TK {{ number_format($cartSubtotal + ($shippingActive ? $shippingInside : 0), 2) }}</span></li>
                             </ul>
+                            @if($shippingActive)
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                var subtotal = {{ $cartSubtotal }};
+                                var shippingEls = document.querySelectorAll('.shipping-radio');
+                                var shippingDisplay = document.getElementById('checkout-shipping');
+                                var totalDisplay = document.getElementById('checkout-total');
+                                function updateTotal() {
+                                    var selectedEl = document.querySelector('.shipping-radio:checked');
+                                    var shipping = selectedEl ? parseFloat(selectedEl.value) : 0;
+                                    var total = subtotal + shipping;
+                                    shippingDisplay.textContent = 'TK ' + shipping.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                                    totalDisplay.textContent = 'TK ' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                                }
+                                shippingEls.forEach(function(el) { el.addEventListener('change', updateTotal); });
+                                updateTotal();
+                            });
+                            </script>
+                            @endif
+                        </div>
+
+                        <div class="box-btn mt-4">
+                            <button type="submit" class="tf-btn w-100">
+                                <span class="text-white">Place order</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -239,13 +252,44 @@
         </div>
     </section>
     <!-- /Check Out Cart -->
-        </div>
-    </section>
-    <!-- /Check Out Cart -->
+
     {{-- Dynamic sections from Page Builder --}}
     @if(isset($page) && $page && $page->activeSections->isNotEmpty())
         @foreach($page->activeSections as $section)
             {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
         @endforeach
     @endif
+
+
+    @push('js')
+        <script>
+            dataLayer.push({ ecommerce: null });
+            dataLayer.push({
+                'event': 'begin_checkout',
+                'ecommerce': {
+                    'currency': 'BDT',
+                    'value': {{ \Cart::getTotal() }},
+                    'items': [
+                        @foreach (\Cart::getContent() as $item)
+                        {
+                            'item_id': '{{ $item->associatedModel->id ?? $item->id }}',
+                            'item_name': '{{ $item->name }}',
+                            'item_category': '{{ $item->associatedModel->category->name ?? '' }}',
+                            'price': {{ $item->price }},
+                            'quantity': {{ $item->quantity }}
+                        },
+                        @endforeach
+                    ]
+                }
+            });
+
+            fbq('track', 'InitiateCheckout', {
+                content_ids: [@foreach (\Cart::getContent() as $item) '{{ $item->associatedModel->id ?? $item->id }}', @endforeach],
+                content_type: 'product',
+                value: {{ \Cart::getTotal() }},
+                currency: 'BDT',
+                num_items: {{ \Cart::getContent()->count() }}
+            });
+        </script>
+    @endpush
 </x-frontend-layout>

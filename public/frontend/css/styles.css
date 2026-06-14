@@ -519,7 +519,7 @@ a {
   text-decoration: none;
   cursor: pointer;
   display: inline-block;
-  color: var(--gray);
+  color: var(--black);
 }
 a:focus, a:hover {
   -webkit-transition: all 0.3s ease-in-out;
@@ -2308,7 +2308,7 @@ header.header-type-stc {
   left: 0;
   bottom: 0;
   width: 100%;
-  height: 1px;
+  height: 3px; /*ch-1PX*/
   background-color: var(--primary);
   transform: scale(0);
   -webkit-transition: all 0.3s ease-in-out;
@@ -2639,6 +2639,7 @@ header.header-type-stc {
   flex-direction: column;
   gap: 15px;
   flex-shrink: 0;
+  justify-content: center; /*CH-ADD*/
 }
 
 .ft-logo .logo-site {
@@ -2837,7 +2838,7 @@ header.header-type-stc {
   color: var(--secondary);
 }
 .flat-title-tab-product-des .menu-tab-line .tab-link.active {
-  color: var(--secondary);
+  color: var(--primary);
 }
 .flat-title-tab-product-des .tab-main {
   padding: 30px;
@@ -3412,7 +3413,7 @@ form input[type=submit] {
   padding: 0;
 }
 form textarea {
-  height: 124px;
+  height: 80px;  /*CH-124px*/
 }
 form .cols {
   display: flex;
@@ -7485,7 +7486,7 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 0px;
+  padding: 10px 0px; /*CH-15px*/
   position: relative;
 }
 .facet-categories ul a::after {
@@ -11002,6 +11003,12 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
 }
 .tf-product-info-content {
     width: 100% !important;
+}
+.form-add-comment .icon-star{
+    font-size: 32px;
+}
+.nav-list .nav-item a{
+    color: var(--white) !important;
 }
 /* Green Pulse Effect */
 @keyframes  pulse-green {

@@ -26,10 +26,10 @@
                     <div class="wrap-sidebar-account ">
                         <ul class="my-account-nav content-append">
                             <li><span class="my-account-nav-item active">Dashboard</span></li>
-                            <li><a href="my-account-orders.html" class="my-account-nav-item">Orders</a></li>
-                            <li><a href="my-account-edit.html" class="my-account-nav-item">Account Details</a></li>
-                            <li><a href="wishlist.html" class="my-account-nav-item">Wishlist</a></li>
-                            <li><a href="index.html" class="my-account-nav-item">Logout</a></li>
+                            <li><a href="{{ route('order.list') }}" class="my-account-nav-item">Orders</a></li>
+                            <li><a href="{{ route('account.edit') }}" class="my-account-nav-item">Account Details</a></li>
+                            <li><a href="{{ route('wishlist') }}" class="my-account-nav-item">Wishlist</a></li>
+                            <li><a href="{{ route('logout') }}" class="my-account-nav-item">Logout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -39,15 +39,15 @@
                             <h3 class="fw-semibold mb-20">Hello Themesflat</h3>
                             <p>
                                 From your account dashboard you can view your
-                                <a class="text-secondary link fw-medium" href="my-account-orders.html">
+                                <a class="text-secondary link fw-medium" href="{{ route('order.list') }}">
                                     recent orders
                                 </a>
-                                , manage your
-                                <a class="text-secondary link fw-medium" href="my-account-address.html">
-                                    shipping and billing address
+                                , and
+                                <a class="text-secondary link fw-medium" href="{{ route('wishlist') }}">
+                                    view your wishlist
                                 </a>
                                 , and
-                                <a class="text-secondary link fw-medium" href="my-account-edit.html">
+                                <a class="text-secondary link fw-medium" href="{{ route('account.edit') }}">
                                     edit your password and account details
                                 </a>.
                             </p>

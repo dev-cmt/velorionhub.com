@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Courier;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
@@ -21,6 +22,7 @@ class SettingController extends Controller
         // convert arrays to json-safe format
         $input['currency_symbols'] = $request->currency_symbols ?? [];
         $input['currency_rates'] = $request->currency_rates ?? [];
+        $input['social_links'] = $request->social_links ?? [];
 
         if($request->hasFile('logo'))
         {
@@ -96,14 +98,14 @@ class SettingController extends Controller
             Setting::create($input);
         }
 
-        try {
-            \Illuminate\Support\Facades\Artisan::call('config:clear');
-            \Illuminate\Support\Facades\Artisan::call('route:clear');
-            \Illuminate\Support\Facades\Artisan::call('view:clear');
-            \Illuminate\Support\Facades\Artisan::call('cache:clear');
-        } catch (\Exception $e) {
-            // Ignore if artisan calls fail in some environments
-        }
+        // try {
+        //     \Illuminate\Support\Facades\Artisan::call('config:clear');
+        //     \Illuminate\Support\Facades\Artisan::call('route:clear');
+        //     \Illuminate\Support\Facades\Artisan::call('view:clear');
+        //     \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        // } catch (\Exception $e) {
+        //     // Ignore if artisan calls fail in some environments
+        // }
 
         return redirect()->back()->with('success', 'Settings updated successfully');
     }
@@ -115,7 +117,8 @@ class SettingController extends Controller
     public function systemSettings()
     {
         $settings = Setting::first();
-        return view('backend.system_setting', compact('settings'));
+        $couriers = Courier::latest()->get();
+        return view('backend.system_setting', compact('settings', 'couriers'));
     }
     public function financialSettings()
     {

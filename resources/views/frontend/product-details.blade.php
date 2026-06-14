@@ -25,7 +25,7 @@
     } catch (\Exception $e) {}
 
     // Reviews
-    $reviews       = $product->reviews()->where('status', 1)->latest()->get();
+    $reviews       = $product->reviews()->where('status', 1)->with('media')->latest()->get();
     $reviewCount   = $reviews->count();
     $avgRating     = $reviewCount > 0 ? round($reviews->avg('rating'), 1) : 0;
     $ratingDistrib = [5=>0, 4=>0, 3=>0, 2=>0, 1=>0];
@@ -402,206 +402,285 @@
     <!-- /Product Main -->
 
     <!-- Product Description Tab -->
-    <section class="tf-sp-4">
+    <section class="tf-sp-4 ">
         <div class="container">
-            <div class="flat-product-des-list style-2">
+            <div class="flat-animate-tab flat-title-tab-product-des">
+                <div class=" flat-title-tab text-center">
+                    <ul class="menu-tab-line" role="tablist">
+                        <li class="nav-tab-item" role="presentation">
+                            <a href="#prd-des" class="tab-link product-title fw-semibold active"
+                                data-bs-toggle="tab">Description</a>
+                        </li>
+                        <li class="nav-tab-item" role="presentation">
+                            <a href="#prd-infor" class="tab-link product-title fw-semibold"
+                                data-bs-toggle="tab">Product
+                                information</a>
+                        </li>
+                        <li class="nav-tab-item" role="presentation">
+                            <a href="#prd-review" class="tab-link product-title fw-semibold"
+                                data-bs-toggle="tab">Reviews</a>
+                        </li>
 
-                {{-- Description --}}
-                @if($product->description)
-                <div class="flat-title-tab-product-des">
-                    <h5 class="fw-semibold">Description</h5>
-                    <div class="tab-main tab-des">
-                        <div class="body-text-3">{!! nl2br(e($product->description)) !!}</div>
-                    </div>
+                    </ul>
                 </div>
-                @endif
-
-                {{-- Specifications --}}
-                @if(!empty($specs))
-                <div class="flat-title-tab-product-des">
-                    <h5 class="fw-semibold">Product information</h5>
-                    <div class="tab-main tab-info">
-                        <ul class="list-feature">
-                            @foreach($specs as $key => $val)
-                                <li>
-                                    <p class="name-feature">{{ $key }}</p>
-                                    <p class="property">{{ $val }}</p>
-                                </li>
-                            @endforeach
-                            @if($product->sku)
-                            <li>
-                                <p class="name-feature">SKU</p>
-                                <p class="property">{{ $product->sku }}</p>
-                            </li>
-                            @endif
-                            @if($product->brand)
-                            <li>
-                                <p class="name-feature">Brand</p>
-                                <p class="property">{{ $product->brand->name }}</p>
-                            </li>
-                            @endif
-                            @if($product->manufacturer)
-                            <li>
-                                <p class="name-feature">Manufacturer</p>
-                                <p class="property">{{ $product->manufacturer }}</p>
-                            </li>
-                            @endif
-                            <li>
-                                <p class="name-feature">Customer Reviews</p>
-                                <div class="w-100 star-review flex-wrap">
-                                    <ul class="list-star">
+                <div class="tab-content">
+                    <div class="tab-pane active show" id="prd-des" role="tabpanel">
+                        <!-- Description -->
+                        @if($product->description)
+                            <div class="tab-main tab-des">
+                                <div class="body-text-3">{!! $product->description ?? '' !!}</div>
+                            </div>
+                        @else
+                            <p class="body-text-3 text-main-2 text-center py-3">No description available for this product.</p>
+                        @endif
+                    </div>
+                    <div class="tab-pane" id="prd-infor" role="tabpanel">
+                        <!-- Specifications -->
+                        @if(!empty($specs))
+                            <div class="tab-main tab-info">
+                                <ul class="list-feature">
+                                    @foreach($specs as $key => $val)
+                                        <li>
+                                            <p class="name-feature">{{ $key }}</p>
+                                            <p class="property">{{ $val }}</p>
+                                        </li>
+                                    @endforeach
+                                    @if($product->sku)
+                                    <li>
+                                        <p class="name-feature">SKU</p>
+                                        <p class="property">{{ $product->sku }}</p>
+                                    </li>
+                                    @endif
+                                    @if($product->brand)
+                                    <li>
+                                        <p class="name-feature">Brand</p>
+                                        <p class="property">{{ $product->brand->name }}</p>
+                                    </li>
+                                    @endif
+                                    @if($product->manufacturer)
+                                    <li>
+                                        <p class="name-feature">Manufacturer</p>
+                                        <p class="property">{{ $product->manufacturer }}</p>
+                                    </li>
+                                    @endif
+                                    <li>
+                                        <p class="name-feature">Customer Reviews</p>
+                                        <div class="w-100 star-review flex-wrap">
+                                            <ul class="list-star">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <li><i class="icon-star {{ $i <= $avgRating ? '' : 'text-main-4' }}"></i></li>
+                                                @endfor
+                                            </ul>
+                                            <p class="caption text-main-2">Reviews ({{ $reviewCount }})</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        @else
+                            <p class="body-text-3 text-main-2 text-center py-3">No additional information available for this product.</p>
+                        @endif
+                    </div>
+                    <div class="tab-pane" id="prd-review" role="tabpanel">
+                        <div class="tab-main tab-review flex-lg-nowrap">
+                            <!-- Rating Summary -->
+                            <div class="tab-rating-wrap">
+                                <div class="li rating-percent flex-shrink-0">
+                                    <p class="rate-percent">{{ number_format($avgRating, 1) }} <span>/ 5</span></p>
+                                    <ul class="list-star justify-content-center">
                                         @for($i = 1; $i <= 5; $i++)
                                             <li><i class="icon-star {{ $i <= $avgRating ? '' : 'text-main-4' }}"></i></li>
                                         @endfor
                                     </ul>
-                                    <p class="caption text-main-2">Reviews ({{ $reviewCount }})</p>
+                                    <p class="text-cl-3">Based on {{ $reviewCount }} review{{ $reviewCount !== 1 ? 's' : '' }}</p>
                                 </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                @endif
-
-                {{-- Reviews --}}
-                <div class="flat-title-tab-product-des">
-                    <h5 class="fw-semibold">Reviews</h5>
-                    <div class="tab-main tab-review style-2">
-
-                        {{-- Rating Summary --}}
-                        <div class="tab-rating-wrap">
-                            <div class="li rating-percent flex-shrink-0">
-                                <p class="rate-percent">{{ number_format($avgRating, 1) }} <span>/ 5</span></p>
-                                <ul class="list-star justify-content-center">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <li><i class="icon-star {{ $i <= $avgRating ? '' : 'text-main-4' }}"></i></li>
-                                    @endfor
+                                <span class="br-line d-none d-xl-block type-vertical"></span>
+                                <ul class="li rating-progress-list flex-shrink-0">
+                                    @foreach([5, 4, 3, 2, 1] as $star)
+                                        @php
+                                            $pct = $reviewCount > 0 ? round(($ratingDistrib[$star] / $reviewCount) * 100) : 0;
+                                        @endphp
+                                        <li>
+                                            <p class="start-number body-text-3">{{ $star }}<i class="icon-star text-third"></i></p>
+                                            <div class="rating-progress">
+                                                <div class="progress style-2" role="progressbar">
+                                                    <div class="progress-bar" style="width: {{ $pct }}%;"></div>
+                                                </div>
+                                            </div>
+                                            <p class="count-review body-text-3">{{ $ratingDistrib[$star] }}</p>
+                                        </li>
+                                    @endforeach
                                 </ul>
-                                <p class="text-cl-3">Based on {{ $reviewCount }} review{{ $reviewCount !== 1 ? 's' : '' }}</p>
-                            </div>
-                            <span class="br-line d-none d-xl-block type-vertical"></span>
-                            <ul class="li rating-progress-list flex-shrink-0">
-                                @foreach([5, 4, 3, 2, 1] as $star)
-                                    @php
-                                        $pct = $reviewCount > 0 ? round(($ratingDistrib[$star] / $reviewCount) * 100) : 0;
-                                    @endphp
-                                    <li>
-                                        <p class="start-number body-text-3">{{ $star }}<i class="icon-star text-third"></i></p>
-                                        <div class="rating-progress">
-                                            <div class="progress style-2" role="progressbar">
-                                                <div class="progress-bar" style="width: {{ $pct }}%;"></div>
-                                            </div>
-                                        </div>
-                                        <p class="count-review body-text-3">{{ $ratingDistrib[$star] }}</p>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
 
-                        {{-- Review List --}}
-                        <div class="tab-review-wrap">
-                            @if(session('success'))
-                                <div class="alert alert-success mb-3">{{ session('success') }}</div>
-                            @endif
-
-                            <ul class="review-list">
-                                @forelse($reviews as $review)
-                                    <li class="box-review">
-                                        <div class="avt">
-                                            <div style="width:48px;height:48px;border-radius:50%;background:#004EC3;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;">
-                                                {{ strtoupper(substr($review->name, 0, 1)) }}
-                                            </div>
+                                <div class="add-comment-wrap sticky-top w-100">
+                                    <h5 class="fw-semibold">Add your comment</h5>
+                                    <form class="form-add-comment" method="POST" action="{{ route('review.store', $product) }}" enctype="multipart/form-data">
+                                        @csrf
+                                        <fieldset class="rate">
+                                            <label>Rating:</label>
+                                            <ul class="list-star justify-content-start" id="star-rating">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <li data-rating="{{ $i }}" style="cursor:pointer;" class="star-item">
+                                                        <i class="icon-star text-main-4"></i>
+                                                    </li>
+                                                @endfor
+                                            </ul>
+                                            <input type="hidden" name="rating" id="rating-value" value="">
+                                            @error('rating')<p class="text-danger body-small">{{ $message }}</p>@enderror
+                                        </fieldset>
+                                        <fieldset>
+                                            <label>Name:</label>
+                                            <input type="text" name="name" placeholder="Your name" value="{{ old('name', Auth::user()->name ?? '') }}" required>
+                                            @error('name')<p class="text-danger body-small">{{ $message }}</p>@enderror
+                                        </fieldset>
+                                        <fieldset>
+                                            <label>Email:</label>
+                                            <input type="email" name="email" placeholder="Your email" value="{{ old('email', Auth::user()->email ?? '') }}" required>
+                                            @error('email')<p class="text-danger body-small">{{ $message }}</p>@enderror
+                                        </fieldset>
+                                        <fieldset class="align-items-sm-start">
+                                            <label>Comment:</label>
+                                            <textarea name="text" placeholder="Write your review..." required>{{ old('text') }}</textarea>
+                                            @error('text')<p class="text-danger body-small">{{ $message }}</p>@enderror
+                                        </fieldset>
+                                        <fieldset class="align-items-sm-start">
+                                            <label>Images:</label>
+                                            <input type="file" name="images[]" id="review-images" multiple accept="image/*" class="form-control" style="padding:6px;">
+                                        </fieldset>
+                                        <div style="flex:1;">
+                                            <small class="text-muted">You can upload up to 5 images. Max file size: 2MB</small>
+                                            @error('images.*')<p class="text-danger body-small">{{ $message }}</p>@enderror
+                                            <div id="review-image-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
                                         </div>
-                                        <div class="review-content">
-                                            <div class="author-wrap">
-                                                <h6 class="name fw-semibold">{{ $review->name }}</h6>
-                                                <ul class="list-star">
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <li><i class="icon-star {{ $i <= $review->rating ? '' : 'text-main-4' }}"></i></li>
-                                                    @endfor
-                                                </ul>
-                                            </div>
-                                            <p class="text-review">{{ $review->comment }}</p>
-                                            <p class="date-review body-small">{{ $review->created_at->format('d/m/Y') }}</p>
-                                        </div>
-                                    </li>
-                                @empty
-                                    <li>
-                                        <p class="body-text-3 text-main-2 py-3">No reviews yet. Be the first to review this product!</p>
-                                    </li>
-                                @endforelse
-                            </ul>
-
-                            {{-- Add Review Form --}}
-                            <div class="add-comment-wrap sticky-top w-100">
-                                <h5 class="fw-semibold">Add your comment</h5>
-                                <form class="form-add-comment" method="POST" action="{{ route('review.store', $product) }}">
-                                    @csrf
-                                    <fieldset class="rate">
-                                        <label>Rating:</label>
-                                        <ul class="list-star justify-content-start" id="star-rating">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <li data-rating="{{ $i }}" style="cursor:pointer;" class="star-item">
-                                                    <i class="icon-star text-main-4"></i>
-                                                </li>
-                                            @endfor
-                                        </ul>
-                                        <input type="hidden" name="rating" id="rating-value" value="">
-                                        @error('rating')<p class="text-danger body-small">{{ $message }}</p>@enderror
-                                    </fieldset>
-                                    <fieldset>
-                                        <label>Name:</label>
-                                        <input type="text" name="name" placeholder="Your name" value="{{ old('name', Auth::user()->name ?? '') }}" required>
-                                        @error('name')<p class="text-danger body-small">{{ $message }}</p>@enderror
-                                    </fieldset>
-                                    <fieldset>
-                                        <label>Email:</label>
-                                        <input type="email" name="email" placeholder="Your email" value="{{ old('email', Auth::user()->email ?? '') }}" required>
-                                        @error('email')<p class="text-danger body-small">{{ $message }}</p>@enderror
-                                    </fieldset>
-                                    <fieldset class="align-items-sm-start">
-                                        <label>Comment:</label>
-                                        <textarea name="text" placeholder="Write your review..." required>{{ old('text') }}</textarea>
-                                        @error('text')<p class="text-danger body-small">{{ $message }}</p>@enderror
-                                    </fieldset>
-                                    <div class="btn-submit">
-                                        <button type="submit" class="tf-btn btn-gray btn-large-2">
+                                        <button type="submit" class="tf-btn btn-gray btn-large-2 w-100">
                                             <span class="text-white">Add Review</span>
                                         </button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="tab-review-wrap">
+                                <ul class="review-list">
+                                    @forelse($reviews as $review)
+                                        <li class="box-review">
+                                            <div class="avt">
+                                                <div style="width:48px;height:48px;border-radius:50%;background:#004EC3;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;">
+                                                    {{ strtoupper(substr($review->name, 0, 1)) }}
+                                                </div>
+                                            </div>
+                                            <div class="review-content">
+                                                <div class="author-wrap">
+                                                    <h6 class="name fw-semibold">{{ $review->name }}</h6>
+                                                    <ul class="list-star">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <li><i class="icon-star {{ $i <= $review->rating ? '' : 'text-main-4' }}"></i></li>
+                                                        @endfor
+                                                    </ul>
+                                                </div>
+                                                <p class="text-review">{{ $review->comment }}</p>
+                                                <p class="date-review body-small">{{ $review->created_at->format('d/m/Y') }}</p>
+                                                @if($review->media && $review->media->count() > 0)
+                                                    <div class="review-images mt-2 d-flex flex-wrap gap-2">
+                                                        @foreach($review->media as $media)
+                                                            <a href="{{ asset('uploads/reviews/' . $media->name) }}" target="_blank">
+                                                                <img src="{{ asset('uploads/reviews/' . $media->name) }}" alt="Review Image" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid #eee;">
+                                                            </a>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </li>
+                                    @empty
+                                        <li>
+                                            <p class="body-text-3 text-main-2 py-3">No reviews yet. Be the first to review this product!</p>
+                                        </li>
+                                    @endforelse
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
     <!-- /Product Description Tab -->
 
-    {{-- Related Products --}}
-    @if($related_products->count() > 0)
-    <section class="tf-sp-4 bg-light">
+    <!-- Related Viewed -->
+    <section class="tf-sp-2">
         <div class="container">
-            <h5 class="fw-semibold mb-4">Related Products</h5>
-            <div class="swiper tf-grid-layout swiper-product" data-preview="2" data-tablet="3" data-mobile="2" data-space="20">
-                <div class="swiper-wrapper">
-                    @foreach($related_products as $rp)
-                        <div class="swiper-slide">
-                            @include('frontend.partials.product-item-deal', ['product' => $rp, 'showProgress' => false])
-                        </div>
-                    @endforeach
+            <div class="flat-title wow fadeInUp" data-wow-delay="0s">
+                <h5 class="fw-semibold">Related Products</h5>
+                <div class="box-btn-slide relative">
+                    <div class="swiper-button-prev nav-swiper nav-prev-products"><i class="icon-arrow-left-lg"></i></div>
+                    <div class="swiper-button-next nav-swiper nav-next-products"><i class="icon-arrow-right-lg"></i></div>
                 </div>
+            </div>
+            <div class="swiper tf-sw-products" data-preview="5" data-tablet="4" data-mobile-sm="3" data-mobile="2"
+                data-space-lg="30" data-space-md="20" data-space="15" data-pagination="2" data-pagination-sm="3"
+                data-pagination-md="4" data-pagination-lg="5">
+                <div class="swiper-wrapper">
+                    @forelse($related_products as $index => $product)
+                        <div class="swiper-slide">
+                            @include('frontend.partials.product-item-deal', [
+                                'product' => $product,
+                                'wowDelay' => ($index * 0.1) . 's',
+                            ])
+                        </div>
+                    @empty
+                        <div class="swiper-slide">
+                            <p class="body-text text-center py-4">No products to show.</p>
+                        </div>
+                    @endforelse
+                </div>
+                <div class="d-flex d-lg-none sw-dot-default sw-pagination-products justify-content-center"></div>
             </div>
         </div>
     </section>
+    <!-- /Recently Viewed -->
+
+    {{-- Dynamic sections from Page Builder --}}
+    @if(isset($page) && $page && $page->activeSections->isNotEmpty())
+        @foreach($page->activeSections as $section)
+            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
+        @endforeach
     @endif
 
     @push('js')
+        @if($product->has_variant && $product->variants)
+            <script id="product-variants-json" type="application/json">
+                {!! json_encode($product->variants->map(function($v) {
+                    return [
+                        'id' => $v->id,
+                        'sku' => $v->variant_sku,
+                        'price' => $v->final_price ?? $v->variant_price,
+                        'regular_price' => $v->variant_price,
+                        'stock' => $v->variant_stock,
+                        'attributes' => $v->attributeItems->pluck('id')->toArray()
+                    ];
+                })) !!}
+            </script>
+        @endif
         <script type="module" src="{{asset($filePath)}}/js/drift.min.js"></script>
         <script type="module" src="{{asset($filePath)}}/js/zoom.js"></script>
         <script>
             $(document).ready(function () {
+                // ── Review image preview ──────────────────────────────────────────
+                $('#review-images').on('change', function () {
+                    const preview = $('#review-image-preview');
+                    preview.empty();
+                    const files = this.files;
+                    for (let i = 0; i < Math.min(files.length, 5); i++) {
+                        const file = files[i];
+                        if (!file.type.startsWith('image/')) continue;
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.append(
+                                $('<img>').attr('src', e.target.result)
+                                         .css({width:'70px',height:'70px','object-fit':'cover','border-radius':'6px',border:'1px solid #eee'})
+                            );
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
                 // ── Quantity +/- buttons ──────────────────────────────────────────
                 const qtyInput = $('#product-qty');
                 const maxQty  = parseInt(qtyInput.attr('max')) || 9999;
@@ -778,10 +857,53 @@
         </script>
     @endpush
 
-    {{-- Dynamic sections from Page Builder --}}
-    @if(isset($page) && $page && $page->activeSections->isNotEmpty())
-        @foreach($page->activeSections as $section)
-            {!! app(\App\Services\PageBuilder::class)->renderSection($section) !!}
-        @endforeach
+    {{-- Variants JSON for Quick View -- hidden element parsed by storefront.js --}}
+    @if($product->has_variant && $product->variants && $product->variants->count() > 0)
+        @php
+            $variantsForJs = $product->variants->map(function($variant) {
+                $attributeIds = $variant->variantItems->map(fn($item) => $item->attributeItem?->id)->filter()->values()->toArray();
+                return [
+                    'id'            => $variant->id,
+                    'sku'           => $variant->sku ?? '',
+                    'price'         => floatval($variant->sale_price ?? $variant->price ?? 0),
+                    'regular_price' => floatval($variant->regular_price ?? $variant->sale_price ?? $variant->price ?? 0),
+                    'stock'         => intval($variant->current_stock ?? $variant->stock ?? 0),
+                    'attributes'    => $attributeIds,
+                ];
+            })->values()->toArray();
+        @endphp
+        <script type="application/json" id="product-variants-json">
+            {!! json_encode($variantsForJs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}
+        </script>
     @endif
+
+    @push('js')
+        <script>
+            dataLayer.push({ ecommerce: null });
+            dataLayer.push({
+                'event': 'view_item',
+                'ecommerce': {
+                    'currency': 'BDT',
+                    'value': {{ $product->sale_price ?? 0 }},
+                    'items': [{
+                        'item_id': '{{ $product->id }}',
+                        'item_name': '{{ $product->name }}',
+                        'item_category': '{{ $product->category->name ?? '' }}',
+                        'price': {{ $product->sale_price ?? 0 }},
+                        'quantity': 1
+                    }]
+                }
+            });
+
+            fbq('track', 'ViewContent', {
+                content_name: '{{ $product->name }}',
+                content_category: '{{ $product->category->name ?? '' }}',
+                content_ids: ['{{ $product->id }}'],
+                content_type: 'product',
+                value: {{ $product->sale_price ?? 0 }},
+                currency: 'BDT'
+            });
+        </script>
+    @endpush
 </x-frontend-layout>
+

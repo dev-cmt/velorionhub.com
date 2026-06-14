@@ -16,12 +16,23 @@
     $soldPercent = $totalUnits > 0 ? round(($sold / $totalUnits) * 100) : 0;
     $inWishlist  = false;
     $inCompare   = false;
+    $inCart      = false;
+    $cartItemId  = null;
     try {
         $sessionId   = (Auth::id() ?? session()->getId());
         $wishlistCart = \Cart::session($sessionId . '_wishlist');
         if ($wishlistCart && $wishlistCart->get($product->id)) { $inWishlist = true; }
         $compareCart  = \Cart::session($sessionId . '_compare');
         if ($compareCart && $compareCart->get($product->id))  { $inCompare  = true; }
+
+        $cartItems = \Cart::session($sessionId)->getContent();
+        foreach ($cartItems as $item) {
+            if (($item->attributes->product_id ?? null) == $product->id) {
+                $inCart = true;
+                $cartItemId = $item->id;
+                break;
+            }
+        }
     } catch (\Exception $e) {}
 @endphp
 <div class="card-product style-row row-small-2 {{ $bgWhite ?? false ? 'bg-white radius-8' : '' }}">
@@ -52,14 +63,17 @@
                 <ul class="list-product-btn flex-row">
                     <li>
                         <a href="#shoppingCart" data-bs-toggle="offcanvas"
-                            class="box-icon add-to-cart btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }}"
+                            class="box-icon add-to-cart btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }} {{ $inCart ? 'in-cart active' : '' }}"
                             data-id="{{ $product->id }}"
                             data-name="{{ $product->name }}"
                             data-price="{{ $product->sale_price }}"
                             data-image="{{ $mainImage }}"
-                            data-url="{{ $productUrl }}">
-                            <span class="icon icon-cart2"></span>
-                            <span class="tooltip">Add to Cart</span>
+                            data-url="{{ $productUrl }}"
+                            data-has-variant="{{ $product->has_variant ? '1' : '0' }}"
+                            data-product-url="{{ $productUrl }}"
+                            @if($inCart) data-cart-id="{{ $cartItemId }}" @endif>
+                            <span class="icon {{ $inCart ? 'icon-close' : 'icon-cart2' }}"></span>
+                            <span class="tooltip">{{ $inCart ? 'Remove from Cart' : 'Add to Cart' }}</span>
                         </a>
                     </li>
                     <li class="{{ $wishlistClass ?? 'd-none d-sm-block' }} wishlist">

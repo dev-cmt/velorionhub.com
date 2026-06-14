@@ -1,16 +1,16 @@
-<x-backend-layout title="Setting">
+<x-backend-layout title="Frontend Settings">
     @push('css')
 
     @endpush
 
     <!-- Page Header -->
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Website Settings</h1>
+        <h1 class="page-title fw-semibold fs-18 mb-0">Frontend Settings</h1>
         <div class="ms-md-1 ms-0">
             <nav>
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Settings</li>
+                    <li class="breadcrumb-item active" aria-current="page">Frontend Settings</li>
                 </ol>
             </nav>
         </div>
@@ -27,6 +27,20 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="fb_pixel" class="form-label">Facebook Pixel</label>
+                                <textarea name="fb_pixel" class="form-control" id="fb_pixel">{{ $settings->fb_pixel ?? '' }}</textarea>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="gtm_head" class="form-label">GTM Head</label>
+                                <textarea name="gtm_head" class="form-control" id="gtm_head">{{ $settings->gtm_head ?? '' }}</textarea>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="gtm_body" class="form-label">GTM Body</label>
+                                <textarea name="gtm_body" class="form-control" id="gtm_body">{{ $settings->gtm_body ?? '' }}</textarea>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <div class="form-check form-switch mt-2">
                                     <input type="hidden" name="is_loading" value="0">

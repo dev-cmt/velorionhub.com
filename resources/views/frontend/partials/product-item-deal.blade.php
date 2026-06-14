@@ -26,12 +26,23 @@
 
     $inWishlist  = false;
     $inCompare   = false;
+    $inCart      = false;
+    $cartItemId  = null;
     try {
         $sessionId   = (Auth::id() ?? session()->getId());
         $wishlistCart = \Cart::session($sessionId . '_wishlist');
         if ($wishlistCart && $wishlistCart->get($product->id)) { $inWishlist = true; }
         $compareCart  = \Cart::session($sessionId . '_compare');
         if ($compareCart && $compareCart->get($product->id))  { $inCompare  = true; }
+
+        $cartItems = \Cart::session($sessionId)->getContent();
+        foreach ($cartItems as $item) {
+            if (($item->attributes->product_id ?? null) == $product->id) {
+                $inCart = true;
+                $cartItemId = $item->id;
+                break;
+            }
+        }
     } catch (\Exception $e) {}
 @endphp
 
@@ -56,15 +67,18 @@
         <!--Action Buttons-->
         <ul class="list-product-btn">
             <li>
-                <a href="#shoppingCart" data-bs-toggle="offcanvas"
-                    class="box-icon add-to-cart btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }}"
+                <a href="#;"
+                    class="box-icon add-to-cart btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }} {{ $inCart ? 'in-cart active' : '' }}"
                     data-id="{{ $product->id }}"
                     data-name="{{ $product->name }}"
                     data-price="{{ $product->sale_price }}"
                     data-image="{{ $mainImage }}"
-                    data-url="{{ $productUrl }}">
+                    data-url="{{ $productUrl }}"
+                    data-has-variant="{{ $product->has_variant ? '1' : '0' }}"
+                    data-product-url="{{ $productUrl }}"
+                    @if($inCart) data-cart-id="{{ $cartItemId }}" @endif>
                     <span class="icon icon-cart2"></span>
-                    <span class="tooltip">Add to Cart</span>
+                    <span class="tooltip">{{ $inCart ? 'In Cart' : 'Add to Cart' }}</span>
                 </a>
             </li>
             <li class="d-none d-sm-block wishlist">
@@ -76,7 +90,7 @@
                     <span class="tooltip">{{ $inWishlist ? 'In Wishlist' : 'Add to Wishlist' }}</span>
                 </a>
             </li>
-            <li>
+            {{-- <li>
                 <a href="#quickView" data-bs-toggle="modal"
                     class="box-icon quickview btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }}"
                     data-product-url="{{ $productUrl }}"
@@ -84,7 +98,7 @@
                     <span class="icon icon-view"></span>
                     <span class="tooltip">Quick View</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="d-none d-sm-block compare">
                 <a href="#compare" data-bs-toggle="offcanvas"
                     class="box-icon btn-icon-action hover-tooltip {{ $tooltipClass ?? 'tooltip-left' }} {{ $inCompare ? 'active' : '' }}"
@@ -184,14 +198,17 @@
     @if($showActionBtn ?? false)
         <div class="card-product-btn">
             <a href="#shoppingCart" data-bs-toggle="offcanvas"
-                class="tf-btn btn-line w-100 btn-cart"
+                class="tf-btn btn-line w-100 btn-cart add-to-cart {{ $inCart ? 'in-cart active' : '' }}"
                 data-id="{{ $product->id }}"
                 data-name="{{ $product->name }}"
                 data-price="{{ $product->sale_price }}"
                 data-image="{{ $mainImage }}"
-                data-url="{{ $productUrl }}">
-                <span>Add to cart</span>
-                <i class="icon-cart-2"></i>
+                data-url="{{ $productUrl }}"
+                data-has-variant="{{ $product->has_variant ? '1' : '0' }}"
+                data-product-url="{{ $productUrl }}"
+                @if($inCart) data-cart-id="{{ $cartItemId }}" @endif>
+                <span>{{ $inCart ? 'Remove from Cart' : 'Add to cart' }}</span>
+                <i class="{{ $inCart ? 'icon-close' : 'icon-cart-2' }}"></i>
             </a>
             <div class="box-btn">
                 <a href="#compare" data-bs-toggle="offcanvas"

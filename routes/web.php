@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\CourierController;
 use App\Http\Controllers\PageSeoController;
 use App\Http\Controllers\DeveloperApiController;
 use App\Http\Controllers\BlogController;
@@ -94,6 +95,7 @@ Route::controller($controller)->group(function () {
     Route::get('/compare', 'compare')->name('compare');
     Route::post('/compare/add', 'addCompare')->name('compare.add');
     Route::delete('/compare/remove/{id}', 'removeCompare')->name('compare.remove');
+    Route::post('/compare/clear', 'clearCompare')->name('compare.clear');
 
     Route::get('/blog', 'blog')->name('blog');
     Route::get('/blog/{slug}', 'blogShow')->name('blog.show');
@@ -104,8 +106,11 @@ Route::controller($controller)->group(function () {
     Route::get('/catalog/{slug}', 'catalogShow')->name('catalog.show');
     Route::get('/about-us', 'aboutUs')->name('about.us');
     Route::get('/contacts', 'contacts')->name('contacts');
-    Route::get('/track-order', 'trackOrder')->name('track.order');
     Route::get('/faq', 'faq')->name('faq');
+    Route::get('/track-order', 'trackOrder')->name('track.order');
+    Route::get('/privacy-policy', 'privacyPolicy')->name('privacy.policy');
+    Route::get('/return-policy', 'returnPolicy')->name('return.policy');
+    Route::get('/terms-conditions', 'termsConditions')->name('terms.conditions');
     Route::get('/my-account', 'myAccount')->name('my.account');
     Route::get('/order-list', 'orderList')->name('order.list');
     Route::get('/account-edit', 'accountEdit')->name('account.edit');
@@ -115,7 +120,8 @@ Route::get('/search-suggestions', [SearchController::class, 'suggest'])->name('s
 // Frontend Cart
 Route::post('/cart/add', [CartController::class, 'addCart'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'updateQty'])->name('cart.update.qty');
-Route::get('/cart/mini', [CartController::class, 'cartItemMinus'])->name('cart.mini');
+Route::get('/cart/mini', [CartController::class, 'getMiniCart'])->name('cart.mini');
+Route::get('/cart/minus', [CartController::class, 'cartItemMinus'])->name('cart.minus');
 Route::get('/cart/plus', [CartController::class, 'cartItemPlus'])->name('cart.plus');
 Route::delete('/cart/remove/{id}', [CartController::class, 'cartItemRemove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'cartClear'])->name('cart.clear');
@@ -330,6 +336,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/system-settings', [SettingController::class, 'systemSettings'])->name('system-settings.index');
     Route::get('/financial-settings', [SettingController::class, 'financialSettings'])->name('financial-settings.index');
     Route::get('/other-settings', [SettingController::class, 'otherSettings'])->name('other-settings.index');
+
+    // Courier CRUD (manage couriers list in system settings)
+    Route::post('/couriers', [CourierController::class, 'store'])->name('couriers.store');
+    Route::put('/couriers/{courier}', [CourierController::class, 'update'])->name('couriers.update');
+    Route::post('/couriers/{courier}/toggle', [CourierController::class, 'toggleStatus'])->name('couriers.toggle');
+    Route::delete('/couriers/{courier}', [CourierController::class, 'destroy'])->name('couriers.destroy');
+
+    // Courier Settings (per-store API credentials)
+    Route::get('/courier-settings', [CourierController::class, 'settingsIndex'])->name('courier-settings.index');
+    Route::post('/courier-settings/update', [CourierController::class, 'settingsUpdate'])->name('courier-settings.update');
+    Route::post('/courier-settings/token', [CourierController::class, 'generateToken'])->name('courier.token.generate');
 
     // SEO settings
     Route::get('/seo-pages',[PageSeoController::class,'index'])->name('settings.seo.index');
