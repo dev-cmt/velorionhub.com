@@ -11,7 +11,7 @@
     <!-- Favicon -->
     <link rel="icon" href="{{ asset($settings ? $settings->favicon : '') }}" type="image/x-icon">
     <!-- Choices JS -->
-    <script src="{{ asset('backend') }}/libs/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="{{ asset('backend') }}/libs/choices.js/scripts/choices.min.js"></script>
     <!-- Main Theme Js -->
     <script src="{{ asset('backend') }}/js/main.js"></script>
     <!-- Bootstrap Css -->

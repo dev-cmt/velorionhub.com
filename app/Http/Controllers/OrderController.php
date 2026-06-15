@@ -11,6 +11,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -420,7 +421,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'order_ids' => 'required|string',
-            'courier_export' => 'required|exists:couriers,id',
+            'courier_export' => 'nullable',
         ]);
 
         $orderIds = $this->parseOrderIds($validated['order_ids']);
@@ -429,8 +430,18 @@ class OrderController extends Controller
             return back()->withErrors(['Please select at least one order.']);
         }
 
-        $courier = Courier::find($validated['courier_export']);
-        $courierName = $courier?->name ?? 'selected courier';
+        $courierId = !empty($validated['courier_export']) ? (int) $validated['courier_export'] : null;
+        if ($courierId) {
+            $courierExists = Courier::where('id', $courierId)->exists();
+            if (!$courierExists) {
+                return back()->withErrors(['Selected courier does not exist.']);
+            }
+            $courier = Courier::find($courierId);
+            $courierName = $courier?->name ?? 'selected courier';
+        } else {
+            $courier = null;
+            $courierName = 'respective couriers';
+        }
 
         $orders = Order::whereIn('id', $orderIds)
             ->with(['items.product', 'store', 'courier'])
@@ -444,7 +455,14 @@ class OrderController extends Controller
         $failedMessages = [];
 
         foreach ($orders as $order) {
-            $order->update(['courier_id' => $courier->id]);
+            if ($courier) {
+                $order->update(['courier_id' => $courier->id]);
+            }
+
+            if (!$order->courier_id) {
+                $failedMessages[] = $order->invoice_no . ': Courier not selected for this order';
+                continue;
+            }
 
             $result = $this->dispatchOrderToCourier($order->fresh(['items.product', 'store', 'courier']));
 
@@ -474,12 +492,8 @@ class OrderController extends Controller
      */
     public function sendToCourierIndex(Request $request)
     {
-        $validated = $request->validate([
-            'order_ids' => 'required|string',
-            'courier_id' => 'required|exists:couriers,id',
-        ]);
-
-        $orderIds = $this->parseOrderIds($validated['order_ids']);
+        // dd($request->all());
+        $orderIds = $this->parseOrderIds($request->order_ids ?? '');
         if (empty($orderIds)) {
             return response()->json(['status' => false, 'message' => 'No orders found.'], 422);
         }
@@ -492,20 +506,14 @@ class OrderController extends Controller
             return response()->json(['status' => false, 'message' => 'No orders found.'], 404);
         }
 
-        $results = [];
-        foreach ($orders as $order) {
-            $order->update(['courier_id' => (int) $validated['courier_id']]);
-            $results[] = $this->dispatchOrderToCourier($order->fresh(['items.product', 'store', 'courier']));
-        }
+        $couriers = Courier::where('status', 1)->get(['id', 'name']);
 
-        return response()->json([
-            'status' => collect($results)->contains('status', true),
-            'results' => $results,
-        ]);
+        return view('backend.orders.send-courier', compact('orders', 'couriers'));
     }
 
     public function sendToCourierItems(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'order_id' => 'required|exists:orders,id',
             'courier_id' => 'nullable|exists:couriers,id',
@@ -562,22 +570,89 @@ class OrderController extends Controller
             ];
         }
 
-        return match ((int) $order->courier_id) {
-            1 => $this->dispatchPathaoOrder($order, $store),
-            2 => $this->dispatchSteadfastOrder($order, $store),
-            5 => $this->dispatchCarrybeeOrder($order, $store),
-            default => [
+        switch ($order->courier->slug ?? null) {
+            case 'steadfast':
+                return $this->dispatchSteadfastOrder($order, $store);
+
+            case 'pathao':
+                return $this->dispatchPathaoOrder($order, $store);
+
+            case 'carrybee':
+                return $this->dispatchCarrybeeOrder($order, $store);
+        }
+
+        return [
+            'status' => false,
+            'message' => 'Courier integration is not configured for this courier',
+            'courier' => $order->courier?->name ?? 'Unknown',
+            'consignment_id' => null,
+        ];
+    }
+
+    private function dispatchSteadfastOrder(Order $order, Store $store): array
+    {
+        $courierSetting = $order->courier->settingForStore($store->id);
+
+        if (!$courierSetting || $courierSetting->status !== 1) {
+            return [
                 'status' => false,
-                'message' => 'Courier integration is not configured for this courier',
-                'courier' => $order->courier?->name ?? 'Unknown',
+                'message' => 'Steadfast is not active for this store',
+                'courier' => 'Steadfast',
                 'consignment_id' => null,
-            ],
-        };
+            ];
+        }
+
+        $payload = [
+            'invoice'           => $order->invoice_no ?? null,
+            'recipient_name'    => $order->customer_name ?? null,
+            'recipient_phone'   => $order->customer_phone ?? null,
+            'recipient_address' => $order->customer_address ?? null,
+            'cod_amount'        => (int) round($order->due ?? 0),
+            'note'              => $order->notes ?? $order->remarks ?? null,
+        ];
+
+        $response = Http::withHeaders([
+            'Api-Key'    => $courierSetting->api_key ?? '',
+            'Secret-Key' => $courierSetting->secret_key ?? '',
+            'Accept'     => 'application/json',
+        ])->post('https://portal.packzy.com/api/v1/create_order', $payload);
+
+        $data = $response->json();
+
+        if ($response->successful() && data_get($data, 'status') == 200) {
+
+            $consignmentId = data_get($data, 'consignment.consignment_id');
+            $trackingCode  = data_get($data, 'consignment.tracking_code');
+            $trackingLink  = data_get($data, 'consignment.tracking_link');
+
+            $order->update([
+                'status'         => 7,
+                'consignment_id' => $consignmentId,
+                'tracking_code'  => $trackingCode,
+                'tracking_url'   => $trackingLink,
+                'courier_id'     => $order->courier_id,
+            ]);
+
+            return [
+                'status' => true,
+                'message' => 'Sent to Steadfast' . ($consignmentId ? " ($consignmentId)" : ''),
+                'courier' => 'Steadfast',
+                'consignment_id' => $consignmentId,
+            ];
+        }
+
+        return [
+            'status' => false,
+            'message' => data_get($data, 'message') ?? 'Steadfast order creation failed',
+            'courier' => 'Steadfast',
+            'consignment_id' => null,
+            'debug' => $data, // 👈 add this for debugging
+        ];
     }
 
     private function dispatchPathaoOrder(Order $order, Store $store): array
     {
-        if ((int) ($store->pathao_is_active ?? 0) !== 1) {
+        if ($order->courier->settingForStore($store->id)->status !== 1) {
             return [
                 'status' => false,
                 'message' => 'Pathao is not active for this store',
@@ -586,10 +661,12 @@ class OrderController extends Controller
             ];
         }
 
+        $courierSetting = $order->courier->settingForStore($store->id);
+
         $parserResponse = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . ($store->pathao_access_token ?? ''),
+            'Authorization' => 'Bearer ' . ($courierSetting->access_token ?? ''),
         ])->post('https://merchant.pathao.com/api/v1/address-parser', [
             'address' => $order->customer_address ?? '',
         ]);
@@ -609,7 +686,7 @@ class OrderController extends Controller
 
         $itemDescription = $this->buildOrderItemDescription($order);
         $payload = [
-            'store_id' => $store->pathao_store_id,
+            'store_id' => $courierSetting->store_code ?? null,
             'merchant_order_id' => $order->invoice_no ?? null,
             'recipient_name' => $order->customer_name ?? null,
             'recipient_phone' => $order->customer_phone ?? null,
@@ -629,7 +706,7 @@ class OrderController extends Controller
         $response = Http::withHeaders([
             'accept' => 'application/json',
             'content-type' => 'application/json',
-            'authorization' => 'Bearer ' . ($store->pathao_access_token ?? ''),
+            'authorization' => 'Bearer ' . ($courierSetting->access_token ?? ''),
         ])->post('https://api-hermes.pathao.com/aladdin/api/v1/orders', $payload);
 
         $responseData = $response->json();
@@ -639,7 +716,7 @@ class OrderController extends Controller
             $order->update([
                 'status' => 7,
                 'consignment_id' => $consignmentId,
-                'tracking_code' => data_get($responseData, 'data.tracking_code'),
+                'tracking_url' => 'https://merchant.pathao.com/tracking?consignment_id=' . $consignmentId,
                 'courier_id' => $order->courier_id,
             ]);
 
@@ -659,65 +736,9 @@ class OrderController extends Controller
         ];
     }
 
-    private function dispatchSteadfastOrder(Order $order, Store $store): array
-    {
-        if ((int) ($store->is_steadfast_active ?? 0) !== 1) {
-            return [
-                'status' => false,
-                'message' => 'Steadfast is not active for this store',
-                'courier' => 'Steadfast',
-                'consignment_id' => null,
-            ];
-        }
-
-        $payload = [[
-            'invoice' => $order->invoice_no ?? null,
-            'recipient_name' => $order->customer_name ?? null,
-            'recipient_phone' => $order->customer_phone ?? null,
-            'recipient_address' => $order->customer_address ?? null,
-            'cod_amount' => number_format((float) ($order->due ?? 0), 0, '.', ''),
-            'note' => $order->notes ?? $order->remarks ?? null,
-        ]];
-
-        $response = Http::withHeaders([
-            'Api-Key' => $store->steadfast_api_key ?? '',
-            'Secret-Key' => $store->setadfast_secret_key ?? '',
-            'Content-Type' => 'application/json',
-        ])->post('https://portal.packzy.com/api/v1/create_order/bulk-order', $payload);
-
-        $responseData = $response->json();
-        $itemData = data_get($responseData, 'data.0');
-
-        if ($response->successful() && data_get($itemData, 'status') === 'success') {
-            $consignmentId = data_get($itemData, 'consignment_id');
-            $trackingCode = data_get($itemData, 'tracking_code');
-
-            $order->update([
-                'status' => 7,
-                'consignment_id' => $consignmentId,
-                'tracking_code' => $trackingCode,
-                'courier_id' => $order->courier_id,
-            ]);
-
-            return [
-                'status' => true,
-                'message' => 'Sent to Steadfast' . ($consignmentId ? ' (Consignment ID: ' . $consignmentId . ')' : ''),
-                'courier' => 'Steadfast',
-                'consignment_id' => $consignmentId,
-            ];
-        }
-
-        return [
-            'status' => false,
-            'message' => data_get($itemData, 'message') ?? data_get($responseData, 'message') ?? 'Steadfast order creation failed',
-            'courier' => 'Steadfast',
-            'consignment_id' => null,
-        ];
-    }
-
     private function dispatchCarrybeeOrder(Order $order, Store $store): array
     {
-        if ((int) ($store->carrybee_is_active ?? 0) !== 1) {
+        if ($order->courier->settingForStore($store->id)->status !== 1) {
             return [
                 'status' => false,
                 'message' => 'Carrybee is not active for this store',
@@ -726,29 +747,31 @@ class OrderController extends Controller
             ];
         }
 
-        $parserResponse = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . ($store->carrybee_access_token ?? ''),
-        ])->post('https://api-merchant.carrybee.com/api/v2/businesses/206/address-parser', [
-            'query' => $order->customer_address ?? '',
-        ]);
+        $courierSetting = $order->courier->settingForStore($store->id);
 
-        $parserData = $parserResponse->json();
-        $cityId = data_get($parserData, 'data.city_id');
-        $zoneId = data_get($parserData, 'data.zone_id');
+        // $parserResponse = Http::withHeaders([
+        //     'Content-Type' => 'application/json',
+        //     'Authorization' => 'Bearer ' . ($courierSetting->access_token ?? ''),
+        // ])->post('https://api-merchant.carrybee.com/api/v2/businesses/206/address-parser', [
+        //     'query' => $order->customer_address ?? '',
+        // ]);
 
-        if (!$parserResponse->successful() || !$cityId || !$zoneId) {
-            return [
-                'status' => false,
-                'message' => 'Unable to resolve Carrybee city/zone from the customer address',
-                'courier' => 'Carrybee',
-                'consignment_id' => null,
-            ];
-        }
+        // $parserData = $parserResponse->json();
+        // $cityId = data_get($parserData, 'data.city_id');
+        // $zoneId = data_get($parserData, 'data.zone_id');
+
+        // if (!$parserResponse->successful() || !$cityId || !$zoneId) {
+        //     return [
+        //         'status' => false,
+        //         'message' => 'Unable to resolve Carrybee city/zone from the customer address',
+        //         'courier' => 'Carrybee',
+        //         'consignment_id' => null,
+        //     ];
+        // }
 
         $itemDescription = $this->buildOrderItemDescription($order);
         $payload = [
-            'store_id' => $store->carrybee_store_id,
+            'store_id' => $courierSetting->store_code ?? null,
             'merchant_order_id' => $order->invoice_no ?? null,
             'delivery_type' => 1,
             'product_type' => 1,
@@ -756,8 +779,8 @@ class OrderController extends Controller
             'recipient_name' => $order->customer_name ?? null,
             'recipient_phone' => $order->customer_phone ?? null,
             'recipient_address' => $order->customer_address ?? null,
-            'city_id' => $cityId,
-            'zone_id' => $zoneId,
+            'city_id' => $cityId ?? null,
+            'zone_id' => $zoneId ?? null,
             'area_id' => null,
             'special_instruction' => $order->notes ?? $order->remarks ?? null,
             'product_description' => $itemDescription ?: null,
@@ -768,9 +791,9 @@ class OrderController extends Controller
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-            'Client-ID' => $store->carrybee_client_id ?? '',
-            'Client-Secret' => $store->carrybee_client_secret ?? '',
-            'Client-Context' => $store->carrybee_client_context ?? '',
+            'Client-ID' => $courierSetting->client_id ?? '',
+            'Client-Secret' => $courierSetting->client_secret ?? '',
+            'Client-Context' => $courierSetting->client_context ?? '',
         ])->post('https://developers.carrybee.com/api/v2/orders', $payload);
 
         $responseData = $response->json();
@@ -780,6 +803,7 @@ class OrderController extends Controller
             $order->update([
                 'status' => 7,
                 'consignment_id' => $consignmentId,
+                'tracking_url' => 'https://merchant.carrybee.com/order-track/' . $consignmentId,
                 'courier_id' => $order->courier_id,
             ]);
 

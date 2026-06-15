@@ -123,12 +123,13 @@
                                                     <input type="text" class="form-control" name="phone"
                                                         value="{{ $setting->phone ?? '' }}">
                                                 </div>
-
+                                                @if ($courier->slug != 'carrybee')
                                                 <div class="col-md-6">
                                                     <label class="form-label">Email</label>
                                                     <input type="email" class="form-control" name="email"
                                                         value="{{ $setting->email ?? '' }}">
                                                 </div>
+                                                @endif
 
                                                 <div class="col-md-6">
                                                     <label class="form-label">Password</label>
@@ -137,29 +138,38 @@
                                                         autocomplete="new-password">
                                                 </div>
 
-                                                <div class="col-md-6">
-                                                    <label class="form-label">API Key</label>
-                                                    <input type="text" class="form-control" name="api_key"
-                                                        value="{{ $setting->api_key ?? '' }}">
-                                                </div>
+                                                @if ( $courier->slug == 'steadfast' )
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">API Key</label>
+                                                        <input type="text" class="form-control" name="api_key"
+                                                            value="{{ $setting->api_key ?? '' }}">
+                                                    </div>
 
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Secret Key</label>
-                                                    <input type="text" class="form-control" name="secret_key"
-                                                        value="{{ $setting->secret_key ?? '' }}">
-                                                </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Secret Key</label>
+                                                        <input type="text" class="form-control" name="secret_key"
+                                                            value="{{ $setting->secret_key ?? '' }}">
+                                                    </div>
+                                                @else
+                                                    @if ($courier->slug == 'carrybee')
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Client Context</label>
+                                                        <input type="text" class="form-control" name="client_context"
+                                                            value="{{ $setting->client_context ?? '' }}">
+                                                    </div>
+                                                    @endif
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Client ID</label>
+                                                        <input type="text" class="form-control" name="client_id"
+                                                            value="{{ $setting->client_id ?? '' }}">
+                                                    </div>
 
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Client ID</label>
-                                                    <input type="text" class="form-control" name="client_id"
-                                                        value="{{ $setting->client_id ?? '' }}">
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Client Secret</label>
-                                                    <input type="text" class="form-control" name="client_secret"
-                                                        value="{{ $setting->client_secret ?? '' }}">
-                                                </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Client Secret</label>
+                                                        <input type="text" class="form-control" name="client_secret"
+                                                            value="{{ $setting->client_secret ?? '' }}">
+                                                    </div>
+                                                @endif
                                             </div>
 
                                             <div class="mt-4 d-flex flex-wrap gap-2">

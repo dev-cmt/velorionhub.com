@@ -259,7 +259,7 @@
                                             <span>{{ $order->courier->name ?? '--' }}</span><br>
                                             @if($order->tracking_url)
                                                 <small  class="badge bg-success-transparent"><i class="ri-eye-line"></i>
-                                                    <a href="{{ $order->tracking_url ?? '#' }}" target="_blank">{{ $order->tracking_no ?? '' }}</a>
+                                                    <a href="{{ $order->tracking_url ?? '#' }}" target="_blank">{{ $order->consignment_id ?? '' }}</a>
                                                 </small>
                                             @endif
                                         </td>
@@ -578,8 +578,9 @@
                 }
 
                 if (confirm("Are you sure you want to send the selected orders to the courier?")) {
-                    $('.courier_export_ids').val(allVals.join(','));
-                    $('#courier_export_form').submit();
+                    var ids = allVals.join(',');
+                    var url = "{{ route('orders.send-courier') }}?order_ids=" + ids;
+                    window.location.href = url;
                 }
             });
 

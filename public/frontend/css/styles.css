@@ -11049,6 +11049,9 @@ html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
     width: 100%;
   }
   .tf-sp-1 {
-  padding-bottom: 15px;
+    padding-bottom: 15px;
+  }
+  .tf-sp-2 {
+    padding-top: 25px;
   }
 }
