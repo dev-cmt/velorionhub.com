@@ -222,10 +222,10 @@
                 </div>
 
                 <div class="mt-4 text-center">
-                    <a href="{{ route('shop') }}" class="tf-btn btn-gray me-2">
+                    <a href="{{ route('shop') }}" class="tf-btn btn-gray">
                         <span class="text-white">Continue Shopping</span>
                     </a>
-                    <a href="{{ url('/') }}" class="tf-btn">
+                    <a href="{{ url('/') }}" class="tf-btn mt-2">
                         <span class="text-white">Go to Home</span>
                     </a>
                 </div>

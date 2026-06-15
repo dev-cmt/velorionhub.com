@@ -105,7 +105,7 @@
                                     </fieldset>
                                     <fieldset>
                                         <label>Phone number <span class="text-danger">*</span></label>
-                                        <input type="text" name="phone" value="{{ old('phone') }}" placeholder="e.g. +8801700000000" required>
+                                        <input type="number" name="phone" value="{{ old('phone') }}" max="11" placeholder="e.g. +8801700000000" required>
                                     </fieldset>
                                 </div>
                                 <fieldset>

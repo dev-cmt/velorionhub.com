@@ -86,6 +86,10 @@
             .variant-option:checked + .variant-swatch-label .swatch-text {
                 color: #004EC3;
             }
+
+            .pswp__img {
+                object-fit: contain !important;
+            }
         </style>
     @endpush
 
@@ -413,8 +417,7 @@
                         </li>
                         <li class="nav-tab-item" role="presentation">
                             <a href="#prd-infor" class="tab-link product-title fw-semibold"
-                                data-bs-toggle="tab">Product
-                                information</a>
+                                data-bs-toggle="tab">Specifications</a>
                         </li>
                         <li class="nav-tab-item" role="presentation">
                             <a href="#prd-review" class="tab-link product-title fw-semibold"

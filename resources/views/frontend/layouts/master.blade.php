@@ -38,6 +38,8 @@
     {!! $settings->fb_pixel ?? null !!}
     <!-- GTM HEAD -->
     {!! $settings->gtm_head ?? null !!}
+
+    <script src="https://api.selfeb.com/api/productOrders/auto-call/call-sdk/ehznv74v275le3d5bqtdd/public_key_y05imfm02zs9c2ethe0r56/69bd65cb1b8e81d7f005ad0a" defer></script>
 </head>
 <body class="preload-wrapper popup-loader">
     <!-- GTM BODY -->
@@ -122,6 +124,7 @@
         };
     </script>
 
+    <!-- GTM EVENT -->
     @if (session()->has('add_to_cart_event'))
         <script>
             (function() {

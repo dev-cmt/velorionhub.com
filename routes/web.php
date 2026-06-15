@@ -56,9 +56,7 @@ Route::get('/dd', function () {
 });
 
 Route::get('/clear-cart', function () {
-
     $sessionKey = Auth::id() ?? session()->getId();
-
     Cart::session($sessionKey)->clear();
 
     session()->flush();        // remove all session data
@@ -76,6 +74,7 @@ Route::get('/cc', function () {
     \Illuminate\Support\Facades\Artisan::call('view:clear');
     \Illuminate\Support\Facades\Artisan::call('route:clear');
     // \Illuminate\Support\Facades\Artisan::call('config:cache');
+    // \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     return 'Cleared!';
 });
 
