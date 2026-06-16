@@ -708,7 +708,7 @@ class ProductController extends Controller
         }
 
         // 4. Load View and Pass Barcode Generators
-        $pdf = Pdf::loadView('backend.inventory.label-print.label-print-pdf', [
+        $pdf = Pdf::loadview('backend.inventory.label-print.label-print-pdf', [
             'labels'  => $labels,
             'config'  => $options,
             'dns1'    => new DNS1D(),

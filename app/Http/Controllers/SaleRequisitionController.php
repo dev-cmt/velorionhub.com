@@ -61,7 +61,7 @@ class SaleRequisitionController extends Controller
             'customer_address' => 'nullable|string|max:500',
             'store_id' => 'required|exists:stores,id',
             'assigned_to' => 'nullable|exists:users,id',
-            
+
             // Financials (calculated on front-end, validated here)
             'sub_total' => 'required|numeric|min:0',
             'shipping_cost' => 'required|numeric|min:0',
@@ -69,13 +69,13 @@ class SaleRequisitionController extends Controller
             'total' => 'required|numeric|min:0',
             'paid' => 'required|numeric|min:0',
             'due' => 'required|numeric|min:0',
-            
+
             'payment_method' => 'required|string|max:50',
             'payment_status' => 'required|string|max:50',
             'status' => 'required|string|max:50',
             'notes' => 'nullable|string',
         ]);
-        
+
         // 2. Validate Order Items Data
         $request->validate([
             'items' => 'required|array|min:1',
@@ -104,11 +104,11 @@ class SaleRequisitionController extends Controller
                     'quantity' => $item['quantity'],
                     'purchase_price' => $item['purchase_price'],
                     'sale_price' => $item['sale_price'],
-                    'attributes' => isset($item['attributes']) ? (is_string($item['attributes']) ? json_decode($item['attributes'], true) : $item['attributes']) : null, 
+                    'attributes' => isset($item['attributes']) ? (is_string($item['attributes']) ? json_decode($item['attributes'], true) : $item['attributes']) : null,
                 ]);
             }
             $order->items()->saveMany($orderItems);
-            
+
             DB::commit();
 
             return redirect()->route('sale-requisitions.index')->with('success', 'Order placed successfully. Invoice No: ' . $order->invoice_no);
@@ -159,7 +159,7 @@ class SaleRequisitionController extends Controller
             'customer_address' => 'nullable|string|max:500',
             'store_id' => 'required|exists:stores,id',
             'assigned_to' => 'nullable|exists:users,id',
-            
+
             // Financials
             'sub_total' => 'required|numeric|min:0',
             'shipping_cost' => 'required|numeric|min:0',
@@ -167,13 +167,13 @@ class SaleRequisitionController extends Controller
             'total' => 'required|numeric|min:0',
             'paid' => 'required|numeric|min:0',
             'due' => 'required|numeric|min:0',
-            
+
             'payment_method' => 'required|string|max:50',
             'payment_status' => 'required|string|max:50',
             'status' => 'required|string|max:50',
             'notes' => 'nullable|string',
         ]);
-        
+
         // 2. Validate Order Items Data
         $request->validate([
             'items' => 'required|array|min:1',
@@ -194,7 +194,7 @@ class SaleRequisitionController extends Controller
 
             // 4. Sync Order Items
             $submittedItemIds = collect($request->input('items'))->pluck('id')->filter()->toArray();
-            
+
             // Delete items not in the submission
             $order->items()->whereNotIn('id', $submittedItemIds)->delete();
 
@@ -222,7 +222,7 @@ class SaleRequisitionController extends Controller
                     OrderItem::create($itemData);
                 }
             }
-            
+
             DB::commit();
 
             return redirect()->route('sale-requisitions.index')->with('success', 'Order updated successfully. Invoice No: ' . $order->invoice_no);
@@ -240,13 +240,13 @@ class SaleRequisitionController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             // Delete all associated order items first
             $order->items()->delete();
-            
+
             // Then delete the order itself
             $order->delete();
-            
+
             DB::commit();
 
             return redirect()->route('sale-requisitions.index')->with('success', 'Order deleted successfully.');

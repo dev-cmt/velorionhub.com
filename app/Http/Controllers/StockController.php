@@ -31,7 +31,7 @@ class StockController extends Controller
         ]);
 
         $product = Product::findOrFail($id);
-        
+
         if ($request->adjustment_type == 'add') {
             $product->total_stock += $request->quantity;
         } else {
@@ -61,11 +61,11 @@ class StockController extends Controller
         $stores = Store::all();
         // Only show products that actually have stock to move
         $products = Product::where('total_stock', '>', 0)->get();
-        
+
         $transfers = StockTransfer::with(['product', 'fromStore', 'toStore', 'requester'])
             ->latest()
             ->paginate(15);
-        
+
         return view('backend.stock.transfer', compact('stores', 'products', 'transfers'));
     }
 

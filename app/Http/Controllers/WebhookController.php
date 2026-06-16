@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Sale;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -205,7 +205,7 @@ class WebhookController extends Controller
         }
 
         if ($object['notification_type'] == 'delivery_status') {//update sale statuses
-            $sale = Sale::where([['consignment_id', $object['consignment_id']], ['invoice_no', $object['invoice']]])->first();
+            $sale = Order::where([['consignment_id', $object['consignment_id']], ['invoice_no', $object['invoice']]])->first();
             if ($sale) {
                 $store = DB::table('stores')->where('id', $sale->store_id)->select('id', 'base_url', 'ep_order_status', 'status', 'is_steadfast_active')->first();
                 if ($object['status'] == 'delivered') {
@@ -260,7 +260,7 @@ class WebhookController extends Controller
 
 
         if ($object['notification_type'] == 'tracking_update') {//parcel tracking status update
-            $sale = Sale::where([['consignment_id', $object['consignment_id']], ['invoice_no', $object['invoice']]])->first();
+            $sale = Order::where([['consignment_id', $object['consignment_id']], ['invoice_no', $object['invoice']]])->first();
             if ($sale) {
                 $sale->update([
                     'courier_status' => array_key_exists('tracking_message', $object) ? $object['tracking_message'] : null,
@@ -289,7 +289,7 @@ class WebhookController extends Controller
             return response()->json($data, 202)->header('X-CB-Webhook-Integration-Header', '40489fe0-9386-4fc9-8e92-2b2fcb9d451c');
         }
 
-        $sale = Sale::where([['consignment_id', $object['consignment_id']], ['invoice_no', $object['merchant_order_id']]])->first();
+        $sale = Order::where([['consignment_id', $object['consignment_id']], ['invoice_no', $object['merchant_order_id']]])->first();
         if ($sale) {
             $store = DB::table('stores')->where('id', $sale->store_id)->select('id', 'base_url', 'ep_order_status', 'status', 'carrybee_is_active')->first();
 

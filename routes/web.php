@@ -25,6 +25,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SaleRequisitionController;
 use App\Http\Controllers\ServiceTicketController;
+use App\Http\Controllers\DamageController;
+use App\Http\Controllers\ReturnReceivedController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\HomeSlideController;
 use App\Http\Controllers\PromotionBannerController;
@@ -307,6 +309,35 @@ Route::prefix('service-tickets')->group(function () {
     // Status Update
     Route::post('/{serviceTicket}/update-status', [ServiceTicketController::class, 'updateStatus'])->name('service-tickets.update-status');
 });
+
+//supplier
+Route::get('/suppliers', [SupplierController::class, 'index'])->name('supplier.index');
+Route::post('/supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
+Route::post('/supplier/update', [SupplierController::class, 'update'])->name('supplier.update');
+Route::get('/supplier/delete', [SupplierController::class, 'delete'])->name('supplier.delete');
+Route::get('/supplier/report/{id}', [SupplierController::class, 'supplierReport'])->name('supplier.report');
+
+//Customer
+Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
+Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store');
+Route::post('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
+Route::get('/customer/delete', [CustomerController::class, 'delete'])->name('customer.delete');
+
+//Damage
+Route::get('/damages', [DamageController::class, 'index'])->name('damages.index');
+Route::post('/damages', [DamageController::class, 'store'])->name('damage.store');
+Route::post('/damages/update', [DamageController::class, 'update'])->name('damage.update');
+Route::get('/damages/delete', [DamageController::class, 'delete'])->name('damage.delete');
+Route::get('/get-product', [DamageController::class, 'getProduct'])->name('get.product');
+Route::get('/get-damage-data', [DamageController::class, 'getDamageData'])->name('get.damage.data');
+
+//return receive
+Route::get('/return_receive', [ReturnReceivedController::class, 'returnReceive'])->name('return.receive');
+Route::get('/return_receive/clear', [ReturnReceivedController::class, 'clearTemp'])->name('return.receive.clear.temp');
+Route::post('/return_receive/print', [ReturnReceivedController::class, 'print'])->name('return.receive.print');
+Route::post('/return_receive/print2', [ReturnReceivedController::class, 'print2'])->name('return.receive.print2');
+Route::get('/return_receive/csv_export', [ReturnReceivedController::class, 'csvExport'])->name('return.receive.csv.export');
+
 
 Route::middleware('auth')->group(function () {
     // Developer API
