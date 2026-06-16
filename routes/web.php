@@ -88,7 +88,7 @@ Route::controller($controller)->group(function () {
     Route::get('/checkout', 'checkout')->name('checkout');
 
     Route::post('/place-order', 'placeOrder')->name('place.order');
-    Route::get('/order/confirm/{invoice}', 'orderConfirm')->name('order.confirm');
+    Route::get('/order-confirm', 'orderConfirm')->name('order.confirm');
     Route::get('/cart', 'cart')->name('cart');
     Route::get('/wishlist', 'wishlist')->name('wishlist');
     Route::post('/wishlist/add', 'addWishlist')->name('wishlist.add');
@@ -418,7 +418,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-// Custom dynamic pages created via the Page Builder
-// Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
-
 require __DIR__.'/auth.php';
+
+// Custom dynamic pages created via the Page Builder
+Route::get('/{slug}', [PageController::class, 'show'])->name('pages.show');

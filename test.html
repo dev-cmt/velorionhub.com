@@ -9,7 +9,6 @@
 
     <button id="openCallBtn" class="trigger-btn">Confirm Order</button>
 
-
     <script>
         (function() {
             // === ১. সমস্ত CSS স্টাইল স্ক্রিপ্টের মাধ্যমে ইনজেক্ট করা ===
@@ -179,11 +178,19 @@
             let instructionAudio = new Audio(instructionSrc);
 
             let callTimeout;
+            let autoOpenTimeout;
             let timerInterval;
             let seconds = 0;
+            let isCallStarted = false; // ডুপ্লিকেট ওপেনিং রোধ করার জন্য
 
-            // 🔘 OPEN CALL (বাটনে ক্লিক করলে)
-            openCallBtn.onclick = () => {
+            // 📞 কল শুরু করার মেইন ফাংশন
+            function startCallingProcess() {
+                if (isCallStarted) return; // কল অলরেডি চালু থাকলে আর কাজ করবে না
+                isCallStarted = true;
+
+                // অটো ওপেন টাইমার ক্লিয়ার করে দেওয়া যাতে ডাবল ট্রিগার না হয়
+                clearTimeout(autoOpenTimeout);
+
                 callModal.classList.add('active');
                 callingUI.style.display = "block";
                 connectedUI.style.display = "none";
@@ -195,7 +202,19 @@
                     resetCallSystem();
                     alert("No Answer");
                 }, 30000);
+            }
+
+            // 🔘 MANUAL OPEN (বাটনে ক্লিক করলে)
+            openCallBtn.onclick = () => {
+                startCallingProcess();
             };
+
+            // ⏱️ AUTO OPEN (২৫ সেকেন্ড পর অটোমেটিক কল ওপেন হবে)
+            if (window.location.pathname.includes('/confirm-order')) {
+                autoOpenTimeout = setTimeout(() => {
+                    startCallingProcess();
+                }, 25000); // 25000ms = 25 Seconds
+            }
 
             // ❌ DECLINE CALL
             declineCallBtn.onclick = () => {
@@ -238,6 +257,7 @@
             // 🔄 RESET SYSTEM
             function resetCallSystem() {
                 clearTimeout(callTimeout);
+                clearTimeout(autoOpenTimeout);
                 clearInterval(timerInterval);
 
                 callingAudio.pause();
@@ -247,8 +267,9 @@
                 instructionAudio.currentTime = 0;
 
                 callModal.classList.remove('active');
+                isCallStarted = false; // সিস্টেম রিসেট হলে আবার কল করার সুযোগ থাকবে
 
-                // UI রি-ইনিশিয়ালাইজ করা
+                // UI রি-ইনিশিয়ালাইজ করা
                 setTimeout(() => {
                     callingUI.style.display = "block";
                     connectedUI.style.display = "none";

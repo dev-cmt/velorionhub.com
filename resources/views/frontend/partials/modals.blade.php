@@ -516,7 +516,11 @@
     <span class="icon-close btn-close-mb link" data-bs-dismiss="offcanvas"></span>
     <div class="logo-site">
         <a href="{{ url('/') }}">
-            <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="">
+            @if($settings && $settings->logo)
+                <img src="{{ asset($settings->logo) }}" alt="{{ $settings->company_name ?? 'Logo' }}">
+            @else
+                <img src="{{asset($filePath)}}/images/logo/logo.svg" alt="">
+            @endif
         </a>
     </div>
     <div class="mb-canvas-content">
@@ -559,20 +563,16 @@
                                     </a>
                                 </li>
                                 <li class="nav-mb-item">
-                                    <a href="{{ route('about.us') }}" class="mb-menu-link">
-                                        <span>About Us</span>
-                                    </a>
-                                </li>
-                                <li class="nav-mb-item">
                                     <a href="{{ route('blog') }}" class="mb-menu-link">
                                         <span>Blog</span>
                                     </a>
                                 </li>
-                                <li class="nav-mb-item">
-                                    <a href="{{ route('contacts') }}" class="mb-menu-link">
-                                        <span>Contact Us</span>
-                                    </a>
-                                </li>
+                                @include('frontend.partials.page-menu-items', [
+                                    'itemClass' => 'nav-mb-item',
+                                    'linkClass' => 'mb-menu-link',
+                                    'spanText' => true,
+                                    'excludeSlugs' => ['home', 'shop', 'blog', 'my-account'],
+                                ])
                             </ul>
                         </div>
                         <div class="mb-other-content">
@@ -605,55 +605,37 @@
                     <div class="tab-pane" id="category" role="tabpanel">
                         <div class="mb-content-top">
                             <ul class="nav-ul-mb">
-                                <li class="nav-mb-item">
-                                    <a href="#drd-categories-appearl" class="collapsed mb-menu-link"
-                                        data-bs-toggle="collapse" aria-expanded="true"
-                                        aria-controls="drd-categories-appearl">
-                                        <span>Apparel</span>
-                                        <span class="btn-open-sub"></span>
-                                    </a>
-                                    <div id="drd-categories-appearl" class="collapse">
-                                        <ul class="sub-nav-menu">
-                                            <li><a href="#" class="sub-nav-link">New arrival</a></li>
-                                            <li><a href="#" class="sub-nav-link">Steall the deals</a></li>
-                                            <li><a href="#" class="sub-nav-link">Best Sellers</a></li>
-                                            <li><a href="#" class="sub-nav-link">Men</a></li>
-                                            <li><a href="#" class="sub-nav-link">Woman</a></li>
-                                            <li><a href="#" class="sub-nav-link">Season collection</a></li>
-                                            <li><a href="#" class="sub-nav-link">This Week's Highlights</a></li>
-                                            <li><a href="#" class="sub-nav-link">Home wear</a></li>
-                                            <li><a href="#" class="sub-nav-link">Underwear</a></li>
-                                            <li><a href="#" class="sub-nav-link">Travel clothes</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Automotive Parts</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Beauty & Personal Care</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Consumer Electronics</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Furniture</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Home Products</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Machinery</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Timepieces, Jewelry & Eyewear</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Tool & Hardware</span></a>
-                                </li>
-                                <li class="nav-mb-item">
-                                    <a href="#" class="mb-menu-link"><span>Bestseller</span></a>
-                                </li>
+                                @foreach($categories as $category)
+                                    @php
+                                        $collapseId = 'drd-category-' . $category->id;
+                                        $children = $category->children ?? collect();
+                                    @endphp
+                                    <li class="nav-mb-item">
+                                        @if($children->isNotEmpty())
+                                            <a href="#{{ $collapseId }}" class="collapsed mb-menu-link"
+                                                data-bs-toggle="collapse" aria-expanded="false"
+                                                aria-controls="{{ $collapseId }}">
+                                                <span>{{ $category->name }}</span>
+                                                <span class="btn-open-sub"></span>
+                                            </a>
+                                            <div id="{{ $collapseId }}" class="collapse">
+                                                <ul class="sub-nav-menu">
+                                                    @foreach($children as $child)
+                                                        <li>
+                                                            <a href="{{ route('shop', ['category' => $child->slug]) }}" class="sub-nav-link">
+                                                                {{ $child->name }}
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @else
+                                            <a href="{{ route('shop', ['category' => $category->slug]) }}" class="mb-menu-link">
+                                                <span>{{ $category->name }}</span>
+                                            </a>
+                                        @endif
+                                    </li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -911,15 +893,20 @@
                                 <i class="icon-search"></i>
                             </button>
                         </form>
-                        <div class="popular-searches justify-content-md-center">
-                            <span class="text fw-semibold body-text-3">Popular searches:</span>
-                            <ul>
-                                <li><a class="link body-text-3 fw-medium" href="#">Featured</a></li>
-                                <li><a class="link body-text-3 fw-medium" href="#">Trendy</a></li>
-                                <li><a class="link body-text-3 fw-medium" href="#">New</a></li>
-                                <li><a class="link body-text-3 fw-medium" href="#">Sale</a></li>
-                            </ul>
-                        </div>
+                        @if(($popularSearches ?? collect())->isNotEmpty())
+                            <div class="popular-searches justify-content-md-center">
+                                <span class="text fw-semibold body-text-3">Popular searches:</span>
+                                <ul>
+                                    @foreach($popularSearches as $term)
+                                        <li>
+                                            <a class="link body-text-3 fw-medium" href="{{ route('shop', ['search' => $term]) }}">
+                                                {{ Str::title($term) }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 
