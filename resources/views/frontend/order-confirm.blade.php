@@ -1,5 +1,4 @@
 <x-frontend-layout title="Order Confirmation">
-    <!-- Breakcrumbs -->
     <div class="tf-sp-3 pb-0">
         <div class="container">
             <ul class="breakcrumbs">
@@ -15,9 +14,6 @@
             </ul>
         </div>
     </div>
-    <!-- /Breakcrumbs -->
-
-    <!-- Check Out Cart -->
     <section class="tf-sp-2">
         <div class="container">
             <div class="checkout-status tf-sp-2 pt-0">
@@ -210,8 +206,6 @@
                             <div class="billing-info">
                                 @if($order->notes)
                                     <p>{{ $order->notes }}</p>
-                                @else
-                                    <p class="text-muted">No notes provided.</p>
                                 @endif
                                 @if($order->store)
                                     <p class="mt-2"><strong>Store:</strong> {{ $order->store->name }}</p>
@@ -222,6 +216,9 @@
                 </div>
 
                 <div class="mt-4 text-center">
+                    <button id="openCallBtn" class="tf-btn btn-gray mb-2 md-mb-0">
+                         <span class="text-white">Simulate Verification Call</span>
+                    </button>
                     <a href="{{ route('shop') }}" class="tf-btn btn-gray">
                         <span class="text-white">Continue Shopping</span>
                     </a>
@@ -232,9 +229,6 @@
             </div>
         </div>
     </section>
-    <!-- /Check Out Cart -->
-
-
     @push('js')
         @if (isset($order))
             <script>
@@ -282,5 +276,406 @@
                 });
             </script>
         @endif
+
+        <script>
+            (function() {
+                // === ১. CSS ===
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .ai-call-system.call-overlay {
+                        position: fixed;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(8, 14, 28, 0.85);
+                        backdrop-filter: blur(12px);
+                        -webkit-backdrop-filter: blur(12px);
+                        top: 0;
+                        left: 0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        z-index: 99999;
+                    }
+                    .ai-call-system.call-overlay.active {
+                        opacity: 1;
+                        visibility: visible;
+                    }
+                    .ai-call-system .call-card {
+                        width: 380px;
+                        background: linear-gradient(145deg, #111827, #1f2937);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        border-radius: 32px;
+                        padding: 40px 30px;
+                        text-align: center;
+                        color: #fff;
+                        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+                        transform: scale(0.9);
+                        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    }
+                    .ai-call-system.call-overlay.active .call-card {
+                        transform: scale(1);
+                    }
+                    .ai-call-system .profile-wrap {
+                        position: relative;
+                        width: 110px;
+                        height: 110px;
+                        margin: 0 auto 24px;
+                    }
+                    .ai-call-system .profile-circle {
+                        width: 110px;
+                        height: 110px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #0d9488, #115e59);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        font-size: 38px;
+                        color: #fff;
+                        position: relative;
+                        z-index: 2;
+                        box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
+                    }
+                    .ai-call-system .pulse-ring {
+                        position: absolute;
+                        top: 0; left: 0; width: 100%; height: 100%;
+                        border-radius: 50%;
+                        background: rgba(13, 148, 136, 0.4);
+                        animation: aiPulse 2s infinite ease-out;
+                        z-index: 1;
+                    }
+                    .ai-call-system .brand-name {
+                        font-size: 24px;
+                        font-weight: 700;
+                        letter-spacing: -0.5px;
+                        margin-bottom: 4px;
+                        font-family: system-ui, -apple-system, sans-serif;
+                    }
+                    .ai-call-system .phone-number {
+                        color: #9ca3af;
+                        font-size: 15px;
+                        margin-bottom: 24px;
+                        font-family: system-ui, -apple-system, sans-serif;
+                    }
+                    .ai-call-system .calling-status {
+                        font-size: 16px;
+                        margin-bottom: 32px;
+                        color: #2dd4bf;
+                        font-weight: 600;
+                        letter-spacing: 0.5px;
+                        text-transform: uppercase;
+                        animation: aiFade 1.5s infinite ease-in-out;
+                        font-family: system-ui, -apple-system, sans-serif;
+                    }
+                    .ai-call-system .btn-group {
+                        display: flex;
+                        gap: 16px;
+                        justify-content: center;
+                    }
+                    .ai-call-system .btn-call {
+                        padding: 14px 24px;
+                        border: none;
+                        border-radius: 16px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 15px;
+                        flex: 1;
+                        transition: all 0.2s ease;
+                        font-family: system-ui, -apple-system, sans-serif;
+                    }
+                    .ai-call-system .accept-btn {
+                        background: #10b981;
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+                    }
+                    .ai-call-system .accept-btn:hover {
+                        background: #059669;
+                        transform: translateY(-2px);
+                    }
+                    .ai-call-system .decline-btn {
+                        background: #374151;
+                        color: #f3f4f6;
+                    }
+                    .ai-call-system .decline-btn:hover {
+                        background: #4b5563;
+                        transform: translateY(-2px);
+                    }
+                    .ai-call-system .confirm-action-btn {
+                        background: #0ea5e9;
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+                    }
+                    .ai-call-system .confirm-action-btn:hover {
+                        background: #0284c7;
+                        transform: translateY(-2px);
+                    }
+                    .ai-call-system .cancel-action-btn {
+                        background: #dc2626;
+                        color: #fff;
+                        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+                    }
+                    .ai-call-system .cancel-action-btn:hover {
+                        background: #b91c1c;
+                        transform: translateY(-2px);
+                    }
+                    .ai-call-system .end-btn {
+                        margin-top: 20px;
+                        width: 100%;
+                        padding: 14px;
+                        border: none;
+                        border-radius: 16px;
+                        background: rgba(220, 38, 38, 0.15);
+                        color: #f87171;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        font-family: system-ui, -apple-system, sans-serif;
+                    }
+                    .ai-call-system .end-btn:hover {
+                        background: #dc2626;
+                        color: #fff;
+                    }
+                    .ai-call-system .timer {
+                        color: #10b981;
+                        font-size: 32px;
+                        margin-bottom: 24px;
+                        font-weight: 700;
+                        font-variant-numeric: tabular-nums;
+                        letter-spacing: 1px;
+                        font-family: system-ui, -apple-system, sans-serif;
+                    }
+                    @keyframes aiPulse {
+                        0% { transform: scale(1); opacity: 1; }
+                        100% { transform: scale(1.5); opacity: 0; }
+                    }
+                    @keyframes aiFade {
+                        0%, 100% { opacity: 0.6; }
+                        50% { opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                // === ২. UI HTML ===
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = `
+                    <div id="callModal" class="ai-call-system call-overlay">
+                        <div class="call-card">
+                            <div id="callingUI">
+                                <div class="profile-wrap">
+                                    <div class="pulse-ring"></div>
+                                    <div class="profile-circle">
+                                        <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                    </div>
+                                </div>
+                                <div class="brand-name">Bikroy Baazar</div>
+                                <div class="phone-number">01752774046</div>
+                                <div class="calling-status" id="statusText">Calling...</div>
+                                <div class="btn-group">
+                                    <button class="btn-call decline-btn" id="declineCallBtn">Decline</button>
+                                    <button class="btn-call accept-btn" id="acceptCallBtn">Accept</button>
+                                </div>
+                            </div>
+
+                            <div id="connectedUI" style="display:none;">
+                                <div class="profile-wrap">
+                                    <div class="profile-circle" style="background: linear-gradient(135deg, #0ea5e9, #0369a1); box-shadow: 0 0 20px rgba(14, 165, 233, 0.4)">
+                                        <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M21 15.46l-5.27-.61-2.52 2.52c-2.83-1.44-5.15-3.76-6.59-6.59l2.53-2.53L8.54 3H3.03C2.45 13.18 10.82 21.55 21 20.97v-5.51z"/></svg>
+                                    </div>
+                                </div>
+                                <div class="brand-name">Bikroy Baazar</div>
+                                <div class="phone-number">AI Verification Assistant</div>
+                                <div id="callTimer" class="timer">00:00</div>
+                                <div class="btn-group">
+                                    <button class="btn-call confirm-action-btn" id="apiConfirmOrderBtn">Confirm Order</button>
+                                    <button class="btn-call cancel-action-btn" id="apiCancelOrderBtn">Cancel Order</button>
+                                </div>
+                                <button id="endCallBtn" class="end-btn">End Call</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modalContainer);
+
+                // === ৩. Variables ===
+                const openCallBtn     = document.getElementById('openCallBtn');
+                const callModal       = document.getElementById('callModal');
+                const acceptCallBtn   = document.getElementById('acceptCallBtn');
+                const declineCallBtn  = document.getElementById('declineCallBtn');
+                const endCallBtn      = document.getElementById('endCallBtn');
+                const apiConfirmOrderBtn = document.getElementById('apiConfirmOrderBtn');
+                const apiCancelOrderBtn  = document.getElementById('apiCancelOrderBtn');
+                const callingUI       = document.getElementById('callingUI');
+                const connectedUI     = document.getElementById('connectedUI');
+                const callTimer       = document.getElementById('callTimer');
+
+                const toneSrc        = "{{ asset('calling-tone.mp3') }}";
+                const instructionSrc = "{{ asset('call_instruction.mp3') }}";
+
+                let callingAudio     = new Audio(toneSrc);
+                callingAudio.loop    = true;
+                let instructionAudio = new Audio(instructionSrc);
+
+                let callTimeout, autoOpenTimeout, timerInterval;
+                let seconds      = 0;
+                let isCallStarted = false;
+
+                // === ৪. AudioContext দিয়ে Autoplay Unlock ===
+                function forceUnlockAndPlay(audioEl) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioCtx) {
+                        audioEl.play().catch(e => console.log('play failed:', e));
+                        return;
+                    }
+
+                    const ctx    = new AudioCtx();
+                    const buffer = ctx.createBuffer(1, 1, 22050);
+                    const source = ctx.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(ctx.destination);
+                    source.start(0);
+
+                    ctx.resume().then(() => {
+                        audioEl.play().catch(e => console.log('play after unlock failed:', e));
+                    }).catch(() => {
+                        audioEl.play().catch(e => console.log('play fallback failed:', e));
+                    });
+                }
+
+                // === ৫. API Call ===
+                function sendOrderActionToAPI(status) {
+                    const gtmEcommerce  = (typeof dataLayer !== 'undefined')
+                        ? dataLayer.find(item => item.ecommerce && item.ecommerce.transaction_id)
+                        : null;
+                    const transactionId = gtmEcommerce ? gtmEcommerce.ecommerce.transaction_id : '';
+
+                    if (!transactionId) {
+                        console.log("GTM transaction_id Not Found.");
+                        resetCallSystem();
+                        return;
+                    }
+
+                    fetch('http://127.0.0.1:8000/api/ai-agent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ transaction_id: transactionId, order_action: status })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('Network error');
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log('API Response:', data);
+                        resetCallSystem();
+                        alert(`Order status updated to "${status}" successfully!`);
+                    })
+                    .catch(err => {
+                        console.error('API Error:', err);
+                        alert("Failed to sync with AI Agent.");
+                        resetCallSystem();
+                    });
+                }
+
+                // === ৬. Main Calling Process ===
+                function startCallingProcess() {
+                    if (isCallStarted) return;
+                    isCallStarted = true;
+
+                    clearTimeout(autoOpenTimeout);
+
+                    callModal.classList.add('active');
+                    callingUI.style.display  = "block";
+                    connectedUI.style.display = "none";
+
+                    // AudioContext দিয়ে force unlock করে audio play
+                    forceUnlockAndPlay(callingAudio);
+
+                    // ৩০ সেকেন্ড no-answer timeout
+                    callTimeout = setTimeout(() => {
+                        resetCallSystem();
+                        alert("No Answer");
+                    }, 30000);
+                }
+
+                // === ৭. Button Events ===
+                if (openCallBtn) {
+                    openCallBtn.onclick = () => startCallingProcess();
+                }
+
+                declineCallBtn.onclick = () => resetCallSystem();
+
+                acceptCallBtn.onclick = () => {
+                    clearTimeout(callTimeout);
+
+                    callingAudio.pause();
+                    callingAudio.currentTime = 0;
+
+                    callingUI.style.display   = "none";
+                    connectedUI.style.display = "block";
+
+                    forceUnlockAndPlay(instructionAudio);
+                    startTimer();
+                };
+
+                apiConfirmOrderBtn.onclick = () => sendOrderActionToAPI('Confirmed');
+
+                apiCancelOrderBtn.onclick = () => {
+                    if (confirm("Are you sure you want to cancel this order?")) {
+                        sendOrderActionToAPI('Cancelled');
+                    }
+                };
+
+                endCallBtn.onclick = () => resetCallSystem();
+
+                // === ৮. Auto Open (5 seconds) ===
+                if (window.location.pathname.includes('/order-confirm')) {
+                    autoOpenTimeout = setTimeout(() => {
+                        startCallingProcess();
+                    }, 5000);
+                }
+
+                // === ৯. Timer ===
+                function startTimer() {
+                    clearInterval(timerInterval);
+                    seconds = 0;
+                    callTimer.innerText = "00:00";
+
+                    timerInterval = setInterval(() => {
+                        seconds++;
+                        let m = String(Math.floor(seconds / 60)).padStart(2, '0');
+                        let s = String(seconds % 60).padStart(2, '0');
+                        callTimer.innerText = m + ":" + s;
+                    }, 1000);
+                }
+
+                // === ১০. Reset ===
+                function resetCallSystem() {
+                    clearTimeout(callTimeout);
+                    clearTimeout(autoOpenTimeout);
+                    clearInterval(timerInterval);
+
+                    callingAudio.pause();
+                    callingAudio.currentTime = 0;
+
+                    instructionAudio.pause();
+                    instructionAudio.currentTime = 0;
+
+                    callModal.classList.remove('active');
+                    isCallStarted = false;
+
+                    setTimeout(() => {
+                        callingUI.style.display   = "block";
+                        connectedUI.style.display = "none";
+                        callTimer.innerText       = "00:00";
+                    }, 400);
+                }
+
+            })();
+        </script>
     @endpush
 </x-frontend-layout>

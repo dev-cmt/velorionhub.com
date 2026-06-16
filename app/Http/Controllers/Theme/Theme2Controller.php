@@ -19,6 +19,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductReview;
 use App\Models\Media;
+use App\Services\SearchTermService;
 use Darryldecode\Cart\Facades\CartFacade as Cart;
 use Illuminate\Support\Facades\Auth;
 
@@ -112,6 +113,8 @@ class Theme2Controller extends Controller
         }
 
         if ($request->has('search') && !empty($request->search)) {
+            SearchTermService::record($request->search);
+
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('sku', 'like', '%' . $request->search . '%');

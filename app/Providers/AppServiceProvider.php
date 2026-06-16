@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use App\Services\SearchTermService;
 use App\Models\Setting;
 use App\Models\Category;
 use App\Models\Page;
@@ -45,7 +46,9 @@ class AppServiceProvider extends ServiceProvider
         $categories = Category::where('status', true)->whereNull('parent_id')->with('children')->get();
         View::share('categories', $categories);
 
-        $pages = Page::where('status', true)->get();
+        $pages = Page::where('status', true)->orderBy('order')->orderBy('title')->get();
         View::share('pages', $pages);
+
+        View::share('popularSearches', SearchTermService::popular());
     }
 }

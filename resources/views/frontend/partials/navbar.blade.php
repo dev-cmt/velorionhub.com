@@ -224,16 +224,12 @@
                                 <span>Blog</span>
                             </a>
                         </li>
-                        <li class="nav-item pst-unset">
-                            <a href="{{ route('about.us') }}" class="item-link body-md-2 fw-semibold">
-                                <span>About Us</span>
-                            </a>
-                        </li>
-                        <li class="nav-item pst-unset">
-                            <a href="{{ route('contacts') }}" class="item-link body-md-2 fw-semibold">
-                                <span>Contact Us</span>
-                            </a>
-                        </li>
+                        @include('frontend.partials.page-menu-items', [
+                            'itemClass' => 'nav-item pst-unset',
+                            'linkClass' => 'item-link body-md-2 fw-semibold',
+                            'spanText' => true,
+                            'excludeSlugs' => ['home', 'shop', 'blog', 'cart', 'checkout', 'wishlist', 'compare', 'privacy-policy', 'return-policy', 'terms-conditions', 'my-account'],
+                        ])
                     </ul>
                 </nav>
             </div>

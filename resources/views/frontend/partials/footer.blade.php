@@ -15,13 +15,17 @@
                     </div>
                     <ul class="ft-link-wrap w-100 tf-grid-layout md-col-2 lg-col-4">
                         <li class="footer-col-block">
-                            <h6 class="ft-heading footer-heading-mobile fw-semibold">Get help</h6>
+                            <h6 class="ft-heading footer-heading-mobile fw-semibold">Pages</h6>
                             <div class="tf-collapse-content">
                                 <ul class="ft-menu-list">
-                                    <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>
-                                    <li><a href="{{ route('privacy.policy') }}" class="link">Privacy Policy</a></li>
-                                    <li><a href="{{ route('return.policy') }}" class="link">Return Policy</a></li>
-                                    <li><a href="{{ route('terms.conditions') }}" class="link">Terms & Conditions</a></li>
+                                    @if(($pages ?? collect())->isNotEmpty())
+                                        @include('frontend.partials.page-menu-items', ['linkClass' => 'link'])
+                                    @else
+                                        <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>
+                                        <li><a href="{{ route('privacy.policy') }}" class="link">Privacy Policy</a></li>
+                                        <li><a href="{{ route('return.policy') }}" class="link">Return Policy</a></li>
+                                        <li><a href="{{ route('terms.conditions') }}" class="link">Terms & Conditions</a></li>
+                                    @endif
                                 </ul>
                             </div>
                         </li>
@@ -220,15 +224,11 @@
                         @endif
                     </ul>
                     <ul class="ft-menu-list-2 body-text-3">
-                        <li><a href="blog-grid.html" class="title-sidebar link fw-bold">New arrivals</a></li>
-                        <li><a href="blog-grid.html" class="title-sidebar link fw-bold">Best sale</a></li>
-                        <li><a href="blog-grid.html" class="title-sidebar link fw-bold">Value of the day</a>
-                        </li>
-                        <li><a href="blog-grid.html" class="title-sidebar link fw-bold">Top 100 offers</a></li>
-                        <li><a href="blog-grid.html" class="title-sidebar link fw-bold">Blog</a></li>
-                        <li><a href="blog-grid.html" class="title-sidebar link fw-bold"><i
-                                    class="icon-fire"></i> 50% OFF</a>
-                        </li>
+                        <li><a href="{{ route('shop', ['sort' => 'latest']) }}" class="title-sidebar link fw-bold">New arrivals</a></li>
+                        <li><a href="{{ route('shop', ['sort' => 'best_selling']) }}" class="title-sidebar link fw-bold">Best sale</a></li>
+                        <li><a href="{{ route('shop') }}" class="title-sidebar link fw-bold">Value of the day</a></li>
+                        <li><a href="{{ route('shop') }}" class="title-sidebar link fw-bold">Top offers</a></li>
+                        <li><a href="{{ route('blog') }}" class="title-sidebar link fw-bold">Blog</a></li>
                     </ul>
                     <p class="nocopy caption text-center">
                         <span class="fw-medium">{{ $settings->company_name ?? config('app.name') }}.</span>© {{ date('Y') }}. All right reserved

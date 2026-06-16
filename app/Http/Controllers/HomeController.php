@@ -18,6 +18,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductReview;
 use App\Models\Media;
+use App\Services\SearchTermService;
 use Darryldecode\Cart\Facades\CartFacade as Cart;
 use Illuminate\Support\Facades\Auth;
 
@@ -112,6 +113,8 @@ class HomeController extends Controller
         }
 
         if ($request->has('search') && !empty($request->search)) {
+            SearchTermService::record($request->search);
+
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('sku', 'like', '%' . $request->search . '%');
@@ -568,18 +571,19 @@ class HomeController extends Controller
             ]);
         }
 
+        session()->put('order_id', $order->id);
         $cart->clear();
 
         // Redirect to order confirmation page
-        return redirect()->route('order.confirm', ['invoice' => $order->invoice_no]);
+        return redirect()->route('order.confirm');
     }
 
-    public function orderConfirm($invoice)
+    public function orderConfirm()
     {
-        $order = Order::where('invoice_no', $invoice)->with('items.product')->firstOrFail();
+        $order = Order::where('id', session()->get('order_id'))->with('items.product')->firstOrFail();
         $breadcrumb_list = [
             ['name' => 'Home', 'url' => url('/')],
-            ['name' => 'Order Confirmation', 'url' => route('order.confirm', ['invoice' => $invoice])],
+            ['name' => 'Order Confirmation', 'url' => route('order.confirm', ['invoice' => $order->invoice_no])],
         ];
         $breadcrumbs = $this->generateBreadcrumbJsonLd($breadcrumb_list);
 
