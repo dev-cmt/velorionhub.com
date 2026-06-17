@@ -36,6 +36,37 @@ class PurchaseItem extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function get_product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getQuantityAttribute()
+    {
+        return $this->ordered_qty;
+    }
+
+    public function getPurchaseQtyAttribute()
+    {
+        return $this->ordered_qty;
+    }
+
+    public function getRecivedQtyAttribute()
+    {
+        return $this->received_qty;
+    }
+
+    public function getSellPriceAttribute()
+    {
+        return $this->sale_price;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Boot Method (Auto total calculation)

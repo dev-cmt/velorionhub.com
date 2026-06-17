@@ -9,6 +9,7 @@ class ReturnReceived extends Model
 {
     protected $fillable = [
         'order_id',
+        'sale_id',
         'is_temp',
     ];
 
@@ -20,5 +21,10 @@ class ReturnReceived extends Model
                 'customer_address', 'courier_id', 'total', 'sub_total',
                 'discount', 'paid', 'due', 'shipping_cost', 'created_at'
             )->with('get_courier');
+    }
+
+    public function get_sale()
+    {
+        return $this->belongsTo(Order::class, 'sale_id', 'id');
     }
 }

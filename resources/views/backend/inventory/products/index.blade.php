@@ -102,7 +102,6 @@
                 <!-- Pagination Links -->
                 <div class="mt-3">
                     {{ $products->links('backend.pagination.paginate') }}
-                    {{-- {{ $products->links('backend.pagination.custom') }} --}}
                 </div>
             </div>
         </div>

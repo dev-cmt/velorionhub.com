@@ -29,8 +29,12 @@ use App\Http\Controllers\DamageController;
 use App\Http\Controllers\ReturnReceivedController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\HomeSlideController;
+use App\Http\Controllers\HandoverController;
 use App\Http\Controllers\PromotionBannerController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SkipOrderController;
 use App\Http\Controllers\PageSectionController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Auth;
@@ -86,6 +90,7 @@ Route::controller($controller)->group(function () {
     Route::get('/shop', 'shop')->name('shop');
     Route::get('/product/{slug}', 'productShow')->name('product.show');
     Route::get('/checkout', 'checkout')->name('checkout');
+    Route::get('/skip-orders', 'skipOrders')->name('skip.orders');
 
     Route::post('/place-order', 'placeOrder')->name('place.order');
     Route::get('/order-confirm', 'orderConfirm')->name('order.confirm');
@@ -316,12 +321,42 @@ Route::post('/supplier/store', [SupplierController::class, 'store'])->name('supp
 Route::post('/supplier/update', [SupplierController::class, 'update'])->name('supplier.update');
 Route::get('/supplier/delete', [SupplierController::class, 'delete'])->name('supplier.delete');
 Route::get('/supplier/report/{id}', [SupplierController::class, 'supplierReport'])->name('supplier.report');
+Route::get('/supplier/ajax/get-balance', [SupplierController::class, 'getBalanceAjax'])->name('supplier.ajax.get.balance');
 
-//Customer
-Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
-Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store');
-Route::post('/customer/update', [CustomerController::class, 'update'])->name('customer.update');
-Route::get('/customer/delete', [CustomerController::class, 'delete'])->name('customer.delete');
+Route::middleware('auth')->group(function () {
+    // Purchases
+    Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchase.index');
+    Route::get('/purchases/create', [PurchaseController::class, 'create'])->name('purchase.create');
+    Route::post('/purchases/store', [PurchaseController::class, 'store'])->name('purchase.store');
+    Route::get('/purchases/edit/{id}', [PurchaseController::class, 'edit'])->name('purchase.edit');
+    Route::post('/purchases/update', [PurchaseController::class, 'update'])->name('purchase.update');
+    Route::get('/purchases/delete', [PurchaseController::class, 'destroy'])->name('purchase.delete');
+
+    // Purchase receive
+    Route::get('/purchases/receive', [PurchaseController::class, 'receiveIndex'])->name('purchase.receive.index');
+    Route::get('/purchases/receive-items', [PurchaseController::class, 'getPurchaseReceiveItemsAjax'])->name('get.purchase-recive-items');
+    Route::post('/purchases/receive-ajax', [PurchaseController::class, 'receiveAjax'])->name('purchase.receive.ajax');
+
+    // AJAX helpers
+    Route::get('/admin/ajax-get-products', [PurchaseController::class, 'getProductsAjax'])->name('admin.ajax.get.products');
+    Route::get('/supplier/ajax-get-purchase-items', [PurchaseController::class, 'getPurchaseItemsAjax'])->name('supplier.ajax.get.purchase.items');
+});
+
+
+Route::get('/handover', [HandoverController::class, 'index'])->name('handover');
+Route::get('/handover/add', [HandoverController::class, 'addTemp'])->name('handover.add.temp');
+Route::get('/handover/clear', [HandoverController::class, 'clearTemp'])->name('handover.clear.temp');
+Route::post('/handover/print', [HandoverController::class, 'print'])->name('handover.print');
+Route::post('/handover/print2', [HandoverController::class, 'print2'])->name('handover.print2');
+Route::get('/handover/csv_export', [HandoverController::class, 'csvExport'])->name('handover.csv.export');
+Route::post('/handover/send-row', [HandoverController::class, 'finalHandover'])->name('handover.send.row');
+
+//skip orders
+Route::get('/skip-orders', [SkipOrderController::class, 'index'])->name('skip.orders');
+Route::get('/skip-orders/{id}/create', [SkipOrderController::class, 'createOrder'])->name('skip.order.create');
+Route::get('/skip-orders/{id}/delete', [SkipOrderController::class, 'delete'])->name('skip.order.delete');
+Route::post('/skip-orders/note-update', [SkipOrderController::class, 'noteUpdate'])->name('skip.order.note.update');
+
 
 //Damage
 Route::get('/damages', [DamageController::class, 'index'])->name('damages.index');
@@ -335,7 +370,6 @@ Route::get('/get-damage-data', [DamageController::class, 'getDamageData'])->name
 Route::get('/return_receive', [ReturnReceivedController::class, 'returnReceive'])->name('return.receive');
 Route::get('/return_receive/clear', [ReturnReceivedController::class, 'clearTemp'])->name('return.receive.clear.temp');
 Route::post('/return_receive/print', [ReturnReceivedController::class, 'print'])->name('return.receive.print');
-Route::post('/return_receive/print2', [ReturnReceivedController::class, 'print2'])->name('return.receive.print2');
 Route::get('/return_receive/csv_export', [ReturnReceivedController::class, 'csvExport'])->name('return.receive.csv.export');
 
 

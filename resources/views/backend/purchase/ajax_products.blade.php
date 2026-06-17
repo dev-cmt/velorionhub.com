@@ -6,8 +6,8 @@
                 <tr>
                     <th></th>
                     <th width="69%">Name</th>
-                    <th width="10%">Purchase Quantity</th>
-                    <th width="10%">Purchase Cost</th>
+                    <th width="10%">Quantity</th>
+                    <th width="10%">Cost</th>
                     <th width="10%">Sell Price</th>
                 </tr>
                 </thead>
@@ -40,40 +40,6 @@
                 </tbody>
             </table>
         </td>
-        {{--        ///--}}
-        {{--<td>
-            <input type="hidden" name="product_id[]" value="{{ $product->id }}">
-            <input type="hidden" value="{{ $product->has_variant }}" id="has_variant"/>
-            @foreach ($product->get_product_attributes as $key => $item)
-                @if($key!=0)
-                    <br>
-                @endif
-                <button style="border: none; background: none;"><i class="remove_btn bi bi-x-circle btn-lg"></i></button>
-                <input type="hidden" name="sku[{{$product->id}}][]" value="{{ $item->variant_sku }}">
-                <label class="col-form-label pt-0"><small class="text-info">#{{ $item->variant_sku }}</small> <br>{{ $product->name }} ({{ $item->variant_name }})
-                </label>
-            @endforeach
-        </td>
-        <td class="qty_section">
-            @foreach ($product->get_product_attributes as $item)
-                <input type="number" class="form-control form-control-sm quantity mb-3" name="quantity[{{$product->id}}][]" id="quantity" value="1" required>
-            @endforeach
-        </td>
-        <input type="hidden" class="sub_total_qty" name="sub_total_qty[{{$product->id}}]">
-        <td class="purchase_cost_section">
-            @foreach ($product->get_product_attributes as $item)
-                <input type="number" class="form-control form-control-sm purchase_cost mb-3" name="purchase_cost[{{$product->id}}][]" id="unit_cost" value="0" min="1"
-                       required>
-                <input type="hidden" class="put_sub_toot">
-            @endforeach
-        </td>
-        <input type="hidden" class="sub_total_purchase_cost">
-        <td class="sell_price_section">
-            @foreach ($product->get_product_attributes as $item)
-                <input type="number" class="form-control form-control-sm sell_price mb-3" name="sell_price[{{$product->id}}][]" value="0" min="1" required>
-            @endforeach
-        </td>--}}
-        {{--        ///--}}
         <input type="hidden" class="sub_total_sell_price">
         {{-- <td><input type="number" class="form-control form-control-sm discount" name="discount[{{$product->id}}][]" value="0"></td>
          <td><input type="number" class="form-control form-control-sm tax" name="tax[{{$product->id}}][]" value="0"></td>--}}

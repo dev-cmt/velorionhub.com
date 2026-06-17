@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +31,7 @@ class WebhookController extends Controller
         $pathao_store_id = DB::table('stores')->where('pathao_store_id', $object['store_id'])->select('id', 'pathao_store_id', 'status', 'ep_order_status', 'base_url')->first();
         if ($pathao_store_id && $pathao_store_id->pathao_store_id) { //if found store id
             if ($object['event'] == 'order.created') {
-                DB::table('sales')->where([['invoice_no', $object['merchant_order_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['invoice_no', $object['merchant_order_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => 'Order Created',
                     'consignment_id' => $object['consignment_id'],
                     //'status' => 7,
@@ -49,57 +48,57 @@ class WebhookController extends Controller
                 }
 
             } elseif ($object['event'] == 'order.updated') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.pickup-requested') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.assigned-for-pickup') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.picked') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.pickup-failed') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.pickup-cancelled') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.at-the-sorting-hub') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.in-transit') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.received-at-last-mile-hub') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.assigned-for-delivery') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.delivered') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'status' => 9,
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
@@ -113,7 +112,7 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.partial-delivery') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'status' => 10,
@@ -128,7 +127,7 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.returned') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'status' => 11,
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
@@ -143,26 +142,26 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.delivery-failed') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.on-hold') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.paid') {
-                $order_id = DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                $order_id = DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => $object['invoice_id'],
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                     // 'payment_status' => 2,
                 ]);
             } elseif ($object['event'] == 'order.paid-return') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'status' => 11,
@@ -177,7 +176,7 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.exchanged') {
-                DB::table('sales')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
+                DB::table('orders')->where([['consignment_id', $object['consignment_id']], ['store_id', $pathao_store_id->id]])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'status' => 13,
@@ -294,85 +293,85 @@ class WebhookController extends Controller
             $store = DB::table('stores')->where('id', $sale->store_id)->select('id', 'base_url', 'ep_order_status', 'status', 'carrybee_is_active')->first();
 
             if ($object['event'] == 'order.updated') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.pickup-requested') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.assigned-for-pickup') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.picked') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.pickup-failed') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.pickup-cancelled') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.at-the-sorting-hub') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.on-the-way-to-central-warehouse') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.at-central-warehouse') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.in-transit') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.received-at-last-mile-hub') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.assigned-for-delivery') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.delivery-on-hold') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.delivered') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'status' => 9,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
@@ -387,7 +386,7 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.partial-delivery') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'status' => 10,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
@@ -402,13 +401,13 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.delivery-failed') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.returned') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'status' => 11,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
@@ -422,7 +421,7 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.paid-return') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'status' => 11,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
@@ -436,7 +435,7 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.exchange') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'status' => 13,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
@@ -450,19 +449,19 @@ class WebhookController extends Controller
                 //     //dd($response);
                 // }
             } elseif ($object['event'] == 'order.paid') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.returned-at-sorting') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
                 ]);
             } elseif ($object['event'] == 'order.returned-to-merchant') {
-                DB::table('sales')->where('consignment_id', $object['consignment_id'])->update([
+                DB::table('orders')->where('consignment_id', $object['consignment_id'])->update([
                     'courier_status' => array_key_exists('order_status', $object) ? $object['order_status'] : null,
                     'courier_status_reason' => array_key_exists('reason', $object) ? $object['reason'] : null,
                     'total_delivery_fee' => array_key_exists('delivery_fee', $object) ?? $object['delivery_fee'],
@@ -477,5 +476,4 @@ class WebhookController extends Controller
             ->header('Content-Type', 'application/json')
             ->header('Content-Length', 185);
     }
-
 }

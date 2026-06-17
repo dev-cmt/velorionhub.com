@@ -11,6 +11,7 @@ class OrderItem extends Model
         'product_id',
         'sku',
         'quantity',
+        'item_out',
         'purchase_price',
         'sale_price',
         'attributes',
@@ -30,5 +31,11 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    // Product helper
+    public function get_product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 }

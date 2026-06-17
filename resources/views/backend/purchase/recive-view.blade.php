@@ -2,7 +2,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <div>
             <h6 class="mb-0">Purchase #{{ $data->id }}</h6>
-            <small class="text-muted">Date: {{ date('d M Y', strtotime($data->date)) }}, Supplier: {{ $data->get_supplier->name }}</small>
+            <small class="text-muted">Date: {{ date('d M Y', strtotime($data->date)) }}, Supplier: {{ $data->supplier->name }}</small>
         </div>
         <button type="button" class="btn btn-primary btn-sm" id="save-all">Receive All</button>
     </div>

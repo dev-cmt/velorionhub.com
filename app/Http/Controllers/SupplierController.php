@@ -1,26 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\SupplierStore;
 use Illuminate\Http\Request;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
-    public function __construct()
-    {
-        $this->paginate_value = 50;
-    }
-
     public function index()
     {
-        $suppliers = Supplier::orderBy('id', 'desc')->paginate($this->paginate_value);
+        $suppliers = Supplier::orderBy('id', 'desc')->paginate(10);
         $stores = DB::table('stores')->where('status', 1)->pluck('name', 'id');
-        return view('backEnd.supplier.index', compact('suppliers', 'stores'));
+        return view('backend.supplier.index', compact('suppliers', 'stores'));
     }
 
     public function store(Request $request)
@@ -40,6 +34,13 @@ class SupplierController extends Controller
             $request_all = $request->all();
             DB::transaction(function () use ($request_all) {
                 $supplier = Supplier::create($request_all);
+                if (isset($request_all['balance']) && $request_all['balance'] != 0) {
+                    $supplier->transactions()->create([
+                        'type' => $request_all['balance'] > 0 ? 'debit' : 'credit',
+                        'amount' => abs($request_all['balance']),
+                        'note' => 'Initial Balance',
+                    ]);
+                }
                 return $supplier;
             });
         }
@@ -59,7 +60,21 @@ class SupplierController extends Controller
         } else {
             $request_all = $request->all();
             DB::transaction(function () use ($request_all) {
-                $supplier = Supplier::find($request_all['id'])->update($request_all);
+                $supplier = Supplier::find($request_all['id']);
+                if ($supplier) {
+                    $current_balance = $supplier->balance;
+                    $supplier->update($request_all);
+
+                    $new_balance = $request_all['balance'] ?? 0;
+                    $diff = $new_balance - $current_balance;
+                    if ($diff != 0) {
+                        $supplier->transactions()->create([
+                            'type' => $diff > 0 ? 'debit' : 'credit',
+                            'amount' => abs($diff),
+                            'note' => 'Balance Adjustment',
+                        ]);
+                    }
+                }
                 return $supplier;
             });
         }
@@ -79,6 +94,12 @@ class SupplierController extends Controller
         // Optional: aggregate total purchases or dues
         $totalPurchases = $supplier->transactions->where('type', 'debit')->sum('amount');
         $totalPayments = $supplier->transactions->where('type', 'credit')->sum('amount');
-        return view('backEnd.supplier.transactions-report', compact('supplier', 'totalPurchases', 'totalPayments'));
+        return view('backend.supplier.transactions-report', compact('supplier', 'totalPurchases', 'totalPayments'));
+    }
+
+    public function getBalanceAjax(Request $request)
+    {
+        $supplier = Supplier::find($request->supplier_id);
+        return response()->json($supplier ? $supplier->balance : 0);
     }
 }

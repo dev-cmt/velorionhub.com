@@ -42,10 +42,16 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // 🔗 Belongs to customer (users table)
+    // Eager loading helper for frontend views
+    public function sale_items()
+    {
+        return $this->hasMany(OrderItem::class, 'order_id');
+    }
+
+    // 🔗 Belongs to customer (customers table)
     public function customer()
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     // 🔗 Belongs to store
@@ -54,10 +60,22 @@ class Order extends Model
         return $this->belongsTo(Store::class);
     }
 
+    // Store helper
+    public function get_store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+
     // 🔗 Belongs to courier
     public function courier()
     {
         return $this->belongsTo(Courier::class);
+    }
+
+    // Courier helper
+    public function get_courier()
+    {
+        return $this->belongsTo(Courier::class, 'courier_id');
     }
 
     // 🔗 Assigned to user

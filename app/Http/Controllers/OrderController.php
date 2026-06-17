@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Courier;
-use App\Models\User; // For Customer and Assigned User
+use App\Models\User;
+use App\Models\Customer;
 use App\Models\Store;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -63,7 +64,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $customers = User::get(['id', 'name', 'phone']);
+        $customers = Customer::get(['id', 'name', 'phone']);
         $stores = Store::where('status', 1)->get(['id', 'name']);
         $products = Product::where('status', 1)
             ->with(['variants.variantItems.attributeItem'])
@@ -195,7 +196,7 @@ class OrderController extends Controller
     {
         $order = Order::with('items.product')->find($order);
 
-        $customers = User::get(['id', 'name', 'phone']);
+        $customers = Customer::get(['id', 'name', 'phone']);
         $stores = Store::where('status', 1)->get(['id', 'name']);
         $products = Product::where('status', 1)
             ->with(['variants.variantItems.attributeItem'])

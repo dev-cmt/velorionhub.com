@@ -1,9 +1,5 @@
-@extends('backEnd.layouts.master')
-@section('title')
-    Return Receive List
-@endsection
+<x-backend-layout title="Stores Management">
 
-@section('body')
     <div class="card custom-card">
         <div class="card-header justify-content-between">
             <div class="card-title">
@@ -141,12 +137,11 @@
                     </tbody>
                 </table>
             </div>
-            {{$data->links('backEnd.includes.paginate')}}
+            {{ $data->links('backend.pagination.paginate') }}
         </div>
     </div>
-@endsection
 
-@section('js')
+@push('js')
     <script>
         $(document).on('change', '#store_id', function () {
             $('#return_receive_store_form').submit();
@@ -161,4 +156,5 @@
 
         $('#invoice').focus();
     </script>
-@endsection
+@endpush
+</x-backend-layout>

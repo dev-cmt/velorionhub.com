@@ -49,6 +49,11 @@ class Purchase extends Model
         return $this->hasMany(PurchaseItem::class);
     }
 
+    public function purchase_items()
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(PurchasePayment::class);
@@ -68,6 +73,16 @@ class Purchase extends Model
     public function getCalculatedDueAttribute()
     {
         return $this->grand_total - $this->total_paid;
+    }
+
+    public function getDateAttribute()
+    {
+        return $this->purchase_date;
+    }
+
+    public function getTotalAttribute()
+    {
+        return $this->grand_total;
     }
 
     /*
@@ -98,11 +113,11 @@ class Purchase extends Model
         $totalReceived = $this->items()->sum('received_qty');
 
         if ($totalReceived == 0) {
-            $status = 'pending';
+            $status = 0; // Ordered/Pending
         } elseif ($totalReceived < $totalOrdered) {
-            $status = 'partial';
+            $status = 2; // Partial Receive
         } else {
-            $status = 'completed';
+            $status = 1; // Completed/Received
         }
 
         $this->update(['status' => $status]);

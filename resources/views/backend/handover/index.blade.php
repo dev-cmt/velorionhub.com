@@ -1,17 +1,13 @@
-@extends('backEnd.layouts.master')
-@section('title')
-    Parcel Handover
-@endsection
-
-@section('css')
-    <link rel="stylesheet" href="{{ asset('backEnd/assets/libs/flatpickr/flatpickr.min.css') }}">
-    <link href="{{ asset('backEnd/assets/libs/select2/select2.min.css') }}" rel="stylesheet" />
+<x-backend-layout title="Stores Management">
+@push('css')
+    <link rel="stylesheet" href="{{ asset('backend/libs/flatpickr/flatpickr.min.css') }}">
+    <link href="{{ asset('backend/libs/select2/select2.min.css') }}" rel="stylesheet" />
     <style>
         .table td, .table th{
             padding: 5px;
         }
     </style>
-@endsection
+@endpush
 
 @php
     //$currency_sign = $data['settings']->currency_sign;
@@ -155,13 +151,12 @@
     </div>
 
     <audio id="errorSound" preload="auto">
-        <source src="{{ asset('backEnd/assets/error-2.mp3') }}" type="audio/mpeg">
+        <source src="{{ asset('backend/error-2.mp3') }}" type="audio/mpeg">
     </audio>
-@endsection
 
-@section('js')
-    <script src="{{ asset('backEnd/assets/libs/flatpickr/flatpickr.min.js') }}"></script>
-    <script src="{{ asset('backEnd/assets/libs/select2/select2.min.js') }}"></script>
+@push('js')
+    <script src="{{ asset('backend/libs/flatpickr/flatpickr.min.js') }}"></script>
+    <script src="{{ asset('backend/libs/select2/select2.min.js') }}"></script>
 
     <script type="text/javascript">
         $('.select2').select2();
@@ -344,4 +339,4 @@
         });
     </script>
 
-@endsection
+</x-backend-layout>

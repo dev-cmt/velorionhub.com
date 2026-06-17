@@ -1,9 +1,4 @@
-@extends('backEnd.layouts.master')
-@section('title')
-    Return List
-@endsection
-
-@section('body')
+<x-backend-layout title="Stores Management">
     <div class="card custom-card">
         <div class="card-header justify-content-between">
             <div class="card-title">
@@ -107,8 +102,8 @@
                     </tbody>
                 </table>
             </div>
-            {{$data->links('backEnd.includes.paginate')}}
+            {{ $data->links('backend.pagination.paginate') }}
         </div>
     </div>
-@endsection
+</x-backend-layout>
 

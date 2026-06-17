@@ -61,4 +61,19 @@ class ProductVariant extends Model
 
         return $this->variant_price;
     }
+
+    public function getVariantPurchaseCostAttribute()
+    {
+        return $this->purchase_cost;
+    }
+
+    public function getAttributeNames()
+    {
+        if (!$this->relationLoaded('variantItems')) {
+            $this->loadMissing('variantItems.attributeItem');
+        }
+        return $this->variantItems->map(function ($item) {
+            return $item->attributeItem->name ?? '';
+        })->filter()->implode(', ');
+    }
 }

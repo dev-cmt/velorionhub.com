@@ -23,12 +23,12 @@
                         <td>{{$i++}}</td>
                         <td>{{ $item->get_product->name }} <span class="text-info">#{{$item->sku}}</span></td>
                         <td>{{ $item->quantity }}</td>
-                        <td>{{ $setting->currency_sign }} {{ number_format($item->purchase_cost,2) }}</td>
-                        <td>{{ $setting->currency_sign }} {{ number_format($item->sell_price,2) }}</td>
-                        {{--<td>{{ $setting->currency_sign }} {{ number_format($item->discount,2,'.','') }}</td>--}}
-                        {{--<td>{{ $setting->currency_sign }} {{ number_format($item->tax,2,'.','') }}</td>
-                        <td>{{ $setting->currency_sign }} {{ number_format($item->profit_margin,2,'.','') }}</td>--}}
-                        <td>{{ $setting->currency_sign }} {{ number_format($item->total,2) }}</td>
+                        <td> {{ number_format($item->purchase_cost,2) }}</td>
+                        <td> {{ number_format($item->sell_price,2) }}</td>
+                        {{--<td> {{ number_format($item->discount,2,'.','') }}</td>--}}
+                        {{--<td> {{ number_format($item->tax,2,'.','') }}</td>
+                        <td> {{ number_format($item->profit_margin,2,'.','') }}</td>--}}
+                        <td> {{ number_format($item->total,2) }}</td>
                     </tr>
                 @endforeach
             @else

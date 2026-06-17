@@ -88,6 +88,11 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function get_product_attributes()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
     public function discount(): HasOne
     {
         return $this->hasOne(ProductDiscount::class);

@@ -155,29 +155,29 @@ class ReturnReceivedController extends Controller
         $courierId = $request->courier;
 
         $return_receiveds = ReturnReceived::query()
-            ->join('sales', 'sales.id', 'return_receiveds.sale_id')
-            ->join('couriers', 'couriers.id', 'sales.courier_id')
-            ->when($courierId, fn($q) => $q->where('sales.courier_id', $courierId))
+            ->join('orders', 'orders.id', 'return_receiveds.sale_id')
+            ->join('couriers', 'couriers.id', 'orders.courier_id')
+            ->when($courierId, fn($q) => $q->where('orders.courier_id', $courierId))
             ->where('return_receiveds.is_temp', 1)
-            ->select('return_receiveds.created_at', 'sales.courier_id', 'couriers.name')
+            ->select('return_receiveds.created_at', 'orders.courier_id', 'couriers.name')
             ->get();
 
         $courier_data = $return_receiveds->groupBy('courier_id')->map(fn($group) => $group->count());
 
-        $sale_items = SaleItem::query()
-            ->join('sales', 'sales.id', 'sale_items.sale_id')
-            ->join('return_receiveds', 'return_receiveds.sale_id', 'sales.id')
-            ->join('products', 'products.id', '=', 'sale_items.product_id') // added
-            ->when($courierId, fn($q) => $q->where('sales.courier_id', $courierId))
+        $sale_items = OrderItem::query()
+            ->join('orders', 'orders.id', 'order_items.order_id')
+            ->join('return_receiveds', 'return_receiveds.sale_id', 'orders.id')
+            ->join('products', 'products.id', '=', 'order_items.product_id') // added
+            ->when($courierId, fn($q) => $q->where('orders.courier_id', $courierId))
             ->where('return_receiveds.is_temp', 1)
             ->with('get_product:id,name')
             ->select(
-                'sale_items.product_id',
-                'sales.courier_id',
-                DB::raw('SUM(sale_items.quantity * sale_items.item_out) as quantity'),
-                DB::raw('SUM(sale_items.quantity * sale_items.unit_price) as total_price')
+                'order_items.product_id',
+                'orders.courier_id',
+                DB::raw('SUM(order_items.quantity * order_items.item_out) as quantity'),
+                DB::raw('SUM(order_items.quantity * order_items.sale_price) as total_price')
             )
-            ->groupBy('sale_items.product_id', 'sales.courier_id')
+            ->groupBy('order_items.product_id', 'orders.courier_id')
             ->get()
             ->groupBy('product_id');
 
@@ -198,14 +198,14 @@ class ReturnReceivedController extends Controller
 
         // Fetch Parcel Handover with courier info
         $return_receiveds = DB::table('return_receiveds')
-            ->join('sales', 'return_receiveds.sale_id', '=', 'sales.id')
-            ->join('couriers', 'sales.courier_id', '=', 'couriers.id')
-            ->when($courierId, fn($q) => $q->where('sales.courier_id', $courierId))
+            ->join('orders', 'return_receiveds.sale_id', '=', 'orders.id')
+            ->join('couriers', 'orders.courier_id', '=', 'couriers.id')
+            ->when($courierId, fn($q) => $q->where('orders.courier_id', $courierId))
             ->where('return_receiveds.is_temp', 1)
             ->select(
                 'return_receiveds.*',
-                'sales.id as sale_id',
-                'sales.courier_id',
+                'orders.id as sale_id',
+                'orders.courier_id',
                 'couriers.name as courier_name'
             )
             ->get();
@@ -225,23 +225,23 @@ class ReturnReceivedController extends Controller
         $courier_data = $return_receiveds->groupBy('courier_id')->map(fn($group) => $group->count());
 
         // Fetch Sale Items with product info including parent
-        $sale_items = DB::table('sale_items')
-            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
-            ->join('products', 'products.id', '=', 'sale_items.product_id')
+        $sale_items = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('products', 'products.id', '=', 'order_items.product_id')
             ->leftJoin('products as parent', 'parent.id', '=', 'products.parent_id')
-            ->join('couriers', 'couriers.id', '=', 'sales.courier_id')
-            ->when($courierId, fn($q) => $q->where('sales.courier_id', $courierId))
-            ->whereIn('sale_items.sale_id', $return_receiveds->pluck('sale_id'))
+            ->join('couriers', 'couriers.id', '=', 'orders.courier_id')
+            ->when($courierId, fn($q) => $q->where('orders.courier_id', $courierId))
+            ->whereIn('order_items.order_id', $return_receiveds->pluck('sale_id'))
             ->select(
-                'sale_items.product_id',
+                'order_items.product_id',
                 'products.name as product_name',
                 'products.parent_id',
                 'parent.name as parent_name',
                 'products.combo_products',
                 // 'sale_items.quantity',
-                DB::raw('(sale_items.quantity * sale_items.item_out) as quantity'), // added
-                'sale_items.unit_price',
-                'sales.courier_id',
+                DB::raw('(order_items.quantity * order_items.item_out) as quantity'), // added
+                'order_items.sale_price as unit_price',
+                'orders.courier_id',
                 'couriers.name as courier_name'
             )->get();
 

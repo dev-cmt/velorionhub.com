@@ -17,4 +17,9 @@ class Damage extends Model
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
+
+    public function get_product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 }

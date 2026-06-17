@@ -200,14 +200,14 @@
                 <li class="slide__category"><span class="category-name">Purchases</span></li>
 
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('purchase.index') }}" class="side-menu__item {{ Request::is('purchases*') && !Request::is('purchases/receive*') ? 'active' : '' }}">
                         <i class="bx bx-shopping-bag side-menu__icon"></i>
                         <span class="side-menu__label">Purchases</span>
                     </a>
                 </li>
 
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('purchase.receive.index') }}" class="side-menu__item {{ Request::is('purchases/receive*') ? 'active' : '' }}">
                         <i class="bx bxs-shopping-bags side-menu__icon"></i>
                         <span class="side-menu__label">Purchase Receive</span>
                     </a>
@@ -304,14 +304,13 @@
                 </li>
                 @endcan
 
-                @can('comming soon')
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('supplier.index') }}"
+                        class="side-menu__item {{ Request::is('suppliers*') ? 'active' : '' }}">
                         <i class="bx bx-user-check side-menu__icon"></i>
                         <span class="side-menu__label">Suppliers</span>
                     </a>
                 </li>
-                @endcan
 
                 @can('view stores')
                 <li class="slide">
