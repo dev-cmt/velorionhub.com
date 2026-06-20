@@ -537,18 +537,30 @@ class HomeController extends Controller
             'address'   => 'required|string',
         ]);
 
+        $threshold = floatval(config('cart.free_shipping_threshold', 250));
+        $subtotal = floatval($cart->getSubTotal());
+        $shippingCost = 0;
+
+        $settings = \App\Models\Setting::first();
+        if ($settings && $settings->shipping_active) {
+            if ($subtotal < $threshold) {
+                $shippingCost = floatval($request->input('shipping_method', 0));
+            }
+        }
+        $total = $subtotal + $shippingCost;
+
         $order = Order::create([
             'invoice_no' => 'INV-' . strtoupper(uniqid()),
             'source' => 'web',
             'customer_name' => $request->full_name,
             'customer_phone' => $request->phone,
             'customer_address' => $request->address,
-            'sub_total' => $cart->getSubTotal(),
-            'shipping_cost' => 0,
+            'sub_total' => $subtotal,
+            'shipping_cost' => $shippingCost,
             'discount' => 0,
-            'total' => $cart->getTotal(),
+            'total' => $total,
             'paid' => 0,
-            'due' => $cart->getTotal(),
+            'due' => $total,
             'payment_method' => 3, // COD
             'payment_status' => 0, // pending
             'status' => 0, // pending

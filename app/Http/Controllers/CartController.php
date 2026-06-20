@@ -132,7 +132,7 @@ class CartController extends Controller
         if ($cart->get($sku)) {
             $cart->update($sku, [
                 'quantity' => [
-                    'relative' => false,
+                    'relative' => true,
                     'value' => $quantity,
                 ],
             ]);
@@ -140,8 +140,8 @@ class CartController extends Controller
             $cart->add([
                 'id' => $sku,
                 'name' => $name,
-                'price' => $price,
-                'quantity' => $quantity,
+                'price' => floatval($price),
+                'quantity' => intval($quantity),
                 'attributes' => [
                     'product_id' => $product->id,
                     'variant_id' => $variant ? $variant->id : null,

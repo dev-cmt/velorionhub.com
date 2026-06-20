@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\JwtAuthController;
-use App\Http\Controllers\Api\AgentController;
+use App\Http\Controllers\Api\AiAgentController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -14,7 +14,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/refresh', [JwtAuthController::class, 'refresh']);
 });
 
-// Route::post('/token/check-courier', [AgentController::class, 'checkManualy'])->middleware('token.valid');
+// Route::post('/token/check-courier', [AiAgentController::class, 'checkManualy'])->middleware('token.valid');
 
-Route::post('/ai-agent', [AgentController::class, 'aiAgent']);
+Route::post('/ai-agent', [AiAgentController::class, 'aiAgent']);
 

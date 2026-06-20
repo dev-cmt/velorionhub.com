@@ -47,6 +47,25 @@
             @endphp
 
             @if($items->count() > 0)
+                @php
+                    $threshold = floatval(config('cart.free_shipping_threshold', 250));
+                    $cartSubtotal = floatval($cart->getSubTotal());
+                    $progressPercentage = $threshold > 0 ? min(100, ($cartSubtotal / $threshold) * 100) : 100;
+                @endphp
+                <div class="delivery-progress mb-4">
+                    <div class="progress" role="progressbar" aria-label="Delivery progress" aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width: {{ $progressPercentage }}%;"></div>
+                    </div>
+                    <p class="body-text-3">
+                        <i class="icon-delivery-2 fs-24"></i>
+                        @if($cartSubtotal >= $threshold)
+                            Your order qualifies for <span class="fw-bold">Free Shipping!</span>
+                        @else
+                            Free shipping on all orders over <span class="fw-bold">TK {{ number_format($threshold, 0) }}</span> (Spend <span class="fw-bold">TK {{ number_format($threshold - $cartSubtotal, 2) }}</span> more to qualify)
+                        @endif
+                    </p>
+                </div>
+
                 <form class="form-discount" onsubmit="event.preventDefault();">
                     <div class="overflow-x-auto">
                         <table class="tf-table-page-cart">

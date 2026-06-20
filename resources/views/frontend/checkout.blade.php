@@ -55,6 +55,8 @@
                 $shippingInside = $settings ? floatval($settings->shipping_inside) : 60;
                 $shippingOutside = $settings ? floatval($settings->shipping_outside) : 100;
                 $cartSubtotal = $cart->getSubTotal();
+                $threshold = floatval(config('cart.free_shipping_threshold', 250));
+                $isFreeShipping = ($cartSubtotal >= $threshold);
             @endphp
 
 
@@ -207,21 +209,29 @@
                             </div>
                             <ul class="sec-total-price">
                                 <li><span class="body-text-3">Subtotal</span><span class="body-text-3" id="checkout-subtotal">TK {{ number_format($cartSubtotal, 2) }}</span></li>
-                                <li><span class="body-text-3">Shipping</span><span class="body-text-3" id="checkout-shipping">@if($shippingActive) TK {{ number_format($shippingInside, 2) }} @else Free Shipping @endif</span></li>
-                                <li><span class="body-md-2 fw-semibold">Total</span><span class="body-md-2 fw-semibold text-primary" id="checkout-total">TK {{ number_format($cartSubtotal + ($shippingActive ? $shippingInside : 0), 2) }}</span></li>
+                                <li><span class="body-text-3">Shipping</span><span class="body-text-3" id="checkout-shipping">@if($shippingActive && !$isFreeShipping) TK {{ number_format($shippingInside, 2) }} @else Free Shipping @endif</span></li>
+                                <li><span class="body-md-2 fw-semibold">Total</span><span class="body-md-2 fw-semibold text-primary" id="checkout-total">TK {{ number_format($cartSubtotal + ($shippingActive && !$isFreeShipping ? $shippingInside : 0), 2) }}</span></li>
                             </ul>
                             @if($shippingActive)
                             <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 var subtotal = {{ $cartSubtotal }};
+                                var threshold = {{ $threshold }};
                                 var shippingEls = document.querySelectorAll('.shipping-radio');
                                 var shippingDisplay = document.getElementById('checkout-shipping');
                                 var totalDisplay = document.getElementById('checkout-total');
                                 function updateTotal() {
                                     var selectedEl = document.querySelector('.shipping-radio:checked');
                                     var shipping = selectedEl ? parseFloat(selectedEl.value) : 0;
+                                    if (subtotal >= threshold) {
+                                        shipping = 0;
+                                    }
                                     var total = subtotal + shipping;
-                                    shippingDisplay.textContent = 'TK ' + shipping.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                                    if (subtotal >= threshold) {
+                                        shippingDisplay.textContent = 'Free Shipping';
+                                    } else {
+                                        shippingDisplay.textContent = 'TK ' + shipping.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                                    }
                                     totalDisplay.textContent = 'TK ' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                                 }
                                 shippingEls.forEach(function(el) { el.addEventListener('change', updateTotal); });
