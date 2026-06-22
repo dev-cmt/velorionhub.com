@@ -126,11 +126,13 @@ Route::get('/search-suggestions', [SearchController::class, 'suggest'])->name('s
 // Frontend Cart
 Route::post('/cart/add', [CartController::class, 'addCart'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'updateQty'])->name('cart.update.qty');
+Route::post('/cart/update-item', [CartController::class, 'updateCartItem'])->name('cart.update-item');
 Route::get('/cart/mini', [CartController::class, 'getMiniCart'])->name('cart.mini');
 Route::get('/cart/minus', [CartController::class, 'cartItemMinus'])->name('cart.minus');
 Route::get('/cart/plus', [CartController::class, 'cartItemPlus'])->name('cart.plus');
 Route::delete('/cart/remove/{id}', [CartController::class, 'cartItemRemove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'cartClear'])->name('cart.clear');
+Route::get('/cart/product-variants', [CartController::class, 'getProductVariants'])->name('cart.product-variants');
 
 // Dashboard
 Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard')->middleware('auth');
@@ -143,6 +145,7 @@ Route::middleware('auth')->group(function () {
     // Products
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::get('/products/check-sku', [ProductController::class, 'checkSku'])->name('products.checkSku');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/update/{product}', [ProductController::class, 'update'])->name('products.update');

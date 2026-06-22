@@ -294,16 +294,18 @@
                     }
                 });
 
-                fbq('track', 'Purchase', {
-                    content_ids: [
-                        @foreach ($order->items as $item)
-                            '{{ $item->product->id ?? '' }}',
-                        @endforeach
-                    ],
-                    content_type: 'product',
-                    value: {{ $order->total }},
-                    currency: 'BDT'
-                });
+                if (typeof fbq === 'function') {
+                    fbq('track', 'Purchase', {
+                        content_ids: [
+                            @foreach ($order->items as $item)
+                                '{{ $item->product->id ?? '' }}',
+                            @endforeach
+                        ],
+                        content_type: 'product',
+                        value: {{ $order->total }},
+                        currency: 'BDT'
+                    });
+                }
             </script>
         @endif
 
@@ -542,7 +544,8 @@
                     // [FIXED] transactionId খালি থাকলে যেন ড্যাশবোর্ড ক্র্যাশ না করে, সেজন্য ব্যাকআপ র্যান্ডম আইডি দেওয়া হয়েছে
                     const transactionId = gtmEcommerce ? gtmEcommerce.ecommerce.transaction_id : 'TXN-' + Math.floor(Math.random() * 100000);
 
-                    fetch('http://127.0.0.1:8000/api/ai-agent', {
+                    const apiUrl = '{{ url("api/ai-agent") }}';
+                    fetch(apiUrl, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -560,11 +563,11 @@
                         })
                         .then(data => {
                             resetCallSystem();
-                            alert(`Order status updated to "${status}" successfully!`);
+                            console.log(`Order status updated to "${status}" successfully!`);
                         })
                         .catch(err => {
                             console.error('Remote sync failure:', err);
-                            alert(`Sync failed, but state cleared locally for order.`);
+                            console.log(`Sync failed, but state cleared locally for order.`);
                             resetCallSystem();
                         });
                 }
@@ -584,7 +587,7 @@
 
                     callTimeout = setTimeout(() => {
                         resetCallSystem();
-                        alert("No Answer");
+                        console.log("No Answer");
                     }, 30000);
                 }
 

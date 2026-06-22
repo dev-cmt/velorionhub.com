@@ -11,10 +11,68 @@
         $(".btn-hide-popup").on("click", function () { sessionStorage.setItem("showPopup", !0) })
     }; var totalPriceVariant = function () {
         $(".tf-product-info-list,.tf-cart-item").each(function () {
-            var productItem = $(this); var basePrice = parseFloat(productItem.find(".price-on-sale").data("base-price")) || parseFloat(productItem.find(".price-on-sale").text().replace("$", "")); var quantityInput = productItem.find(".quantity-product"); function updateTotalPrice(price, scope) { var currentPrice = price || parseFloat(scope.find(".price-on-sale").text().replace("$", "")); var quantity = parseInt(scope.find(".quantity-product").val()); var totalPrice = currentPrice * quantity; scope.find(".total-price").text("$" + totalPrice.toFixed(2).toLocaleString()) }
-            updateTotalPrice(null, productItem); productItem.find(".color-btn, .size-btn").on("click", function () { var newPrice = parseFloat($(this).data("price")) || basePrice; quantityInput.val(1); productItem.find(".price-on-sale").text("$" + newPrice.toFixed(2).toLocaleString()); updateTotalPrice(newPrice, productItem); updateCartTotal() }); productItem.find(".btn-increase").on("click", function () { var currentQuantity = parseInt(quantityInput.val()); quantityInput.val(currentQuantity + 1); updateTotalPrice(null, productItem); updateCartTotal() }); productItem.find(".btn-decrease").on("click", function () { var currentQuantity = parseInt(quantityInput.val()); if (currentQuantity > 1) { quantityInput.val(currentQuantity - 1); updateTotalPrice(null, productItem); updateCartTotal() } })
-        }); function updateCartTotal() { let total = 0; $(".total-price").each(function () { let price = parseFloat($(this).text().replace("$", "").replace(/,/g, "")); if (!isNaN(price)) { total += price } }); $(".last-total-price").text(`Total: $${total.toFixed(2).toLocaleString()}`) }
-        updateCartTotal(); $(".remove-cart").on("click", function () { $(this).closest(".tf-cart-item").remove(); updateCartTotal() })
+            var productItem = $(this);
+            if (productItem.find(".price-on-sale").length === 0 || productItem.find(".quantity-product").length === 0) {
+                return;
+            }
+            var basePrice = parseFloat(productItem.find(".price-on-sale").data("base-price")) || parseFloat(productItem.find(".price-on-sale").text().replace(/[$,TK\s]/g, "").replace(/,/g, ""));
+            var quantityInput = productItem.find(".quantity-product");
+            function updateTotalPrice(price, scope) {
+                var currentPrice = price || parseFloat(scope.find(".price-on-sale").text().replace(/[$,TK\s]/g, "").replace(/,/g, ""));
+                var quantity = parseInt(scope.find(".quantity-product").val()) || 1;
+                var totalPrice = currentPrice * quantity;
+                let hasTK = scope.find(".price-on-sale").text().includes("TK") || scope.find(".total-price").text().includes("TK");
+                let prefix = hasTK ? "TK " : "$";
+                scope.find(".total-price").text(prefix + totalPrice.toFixed(2).toLocaleString());
+            }
+            updateTotalPrice(null, productItem);
+            productItem.find(".color-btn, .size-btn").on("click", function () {
+                var newPrice = parseFloat($(this).data("price")) || basePrice;
+                quantityInput.val(1);
+                let hasTK = productItem.find(".price-on-sale").text().includes("TK");
+                let prefix = hasTK ? "TK " : "$";
+                productItem.find(".price-on-sale").text(prefix + newPrice.toFixed(2).toLocaleString());
+                updateTotalPrice(newPrice, productItem);
+                updateCartTotal();
+            });
+            productItem.find(".btn-increase").on("click", function () {
+                var currentQuantity = parseInt(quantityInput.val()) || 1;
+                quantityInput.val(currentQuantity + 1);
+                updateTotalPrice(null, productItem);
+                updateCartTotal();
+            });
+            productItem.find(".btn-decrease").on("click", function () {
+                var currentQuantity = parseInt(quantityInput.val()) || 1;
+                if (currentQuantity > 1) {
+                    quantityInput.val(currentQuantity - 1);
+                    updateTotalPrice(null, productItem);
+                    updateCartTotal();
+                }
+            });
+        });
+        function updateCartTotal() {
+            let total = 0;
+            let hasTK = false;
+            $(".total-price").each(function () {
+                let text = $(this).text();
+                if (text.includes("TK")) {
+                    hasTK = true;
+                }
+                let price = parseFloat(text.replace(/[$,TK\s]/g, "").replace(/,/g, ""));
+                if (!isNaN(price)) {
+                    total += price;
+                }
+            });
+            if ($(".total-price").length > 0) {
+                let prefix = hasTK ? "TK " : "$";
+                $(".last-total-price").text(`Total: ${prefix}${total.toFixed(2).toLocaleString()}`);
+            }
+        }
+        updateCartTotal();
+        $(".remove-cart").on("click", function () {
+            $(this).closest(".tf-cart-item").remove();
+            updateCartTotal();
+        });
     }; var changeValueDropdown = function () { $(".tf-control-sort .select-item").on("click", function () { let selectedValue = $(this).find(".text-value-item").text(); $(".tf-control-sort .body-text-3").text(selectedValue) }); $(".tf-dropdown-sort .select-item").on("click", function () { let selectedValue = $(this).find(".text-value-item").text(); $(".tf-dropdown-sort .text-sort-value").text(selectedValue) }) }; var handleFooter = function () {
         var footerAccordion = function () { var args = { duration: 250 }; $(".footer-heading-mobile").on("click", function () { $(this).parent(".footer-col-block").toggleClass("open"); if (!$(this).parent(".footer-col-block").is(".open")) { $(this).next().slideUp(args) } else { $(this).next().slideDown(args) } }) }; function handleAccordion() { if (matchMedia("only screen and (max-width: 767px)").matches) { if (!$(".footer-heading-mobile").data("accordion-initialized")) { footerAccordion(); $(".footer-heading-mobile").data("accordion-initialized", !0) } } else { $(".footer-heading-mobile").off("click"); $(".footer-heading-mobile").parent(".footer-col-block").removeClass("open"); $(".footer-heading-mobile").next().removeAttr("style"); $(".footer-heading-mobile").data("accordion-initialized", !1) } }
         handleAccordion(); window.addEventListener("resize", function () { handleAccordion() })

@@ -94,6 +94,7 @@
                                                 <label class="form-label">SKU Prefix <span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control form-control-sm" id="sku" name="sku"
                                                     value="{{ old('sku', $product->sku ?? 'SKU') }}" required>
+                                                <div id="sku-feedback" class="mt-1" style="font-size: 11px; font-weight: 500;"></div>
                                                 @error('sku') <div class="text-danger mt-1">{{ $message }}</div> @enderror
                                             </div>
 
@@ -736,6 +737,45 @@
                     placeholder: true,
                     placeholderValue: select.dataset.placeholder || 'Select an option'
                 });
+            });
+
+            // Check SKU uniqueness via AJAX
+            let skuTimeout = null;
+            $('#sku').on('input', function() {
+                let sku = $(this).val().trim();
+                let inputField = $(this);
+                let feedback = $('#sku-feedback');
+
+                clearTimeout(skuTimeout);
+
+                if (sku.length === 0) {
+                    inputField.css('border-color', '');
+                    feedback.text('').removeClass('text-danger text-success');
+                    return;
+                }
+
+                skuTimeout = setTimeout(function() {
+                    $.ajax({
+                        url: "{{ route('products.checkSku') }}",
+                        method: "GET",
+                        data: { 
+                            sku: sku,
+                            product_id: "{{ $product->id }}"
+                        },
+                        success: function(response) {
+                            if (response.exists) {
+                                inputField.css('border-color', 'red');
+                                feedback.text('This SKU already exists!').removeClass('text-success').addClass('text-danger');
+                            } else {
+                                inputField.css('border-color', 'green');
+                                feedback.text('SKU is available').removeClass('text-danger').addClass('text-success');
+                            }
+                        },
+                        error: function() {
+                            feedback.text('Error checking SKU.').removeClass('text-success').addClass('text-danger');
+                        }
+                    });
+                }, 300);
             });
         });
     </script>

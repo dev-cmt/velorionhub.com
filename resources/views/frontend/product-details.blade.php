@@ -2,6 +2,7 @@
     use Darryldecode\Cart\Facades\CartFacade as Cart;
     use Illuminate\Support\Facades\Auth;
 
+    $productId      = $product->id;
     $mainImage    = $product->main_image ? asset($product->main_image) : asset('images/no-image.jpg');
     $productUrl   = route('product.show', $product->slug);
     $isSale       = floatval($product->sale_price) < floatval($product->regular_price);
@@ -342,7 +343,7 @@
                                             <div class="product-box-btn">
                                                 @if($product->total_stock > 0)
                                                     <button class="tf-btn text-white order-now"
-                                                       data-id="{{ $product->id }}"
+                                                       data-id="{{ $productId }}"
                                                        data-name="{{ $product->name }}"
                                                        data-price="{{ $product->sale_price }}"
                                                        data-image="{{ $mainImage }}"
@@ -352,12 +353,12 @@
                                                     </button>
                                                     <a href="#shoppingCart" data-bs-toggle="offcanvas"
                                                        class="tf-btn btn-line add-to-cart"
-                                                       data-id="{{ $product->id }}"
+                                                       data-id="{{ $productId }}"
                                                        data-name="{{ $product->name }}"
                                                        data-price="{{ $product->sale_price }}"
                                                        data-image="{{ $mainImage }}"
                                                        data-url="{{ $productUrl }}">
-                                                        Add to cart
+                                                        Add to cart {{ $productId }}
                                                     </a>
                                                 @else
                                                     <button class="tf-btn text-white" disabled style="opacity:0.6; cursor:not-allowed;">
@@ -373,7 +374,7 @@
                                     <div class="d-flex gap-2">
                                         <a href="#;" class="tf-btn-icon style-2 type-black {{ $inWishlist ? 'active' : '' }}"
                                             data-action="wishlist"
-                                            data-id="{{ $product->id }}"
+                                            data-id="{{ $productId }}"
                                             id="product-detail-wishlist"
                                             title="{{ $inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}">
                                             <i class="icon-heart2"></i>
@@ -382,7 +383,7 @@
                                         <a href="#compare" data-bs-toggle="offcanvas"
                                             class="tf-btn-icon style-2 type-black {{ $inCompare ? 'active' : '' }}"
                                             data-action="compare"
-                                            data-id="{{ $product->id }}"
+                                            data-id="{{ $productId }}"
                                             id="product-detail-compare"
                                             title="{{ $inCompare ? 'Remove from Compare' : 'Add to Compare' }}">
                                             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -784,7 +785,7 @@
                             // Enable buttons & recreate them
                             $('.product-box-btn').html(`
                                 <button class="tf-btn text-white order-now"
-                                   data-id="{{ $product->id }}"
+                                   data-id="{{ $productId }}"
                                    data-name="{{ $product->name }}"
                                    data-price="${matchedVariant.price}"
                                    data-image="${$('.tf-product-media-main .swiper-slide:first-child img.tf-image-zoom').attr('src')}"
@@ -794,7 +795,7 @@
                                 </button>
                                 <a href="#shoppingCart" data-bs-toggle="offcanvas"
                                    class="tf-btn btn-line add-to-cart"
-                                   data-id="{{ $product->id }}"
+                                   data-id="{{ $productId }}"
                                    data-name="{{ $product->name }}"
                                    data-price="${matchedVariant.price}"
                                    data-image="${$('.tf-product-media-main .swiper-slide:first-child img.tf-image-zoom').attr('src')}"
@@ -889,7 +890,7 @@
                     'currency': 'BDT',
                     'value': {{ $product->sale_price ?? 0 }},
                     'items': [{
-                        'item_id': '{{ $product->id }}',
+                        'item_id': '{{ $productId }}',
                         'item_name': '{{ $product->name }}',
                         'item_category': '{{ $product->category->name ?? '' }}',
                         'price': {{ $product->sale_price ?? 0 }},
@@ -898,14 +899,16 @@
                 }
             });
 
-            fbq('track', 'ViewContent', {
-                content_name: '{{ $product->name }}',
-                content_category: '{{ $product->category->name ?? '' }}',
-                content_ids: ['{{ $product->id }}'],
-                content_type: 'product',
-                value: {{ $product->sale_price ?? 0 }},
-                currency: 'BDT'
-            });
+            if (typeof fbq === 'function') {
+                fbq('track', 'ViewContent', {
+                    content_name: '{{ $product->name }}',
+                    content_category: '{{ $product->category->name ?? '' }}',
+                    content_ids: ['{{ $productId }}'],
+                    content_type: 'product',
+                    value: {{ $product->sale_price ?? 0 }},
+                    currency: 'BDT'
+                });
+            }
         </script>
     @endpush
 </x-frontend-layout>

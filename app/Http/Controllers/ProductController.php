@@ -60,6 +60,23 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'sku' => [
+                'required',
+                'string',
+                'unique:products,sku',
+                function ($attribute, $value, $fail) {
+                    if (\App\Models\ProductVariant::where('variant_sku', $value)->exists()) {
+                        $fail('The SKU has already been taken by a product variant.');
+                    }
+                }
+            ],
+            'category_id' => 'required|exists:categories,id',
+        ], [
+            'sku.unique' => 'The SKU has already been taken by another product.',
+        ]);
+
         $data = $request->all();
 
         // Handle specifications
@@ -207,6 +224,23 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'sku' => [
+                'required',
+                'string',
+                'unique:products,sku,' . $product->id,
+                function ($attribute, $value, $fail) use ($product) {
+                    if (\App\Models\ProductVariant::where('variant_sku', $value)->where('product_id', '!=', $product->id)->exists()) {
+                        $fail('The SKU has already been taken by a product variant.');
+                    }
+                }
+            ],
+            'category_id' => 'required|exists:categories,id',
+        ], [
+            'sku.unique' => 'The SKU has already been taken by another product.',
+        ]);
+
         $data = $request->all();
 
         // Handle specifications
@@ -749,6 +783,30 @@ class ProductController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function checkSku(Request $request)
+    {
+        $sku = $request->query('sku');
+        $productId = $request->query('product_id');
+
+        if (empty($sku)) {
+            return response()->json(['exists' => false]);
+        }
+
+        $existsInProducts = Product::where('sku', $sku)
+            ->when($productId, function($q) use ($productId) {
+                $q->where('id', '!=', $productId);
+            })
+            ->exists();
+
+        $existsInVariants = ProductVariant::where('variant_sku', $sku)
+            ->when($productId, function($q) use ($productId) {
+                $q->where('product_id', '!=', $productId);
+            })
+            ->exists();
+
+        return response()->json(['exists' => $existsInProducts || $existsInVariants]);
     }
 
 }

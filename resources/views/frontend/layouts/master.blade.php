@@ -143,14 +143,16 @@
                     }
                 });
 
-                fbq('track', 'AddToCart', {
-                    content_name: eventData.name,
-                    content_category: eventData.category,
-                    content_ids: [String(eventData.id)],
-                    content_type: 'product',
-                    value: eventData.price * eventData.quantity,
-                    currency: 'BDT'
-                });
+                if (typeof fbq === 'function') {
+                    fbq('track', 'AddToCart', {
+                        content_name: eventData.name,
+                        content_category: eventData.category,
+                        content_ids: [String(eventData.id)],
+                        content_type: 'product',
+                        value: eventData.price * eventData.quantity,
+                        currency: 'BDT'
+                    });
+                }
             })();
         </script>
     @endif

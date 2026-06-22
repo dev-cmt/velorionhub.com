@@ -122,7 +122,7 @@ class CartController extends Controller
         }
 
         // ================= SKU / PRICE =================
-        $sku = $variant ? $variant->variant_sku : $product->sku;
+        $sku = $variant ? $variant->variant_sku : ($product->sku ?: 'product_' . $product->id);
         $price = $variant ? $variant->variant_price : $product->sale_price;
         $name = $product->name;
 
@@ -218,6 +218,133 @@ class CartController extends Controller
         $cart->remove($itemId);
 
         return $this->miniCartResponse('Item removed from cart');
+    }
+
+    // ================= UPDATE CART ITEM (qty + optional variant swap) =================
+    public function updateCartItem(Request $request)
+    {
+        $cart      = $this->cart();
+        $oldId     = $request->input('old_id');
+        $productId = $request->input('product_id');
+        $qty       = max(1, intval($request->input('qty', 1)));
+        $attrIds   = $request->input('attributes'); // array of attribute_item_ids (optional)
+
+        $product = Product::find($productId);
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Product not found'], 404);
+        }
+
+        // Resolve variant (if attributes provided)
+        $variant           = null;
+        $variantKey        = null;
+        $variantAttributes = [];
+        $variantLabel      = null;
+
+        if (!empty($attrIds) && is_array($attrIds)) {
+            sort($attrIds);
+            $attrIds = array_map('intval', $attrIds);
+
+            $variant = ProductVariant::where('product_id', $product->id)
+                ->with('variantItems.attribute', 'variantItems.attributeItem')
+                ->get()
+                ->filter(function ($v) use ($attrIds) {
+                    $ids = $v->variantItems
+                        ->pluck('attribute_item_id')
+                        ->map(fn($id) => (int) $id)
+                        ->sort()->values()->toArray();
+                    return $ids == $attrIds;
+                })->first();
+
+            $variantKey = $variant ? implode('-', $attrIds) : null;
+
+            if ($variant) {
+                foreach ($variant->variantItems as $vi) {
+                    if ($vi->attribute && $vi->attributeItem) {
+                        $variantAttributes[$vi->attribute->name] = $vi->attributeItem->name;
+                    }
+                }
+                $variantLabel = implode(' / ', array_values($variantAttributes));
+            }
+        }
+
+        $sku   = $variant ? $variant->variant_sku : ($product->sku ?: 'product_' . $product->id);
+        $price = $variant ? $variant->variant_price : $product->sale_price;
+
+        // Remove old item
+        if ($oldId && $cart->get($oldId)) {
+            $cart->remove($oldId);
+        }
+
+        // Add new / update quantity
+        if ($cart->get($sku)) {
+            $cart->update($sku, [
+                'quantity' => ['relative' => true, 'value' => $qty],
+            ]);
+        } else {
+            $cart->add([
+                'id'             => $sku,
+                'name'           => $product->name,
+                'price'          => floatval($price),
+                'quantity'       => $qty,
+                'attributes'     => [
+                    'product_id'        => $product->id,
+                    'variant_id'        => $variant ? $variant->id : null,
+                    'variant_key'       => $variantKey,
+                    'variant_attributes'=> $variantAttributes,
+                    'variant_label'     => $variantLabel,
+                ],
+                'associatedModel'=> $product,
+            ]);
+        }
+
+        return $this->miniCartResponse('Cart item updated');
+    }
+
+    // ================= GET PRODUCT VARIANTS (for checkout modal) =================
+    public function getProductVariants(Request $request)
+    {
+        $product = Product::with('variants.variantItems.attribute', 'variants.variantItems.attributeItem')
+            ->find($request->input('product_id'));
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Product not found'], 404);
+        }
+
+        // Build attribute groups
+        $attributeGroups = [];
+        foreach ($product->variants as $variant) {
+            foreach ($variant->variantItems as $vi) {
+                if (!$vi->attribute || !$vi->attributeItem) continue;
+                $attrName = $vi->attribute->name;
+                if (!isset($attributeGroups[$attrName])) {
+                    $attributeGroups[$attrName] = ['name' => $attrName, 'items' => []];
+                }
+                $exists = collect($attributeGroups[$attrName]['items'])->contains('id', $vi->attributeItem->id);
+                if (!$exists) {
+                    $attributeGroups[$attrName]['items'][] = [
+                        'id'   => $vi->attributeItem->id,
+                        'name' => $vi->attributeItem->name,
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'success'         => true,
+            'product_id'      => $product->id,
+            'product_name'    => $product->name,
+            'has_variant'     => $product->has_variant,
+            'attribute_groups'=> array_values($attributeGroups),
+            'variants'        => $product->variants->map(function ($v) {
+                return [
+                    'id'         => $v->id,
+                    'sku'        => $v->variant_sku,
+                    'price'      => floatval($v->variant_price),
+                    'stock'      => $v->variant_stock,
+                    'attr_ids'   => $v->variantItems->pluck('attribute_item_id')->map(fn($id)=>(int)$id)->sort()->values()->toArray(),
+                ];
+            }),
+        ]);
     }
 
     // ================= CLEAR CART =================
