@@ -60,7 +60,7 @@
         </td>
         <input type="hidden" class="sub_total_qty" name="sub_total_qty[{{$product->id}}]">
         <td class="purchase_cost_section">
-            <input type="number" class="form-control form-control-sm purchase_cost" name="purchase_cost[{{$product->id}}][]" id="unit_cost" value="{{ sprintf('%.2f', $product->product_cost ?? 0) }}" min="0" step="0.01" required>
+            <input type="number" class="form-control form-control-sm purchase_cost" name="purchase_cost[{{$product->id}}][]" id="unit_cost" value="{{ sprintf('%.2f', $product->purchase_price ?? 0) }}" min="0" step="0.01" required>
             <input type="hidden" class="put_sub_toot" name="put_sub_toot[{{$product->id}}][]">
         </td>
         <input type="hidden" class="sub_total_purchase_cost">

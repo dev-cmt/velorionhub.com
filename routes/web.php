@@ -350,7 +350,6 @@ Route::get('/handover', [HandoverController::class, 'index'])->name('handover');
 Route::get('/handover/add', [HandoverController::class, 'addTemp'])->name('handover.add.temp');
 Route::get('/handover/clear', [HandoverController::class, 'clearTemp'])->name('handover.clear.temp');
 Route::post('/handover/print', [HandoverController::class, 'print'])->name('handover.print');
-Route::post('/handover/print2', [HandoverController::class, 'print2'])->name('handover.print2');
 Route::get('/handover/csv_export', [HandoverController::class, 'csvExport'])->name('handover.csv.export');
 Route::post('/handover/send-row', [HandoverController::class, 'finalHandover'])->name('handover.send.row');
 

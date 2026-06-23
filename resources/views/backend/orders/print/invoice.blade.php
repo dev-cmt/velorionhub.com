@@ -326,8 +326,8 @@
                 </tbody>
             </table>
 
-            @if($item->customer_note)
-                <p style="margin: 5px 0 0 5px">Note: {{$item->customer_note}}</p>
+            @if($item->note)
+                <p style="margin: 5px 0 0 5px">Note: {{$item->note}}</p>
             @endif
         </div>
     </div>

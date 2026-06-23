@@ -50,10 +50,15 @@ class AdminController extends Controller
             'view stock adjustments',
             'view stock transfers',
 
+            'view parcel handling',
+            'view return received',
+            'view damages',
+
             'view sliders',
             'view banners',
             'view pages',
             'view seo',
+            'view blogs',
 
             'view settings',
             'view settings website',

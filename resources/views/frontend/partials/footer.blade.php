@@ -17,15 +17,16 @@
                         <li class="footer-col-block">
                             <h6 class="ft-heading footer-heading-mobile fw-semibold">Pages</h6>
                             <div class="tf-collapse-content">
-                                <ul class="ft-menu-list">
+                                <!-- <ul class="ft-menu-list">
                                     @if(($pages ?? collect())->isNotEmpty())
                                         @include('frontend.partials.page-menu-items', ['linkClass' => 'link'])
-                                    @else
-                                        <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>
-                                        <li><a href="{{ route('privacy.policy') }}" class="link">Privacy Policy</a></li>
-                                        <li><a href="{{ route('return.policy') }}" class="link">Return Policy</a></li>
-                                        <li><a href="{{ route('terms.conditions') }}" class="link">Terms & Conditions</a></li>
                                     @endif
+                                </ul> -->
+                                <ul class="ft-menu-list">
+                                    <li><a href="{{ route('contacts') }}" class="link">Contact Us</a></li>
+                                    <li><a href="{{ route('privacy.policy') }}" class="link">Privacy Policy</a></li>
+                                    <li><a href="{{ route('return.policy') }}" class="link">Return Policy</a></li>
+                                    <li><a href="{{ route('terms.conditions') }}" class="link">Terms & Conditions</a></li>
                                 </ul>
                             </div>
                         </li>

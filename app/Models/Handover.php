@@ -9,22 +9,19 @@ class Handover extends Model
 {
     protected $fillable = [
         'order_id',
-        'sale_id',
         'is_temp',
     ];
 
+    // Filtered eager-load for list views
     public function orderFilter()
     {
-        return $this->belongsTo(Order::class, 'order_id', 'id')->select('id', 'invoice_no', 'courier_id', 'status', 'created_at');
+        return $this->belongsTo(Order::class, 'order_id', 'id')
+            ->select('id', 'invoice_no', 'courier_id', 'status', 'created_at');
     }
 
+    // Full order relationship
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id', 'id');
-    }
-
-    public function get_sale()
-    {
-        return $this->belongsTo(Order::class, 'sale_id', 'id');
     }
 }

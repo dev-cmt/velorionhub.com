@@ -223,26 +223,32 @@
                 <!-- Stock -->
                 <li class="slide__category"><span class="category-name">Stock</span></li>
 
+                @can('view parcel handling')
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
-                        <i class="bx bxs-package side-menu__icon"></i>
+                    <a href="{{ route('handover') }}" class="side-menu__item {{ Request::is('handover*') ? 'active' : '' }}">
+                        <i class="bx bx-package side-menu__icon"></i>
                         <span class="side-menu__label">Parcel Handling</span>
                     </a>
                 </li>
+                @endcan
 
+                @can('view return received')
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
-                        <i class="bx bxs-package side-menu__icon"></i>
+                    <a href="{{ route('return.receive') }}" class="side-menu__item {{ Request::is('return_receive*') ? 'active' : '' }}">
+                        <i class="bx bx-revision side-menu__icon"></i>
                         <span class="side-menu__label">Returnable Stock</span>
                     </a>
                 </li>
+                @endcan
 
+                @can('view damages')
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
-                        <i class="bx bxs-package side-menu__icon"></i>
+                    <a href="{{ route('damages.index') }}" class="side-menu__item {{ Request::is('damages*') ? 'active' : '' }}">
+                        <i class="bx bx-error-alt side-menu__icon"></i>
                         <span class="side-menu__label">Damaged Stock</span>
                     </a>
                 </li>
+                @endcan
 
                 @can('view stock manage')
                 <li class="slide">

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('handovers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id')->nullable();
-            $table->unsignedBigInteger('sale_id')->nullable();
             $table->tinyInteger('is_temp')->default(0);
             $table->timestamps();
         });

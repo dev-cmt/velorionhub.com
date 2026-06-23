@@ -31,13 +31,15 @@
                             <thead>
                                 <tr>
                                     <th>SL</th>
+                                    <th>Date</th>
                                     <th>Memo Number</th>
                                     <th>Supplier</th>
-                                    <th>Total</th>
+                                    <th>Sub Total</th>
                                     <th>Discount</th>
+                                    <th>Grand Total</th>
                                     <th>Due</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    <th class="text-end">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -47,21 +49,24 @@
                                         <tr>
                                             <td>{{ $i++ }}</td>
                                             <td>
-                                                {{ date('d M Y', strtotime($item->date)) }}
+                                                {{ date('d M Y', strtotime($item->purchase_date)) }}
                                             </td>
                                             <td>
-                                                {{ $item->memo_no }}
+                                                {{ $item->memo_number }}
                                             </td>
 
                                             <td>{{ $item->supplier->name }}</td>
                                             <td>
-                                                {{ number_format($item->sub_total, 2, '.', '') }}
+                                                {{ number_format($item->sub_total, 2) }}
                                             </td>
                                             <td>
-                                                {{ number_format($item->discount, 2, '.', '') }}
+                                                {{ number_format($item->discount, 2) }}
                                             </td>
                                             <td>
-                                                {{ number_format($item->due_amount, 2, '.', '') }}
+                                                {{ number_format($item->grand_total, 2) }}
+                                            </td>
+                                            <td>
+                                                {{ number_format($item->due_amount, 2) }}
                                             </td>
                                             <td>
                                                 @if ($item->status == 0)
@@ -95,7 +100,7 @@
                                     @endforeach
                                 @else
                                     <tr>
-                                        <td colspan="9" class="text-danger text-center">No Data Available!</td>
+                                        <td colspan="10" class="text-danger text-center">No Data Available!</td>
                                     </tr>
                                 @endif
                             </tbody>

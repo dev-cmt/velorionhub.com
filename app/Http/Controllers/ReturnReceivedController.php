@@ -8,7 +8,7 @@ use App\Models\ReturnReceived;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\ProductAttribute;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -55,66 +55,102 @@ class ReturnReceivedController extends Controller
 
                             $qty = ($item->quantity ?? 0) * ($item->item_out ?? 0);
 
-                            // Combo products
-                            if ($product->get_combo_products && $product->combo_products) {
-                                foreach ($product->get_combo_products as $combo) {
-                                    $comboProduct = Product::find($combo->product_id);
+                            $itemAttributes = is_array($item->attributes) ? $item->attributes : json_decode($item->attributes ?? '[]', true);
+                            if (!is_array($itemAttributes)) {
+                                $itemAttributes = [];
+                            }
 
-                                    if ($comboProduct->parent_id) {
-                                        $parentProduct = Product::find($comboProduct->parent_id);
-                                        if ($parentProduct) {
-                                            $parentProduct->increment('total_stock', $qty);
-                                            if ($parentProduct->has_variant) {
-                                                optional(
-                                                    ProductAttribute::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                                        json_encode(array_map('strval', tap((array) json_decode($item->attributes, true), fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                                    ])->first()
-                                                    // ?? $parentProduct->get_product_attributes()->first()
-                                                )->increment('variant_stock', $qty);
-                                            }
-                                        }
-                                    }else{
-                                        $comboProduct->increment('total_stock', $qty);
-                                        // ProductAttribute::where('variant_sku', $item->sku)->increment('variant_stock', $qty);
-                                        if ($comboProduct->has_variant) {
-                                            optional(
-                                                ProductAttribute::where('product_id', $comboProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                                    json_encode(array_map('strval', tap((array) json_decode($item->attributes, true), fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                                ])->first()
-                                                // ?? $comboProduct->get_product_attributes()->first()
-                                            )->increment('variant_stock', $qty);
-                                        }
-                                    }
-                                }
-                            }
-                            // Similar products
-                            elseif ($product->parent_id) {
-                                $parentProduct = Product::find($product->parent_id);
-                                if ($parentProduct) {
-                                    $parentProduct->increment('total_stock', $qty);
-                                    if ($parentProduct->has_variant) {
-                                        optional(
-                                            ProductAttribute::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                                json_encode(array_map('strval', tap((array) json_decode($item->attributes, true), fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                            ])->first()
-                                            // ?? $parentProduct->get_product_attributes()->first()
-                                        )->increment('variant_stock', $qty);
-                                    }
-                                }
-                            }
-                            // Normal product
-                            else {
-                                $product->increment('total_stock', $qty);
-                                // ProductAttribute::where('variant_sku', $item->sku)->increment('variant_stock', $qty);
-                                if ($product->has_variant) {
-                                    optional(
-                                        ProductAttribute::where('product_id', $product->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                            json_encode(array_map('strval', tap((array) json_decode($item->attributes, true), fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                        ])->first()
-                                        // ?? $product->get_product_attributes()->first()
-                                    )->increment('variant_stock', $qty);
-                                }
-                            }
+                             // Combo products
+                             if ($product->get_combo_products && $product->combo_products) {
+                                 foreach ($product->get_combo_products as $combo) {
+                                     $comboProduct = Product::find($combo->product_id);
+                                     if (!$comboProduct) continue;
+
+                                     if ($comboProduct->parent_id) {
+                                         $parentProduct = Product::find($comboProduct->parent_id);
+                                         if ($parentProduct) {
+                                             if ($parentProduct->has_variant) {
+                                                 $variant = ProductVariant::where('product_id', $parentProduct->id)
+                                                     ->where('variant_sku', $item->sku)
+                                                     ->first();
+
+                                                 if (!$variant && !empty($itemAttributes)) {
+                                                     $variant = ProductVariant::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                                         json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                                     ])->first();
+                                                 }
+
+                                                 if ($variant) {
+                                                     $variant->increment('variant_stock', $qty);
+                                                 }
+                                             } else {
+                                                 $parentProduct->increment('total_stock', $qty);
+                                             }
+                                         }
+                                     }else{
+                                         if ($comboProduct->has_variant) {
+                                             $variant = ProductVariant::where('product_id', $comboProduct->id)
+                                                 ->where('variant_sku', $item->sku)
+                                                 ->first();
+
+                                             if (!$variant && !empty($itemAttributes)) {
+                                                 $variant = ProductVariant::where('product_id', $comboProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                                     json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                                 ])->first();
+                                             }
+
+                                             if ($variant) {
+                                                 $variant->increment('variant_stock', $qty);
+                                             }
+                                         } else {
+                                             $comboProduct->increment('total_stock', $qty);
+                                         }
+                                     }
+                                 }
+                             }
+                             // Similar products
+                             elseif ($product->parent_id) {
+                                 $parentProduct = Product::find($product->parent_id);
+                                 if ($parentProduct) {
+                                     if ($parentProduct->has_variant) {
+                                         $variant = ProductVariant::where('product_id', $parentProduct->id)
+                                             ->where('variant_sku', $item->sku)
+                                             ->first();
+
+                                         if (!$variant && !empty($itemAttributes)) {
+                                             $variant = ProductVariant::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                                 json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                             ])->first();
+                                         }
+
+                                         if ($variant) {
+                                             $variant->increment('variant_stock', $qty);
+                                         }
+                                     } else {
+                                         $parentProduct->increment('total_stock', $qty);
+                                     }
+                                 }
+                             }
+                             // Normal product
+                             else {
+                                 if ($product->has_variant) {
+                                     $variant = ProductVariant::where('product_id', $product->id)
+                                         ->where('variant_sku', $item->sku)
+                                         ->first();
+
+                                     if (!$variant && !empty($itemAttributes)) {
+                                         $variant = ProductVariant::where('product_id', $product->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                             json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                         ])->first();
+                                     }
+
+                                     if ($variant) {
+                                         $variant->increment('variant_stock', $qty);
+                                     }
+                                 } else {
+                                     $product->increment('total_stock', $qty);
+                                 }
+                             }
                         }
                         /**------------------------------------------
                          * END - Update stock for each sale item

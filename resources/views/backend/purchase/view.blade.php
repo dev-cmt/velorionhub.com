@@ -21,7 +21,7 @@
                 @foreach($data->purchase_items as $item)
                     <tr>
                         <td>{{$i++}}</td>
-                        <td>{{ $item->get_product->name }} <span class="text-info">#{{$item->sku}}</span></td>
+                        <td>{{ optional($item->get_product)->name ?? 'Deleted Product' }} <span class="text-info">#{{$item->sku}}</span></td>
                         <td>{{ $item->quantity }}</td>
                         <td> {{ number_format($item->purchase_cost,2) }}</td>
                         <td> {{ number_format($item->sell_price,2) }}</td>

@@ -394,8 +394,6 @@ class PurchaseController extends Controller
         });
     }
 
-
-
     private function paymentMethods()
     {
         return [

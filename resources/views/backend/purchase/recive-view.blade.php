@@ -27,7 +27,7 @@
                         $progressPercent = $item->purchase_qty > 0 ? ($item->recived_qty / $item->purchase_qty) * 100 : 0;
                     @endphp
                     <tr id="row-{{ $item->id }}" class="item-row">
-                        <td>{{ $item->get_product->name }} <span class="text-info">#{{ $item->sku }}</span></td>
+                        <td>{{ optional($item->get_product)->name ?? 'Deleted Product' }} <span class="text-info">#{{ $item->sku }}</span></td>
                         <td>{{ $item->purchase_qty }}</td>
                         <td>
                             <input type="text" class="form-control form-control-sm received-display" id="received-{{ $item->id }}" value="{{ $item->recived_qty }}" disabled>

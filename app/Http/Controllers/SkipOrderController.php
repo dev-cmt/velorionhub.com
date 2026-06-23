@@ -58,7 +58,6 @@ class SkipOrderController extends Controller
 
             // 5️⃣ Create Sale
             $sale = Order::create([
-                'p_id'          => $abandoned->id,
                 'store_id'      => $abandoned->store_id,
                 'customer_id'   => $customer->id,
                 'invoice_no'    => $invoice_id,
@@ -73,7 +72,6 @@ class SkipOrderController extends Controller
                 'paid'          => 0,
                 'due'           => $abandoned->total ?? 0,
                 'status'        => 0,
-                'customer_note' => null,
                 'note'          => null,
                 'source'        => 'incomplete',
             ]);
