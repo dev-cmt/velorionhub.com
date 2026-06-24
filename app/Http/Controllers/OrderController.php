@@ -395,7 +395,12 @@ class OrderController extends Controller
             return back()->withErrors(['Invalid status selected.']);
         }
 
-        Order::whereIn('id', $orderIds)->update(['status' => $status]);
+        DB::transaction(function() use ($orderIds, $status) {
+            foreach (Order::whereIn('id', $orderIds)->get() as $order) {
+                $order->status = $status;
+                $order->save();
+            }
+        });
 
         return back()->with('success', 'Selected orders updated successfully.');
     }
@@ -413,10 +418,65 @@ class OrderController extends Controller
             return back()->withErrors(['Please select at least one order.']);
         }
 
-        Order::whereIn('id', $orderIds)->update(['assigned_to' => $validated['bulk_assign']]);
+        $assignId = (int)$validated['bulk_assign'];
+        DB::transaction(function() use ($orderIds, $assignId) {
+            foreach (Order::whereIn('id', $orderIds)->get() as $order) {
+                $order->assigned_to = $assignId;
+                $order->save();
+            }
+        });
 
         return back()->with('success', 'Selected orders assigned successfully.');
     }
+
+    public function updateSingleStatusAjax(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'status' => 'required|integer',
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+        $status = (int)$request->status;
+
+        if (!array_key_exists($status, $this->orderStatuses())) {
+            return response()->json(['success' => false, 'message' => 'Invalid status.']);
+        }
+
+        $order->status = $status;
+        $order->save();
+
+        $statusMap = [
+            0 => ['label' => 'Pending',           'color' => 'warning'],
+            1 => ['label' => 'Confirmed',         'color' => 'info'],
+            2 => ['label' => 'Hold',              'color' => 'secondary'],
+            3 => ['label' => 'Cancelled',         'color' => 'danger'],
+            4 => ['label' => 'Stock Out',         'color' => 'danger'],
+            5 => ['label' => 'Packaged',          'color' => 'secondary'],
+            6 => ['label' => 'Courier Entry',     'color' => 'primary'],
+            7 => ['label' => 'On Delivery',       'color' => 'info'],
+            8 => ['label' => 'Delivered',         'color' => 'success'],
+            9 => ['label' => 'Partial Delivered', 'color' => 'secondary'],
+            10 => ['label' => 'Exchange',         'color' => 'warning'],
+            11 => ['label' => 'Return',           'color' => 'danger'],
+            12 => ['label' => 'Return Received',  'color' => 'success'],
+        ];
+
+        $info = $statusMap[$status] ?? ['label' => 'Unknown', 'color' => 'secondary'];
+
+        return response()->json([
+            'success' => true,
+            'label' => $info['label'],
+            'color' => $info['color']
+        ]);
+    }
+
+    public function historyAjax($id)
+    {
+        $order = Order::with(['histories.user'])->findOrFail($id);
+        return view('backend.orders.history-modal', compact('order'));
+    }
+
 
     public function courierExport(Request $request)
     {
@@ -433,12 +493,11 @@ class OrderController extends Controller
 
         $courierId = !empty($validated['courier_export']) ? (int) $validated['courier_export'] : null;
         if ($courierId) {
-            $courierExists = Courier::where('id', $courierId)->exists();
-            if (!$courierExists) {
+            $courier = Courier::find($courierId);
+            if (!$courier) {
                 return back()->withErrors(['Selected courier does not exist.']);
             }
-            $courier = Courier::find($courierId);
-            $courierName = $courier?->name ?? 'selected courier';
+            $courierName = $courier->name;
         } else {
             $courier = null;
             $courierName = 'respective couriers';
@@ -556,7 +615,7 @@ class OrderController extends Controller
             return [
                 'status' => true,
                 'message' => 'Already sent' . ($order->consignment_id ? ' (ID: ' . $order->consignment_id . ')' : ''),
-                'courier' => $order->courier?->name ?? 'Unknown',
+                'courier' => $order->courier->name ?? 'Unknown',
                 'consignment_id' => $order->consignment_id,
             ];
         }
@@ -566,7 +625,7 @@ class OrderController extends Controller
             return [
                 'status' => false,
                 'message' => 'Store not found for this order',
-                'courier' => $order->courier?->name ?? 'Unknown',
+                'courier' => $order->courier->name ?? 'Unknown',
                 'consignment_id' => null,
             ];
         }
@@ -585,7 +644,7 @@ class OrderController extends Controller
         return [
             'status' => false,
             'message' => 'Courier integration is not configured for this courier',
-            'courier' => $order->courier?->name ?? 'Unknown',
+            'courier' => $order->courier->name ?? 'Unknown',
             'consignment_id' => null,
         ];
     }

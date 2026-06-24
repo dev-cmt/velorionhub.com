@@ -240,6 +240,10 @@
                                         <label class="form-label">Remarks</label>
                                         <textarea class="form-control" name="remarks" rows="2" placeholder="Internal remarks...">{{ old('remarks', $order->remarks) }}</textarea>
                                     </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Reason for Edit / Status Update</label>
+                                        <textarea class="form-control" name="edit_reason" rows="2" placeholder="Describe why this order is being updated (optional)..."></textarea>
+                                    </div>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">Update Order</button>
@@ -251,6 +255,116 @@
             </form>
         </div>
     </div>
+
+    {{-- Order History Timeline --}}
+    <div class="row mt-4">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        <i class="bx bx-history me-1 text-primary fs-18"></i> Order Status & Edit History
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if($order->histories->isEmpty())
+                        <div class="text-center py-4 text-muted">
+                            <i class="bx bx-history fs-2 d-block mb-1"></i> No history records found for this order.
+                        </div>
+                    @else
+                        <div class="timeline-container px-3">
+                            <ul class="list-unstyled mb-0">
+                                @foreach($order->histories as $history)
+                                    @php
+                                        $statusMap = [
+                                            0 => ['label' => 'Pending',           'color' => 'secondary'],
+                                            1 => ['label' => 'Confirmed',         'color' => 'info'],
+                                            2 => ['label' => 'Hold',              'color' => 'warning text-dark'],
+                                            3 => ['label' => 'Cancelled',         'color' => 'danger'],
+                                            4 => ['label' => 'Stock Out',         'color' => 'danger'],
+                                            5 => ['label' => 'Packaged',          'color' => 'secondary'],
+                                            6 => ['label' => 'Courier Entry',     'color' => 'primary'],
+                                            7 => ['label' => 'On Delivery',       'color' => 'info'],
+                                            8 => ['label' => 'Delivered',         'color' => 'success'],
+                                            9 => ['label' => 'Partial Delivered', 'color' => 'secondary'],
+                                            10 => ['label' => 'Exchange',         'color' => 'warning text-dark'],
+                                            11 => ['label' => 'Return',           'color' => 'danger'],
+                                            12 => ['label' => 'Return Received',  'color' => 'success'],
+                                        ];
+                                    @endphp
+                                    <li class="position-relative pb-4 ps-4 border-start border-2" style="border-color: #dee2e6 !important;">
+                                        {{-- Icon indicator --}}
+                                        <span class="position-absolute translate-middle-x bg-white border border-2 border-primary rounded-circle" 
+                                              style="left: 0; top: 0; width: 14px; height: 14px;"></span>
+                                        
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
+                                            <span class="fw-semibold text-dark">
+                                                {{ ucfirst($history->action == 'status_changed' ? 'Status changed' : $history->action) }} 
+                                                @if($history->user)
+                                                    by <span class="text-primary">{{ $history->user->name }}</span>
+                                                @else
+                                                    by <span class="text-muted">System/Webhook</span>
+                                                @endif
+                                            </span>
+                                            <span class="text-muted small">
+                                                <i class="bx bx-calendar me-1"></i> {{ $history->created_at->format('d M Y, h:i A') }}
+                                            </span>
+                                        </div>
+
+                                        {{-- Status badges if status changed --}}
+                                        @if($history->old_status !== null && $history->old_status != $history->new_status)
+                                            <div class="mb-2">
+                                                <span class="badge bg-{{ $statusMap[$history->old_status]['color'] ?? 'light' }} px-2 py-1">
+                                                    {{ $statusMap[$history->old_status]['label'] ?? $history->old_status }}
+                                                </span>
+                                                <i class="bx bx-right-arrow-alt mx-1 align-middle text-muted"></i>
+                                                <span class="badge bg-{{ $statusMap[$history->new_status]['color'] ?? 'light' }} px-2 py-1">
+                                                    {{ $statusMap[$history->new_status]['label'] ?? $history->new_status }}
+                                                </span>
+                                            </div>
+                                        @endif
+
+                                        {{-- Reason text --}}
+                                        @if($history->reason)
+                                            <p class="text-muted mb-1 fs-13">
+                                                <strong>Note/Reason:</strong> {{ $history->reason }}
+                                            </p>
+                                        @endif
+
+                                        {{-- Details of changed fields --}}
+                                        @if(!empty($history->changes))
+                                            <div class="mt-2">
+                                                <button class="btn btn-xs btn-outline-light border text-muted py-0 px-2 fs-11 collapsed" 
+                                                        type="button" 
+                                                        data-bs-toggle="collapse" 
+                                                        data-bs-target="#changes-{{ $history->id }}">
+                                                    Show Changes
+                                                </button>
+                                                <div class="collapse mt-2" id="changes-{{ $history->id }}">
+                                                    <div class="card card-body bg-light p-2 mb-0 border-0 fs-12">
+                                                        <ul class="list-unstyled mb-0">
+                                                            @foreach($history->changes as $field => $val)
+                                                                <li>
+                                                                    <code class="text-dark">{{ ucwords(str_replace('_', ' ', $field)) }}</code>: 
+                                                                    <span class="text-danger">{{ is_array($val['old']) ? json_encode($val['old']) : ($val['old'] ?? 'N/A') }}</span> 
+                                                                    <i class="bx bx-right-arrow-alt align-middle"></i> 
+                                                                    <span class="text-success">{{ is_array($val['new']) ? json_encode($val['new']) : ($val['new'] ?? 'N/A') }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     {{-- Variant Picker Modal --}}
     <div class="modal fade" id="variantPickerModal" tabindex="-1" aria-labelledby="variantPickerModalLabel" aria-hidden="true">

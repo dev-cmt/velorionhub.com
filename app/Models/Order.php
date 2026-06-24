@@ -83,4 +83,11 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
+
+    // 🔗 Order has many histories
+    public function histories()
+    {
+        return $this->hasMany(OrderHistory::class)->orderBy('id', 'desc');
+    }
 }
+

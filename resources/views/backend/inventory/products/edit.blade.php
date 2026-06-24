@@ -148,7 +148,7 @@
                                             <div class="col-md-4 mb-1">
                                                 <label for="total_stock" class="form-label">Total Stock <span class="text-danger">*</span></label>
                                                 <input type="number" class="form-control form-control-sm" id="total_stock" name="total_stock"
-                                                    value="{{ old('total_stock', $product->total_stock ?? 0) }}">
+                                                    value="{{ old('total_stock', $product->total_stock ?? 0) }}" readonly>
                                                 @error('total_stock') <div class="text-danger mt-1">{{ $message }}</div> @enderror
                                             </div>
 
@@ -626,7 +626,7 @@
                 <!-- Actions -->
                 <div class="card custom-card mt-3">
                     <div class="card-body">
-                        <button type="submit" class="btn btn-primary w-100">Update Product</button>
+                        <button type="submit" class="btn btn-primary w-100" id="updateProductBtn">Update Product</button>
                         <a href="{{ route('products.index') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
                     </div>
                 </div>
@@ -745,12 +745,14 @@
                 let sku = $(this).val().trim();
                 let inputField = $(this);
                 let feedback = $('#sku-feedback');
+                let updateProductBtn = $('#updateProductBtn');
 
                 clearTimeout(skuTimeout);
 
                 if (sku.length === 0) {
                     inputField.css('border-color', '');
                     feedback.text('').removeClass('text-danger text-success');
+                    updateProductBtn.prop('disabled', false);
                     return;
                 }
 
@@ -766,13 +768,16 @@
                             if (response.exists) {
                                 inputField.css('border-color', 'red');
                                 feedback.text('This SKU already exists!').removeClass('text-success').addClass('text-danger');
+                                updateProductBtn.prop('disabled', true);
                             } else {
                                 inputField.css('border-color', 'green');
                                 feedback.text('SKU is available').removeClass('text-danger').addClass('text-success');
+                                updateProductBtn.prop('disabled', false);
                             }
                         },
                         error: function() {
                             feedback.text('Error checking SKU.').removeClass('text-success').addClass('text-danger');
+                            updateProductBtn.prop('disabled', true);
                         }
                     });
                 }, 300);

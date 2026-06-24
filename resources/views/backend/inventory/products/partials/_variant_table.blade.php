@@ -28,7 +28,7 @@
             <td><input type="text" name="variants[variant_sku][]" class="form-control form-control-sm" value="{{ $variant['variant_sku'] }}"></td>
             <td><input type="number" name="variants[variant_price][]" class="form-control form-control-sm" value="{{ $variant['variant_price'] }}"></td>
             <td><input type="number" name="variants[purchase_cost][]" class="form-control form-control-sm" value="{{ $variant['purchase_cost'] }}"></td>
-            <td><input type="number" name="variants[variant_stock][]" class="form-control form-control-sm" value="{{ $variant['variant_stock'] }}"></td>
+            <td><input type="number" name="variants[variant_stock][]" class="form-control form-control-sm" value="{{ $variant['variant_stock'] }}" readonly></td>
             <td class="text-center">
                 <button type="button" class="btn btn-sm btn-outline-danger remove-variant">X</button>
             </td>

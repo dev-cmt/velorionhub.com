@@ -31,6 +31,7 @@
                             <th>Brand</th>
                             <th>Variants</th>
                             <th>Price</th>
+                            <th>Total Stock</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -69,6 +70,33 @@
                                 @endif
                             </td>
                             <td>{{ number_format($product->sale_price, 2) }}</td>
+
+                            {{-- Total Stock Column --}}
+                            <td>
+                                @if($product->has_variant && count($product->variant_summary))
+                                    @php
+                                        $totalVariantStock = collect($product->variant_summary)->sum('stock');
+                                    @endphp
+                                    <span class="fw-semibold {{ $totalVariantStock > 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ $totalVariantStock }}
+                                    </span>
+                                    <button type="button"
+                                        class="btn btn-xs btn-light border ms-1 px-1 py-0"
+                                        data-bs-toggle="popover"
+                                        data-bs-trigger="click"
+                                        data-bs-html="true"
+                                        data-bs-placement="left"
+                                        title="Stock by Variant"
+                                        data-bs-content="{{ implode('<br>', array_map(fn($v) => '<b>' . e($v['label']) . '</b>: ' . $v['stock'], $product->variant_summary)) }}">
+                                        <i class="ri-bar-chart-line fs-12"></i>
+                                    </button>
+                                @else
+                                    <span class="fw-semibold {{ ($product->total_stock ?? 0) > 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ $product->total_stock ?? 0 }}
+                                    </span>
+                                @endif
+                            </td>
+
                             <td>
                                 @if($product->status)
                                     <span class="badge bg-success">Active</span>
@@ -93,7 +121,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center">No products found.</td>
+                            <td colspan="10" class="text-center">No products found.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -107,3 +135,25 @@
         </div>
     </div>
 </x-backend-layout>
+
+@push('js')
+<script>
+    // Initialize Bootstrap popovers for variant stock breakdown
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (el) {
+            new bootstrap.Popover(el, {
+                sanitize: false // allow <b> and <br> in popover HTML
+            });
+        });
+
+        // Dismiss popover when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('[data-bs-toggle="popover"]') && !e.target.closest('.popover')) {
+                document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function (el) {
+                    bootstrap.Popover.getInstance(el)?.hide();
+                });
+            }
+        });
+    });
+</script>
+@endpush

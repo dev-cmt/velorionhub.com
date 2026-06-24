@@ -270,16 +270,24 @@
                                             <span class="badge bg-success-transparent">Paid: TK {{ number_format($order->paid, 2) }}</span><br>
                                             <span class="badge bg-danger-transparent">Due: TK {{ number_format($order->due, 2) }}</span>
                                         </td>
-                                        <td>
-                                            <span class="badge bg-{{ ($orderStatus[$order->status]['color'] ?? 'secondary') }}-transparent">
+                                        <td class="status-cell position-relative text-center">
+                                            <span class="badge bg-{{ ($orderStatus[$order->status]['color'] ?? 'secondary') }}-transparent status-badge-click cursor-pointer" data-id="{{ $order->id }}" style="cursor:pointer;" title="Click to change status">
                                                 {{ $orderStatus[$order->status]['label'] ?? 'Unknown' }}
                                             </span>
+                                            <select class="form-select form-select-sm single-status-select mt-1" data-id="{{ $order->id }}" style="display:none; width: auto; min-width: 120px; margin: 0 auto;">
+                                                @foreach($orderStatus as $val => $sData)
+                                                    <option value="{{ $val }}" {{ $order->status == $val ? 'selected' : '' }}>{{ $sData['label'] }}</option>
+                                                @endforeach
+                                            </select>
                                         </td>
                                         <td>
                                             <div class="btn-list">
                                                 <a href="{{ route('orders.edit', $order) }}" class="btn btn-sm btn-warning-light btn-icon" title="Edit">
                                                     <i class="ri-pencil-line"></i>
                                                 </a>
+                                                <button type="button" class="btn btn-sm btn-info-light btn-icon show-history-btn" data-id="{{ $order->id }}" title="View History Logs">
+                                                    <i class="ri-history-line"></i>
+                                                </button>
                                                 <form action="{{ route('orders.destroy', $order->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
@@ -563,6 +571,27 @@
         </div>
     </div>
 
+    {{-- Order History Modal --}}
+    <div class="modal fade" id="orderHistoryModal" tabindex="-1" aria-labelledby="orderHistoryModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderHistoryModalTitle">Order History Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="order-history-content">
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Loading history logs...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('js')
         <script>
             //send to courier
@@ -806,6 +835,95 @@
 
                     $('#customer_activity_modal').modal('show');
                 });
+            });
+
+            // Inline Single Status Click & Change
+            $(document).on('click', '.status-badge-click', function() {
+                let cell = $(this).parent();
+                cell.find('.status-badge-click').hide();
+                cell.find('.single-status-select').show().focus();
+            });
+
+            $(document).on('change', '.single-status-select', function() {
+                let select = $(this);
+                let orderId = select.data('id');
+                let newStatus = select.val();
+                let cell = select.parent();
+
+                select.prop('disabled', true);
+
+                $.post("{{ route('orders.single-status-ajax') }}", {
+                    _token: "{{ csrf_token() }}",
+                    order_id: orderId,
+                    status: newStatus
+                }).done(function(res) {
+                    if (res.success) {
+                        let badge = cell.find('.status-badge-click');
+                        badge.removeClass(function (index, className) {
+                            return (className.match(/(^|\s)bg-\S+/g) || []).join(' ');
+                        }).addClass('bg-' + res.color + '-transparent').text(res.label);
+
+                        select.hide().prop('disabled', false);
+                        badge.show();
+
+                        // Flash success on row
+                        let row = cell.closest('tr');
+                        row.css('background-color', '#d1e7dd');
+                        setTimeout(function() {
+                            row.css('background-color', '');
+                        }, 1000);
+                    } else {
+                        alert(res.message || 'Failed to update status.');
+                        select.hide().prop('disabled', false);
+                        cell.find('.status-badge-click').show();
+                    }
+                }).fail(function() {
+                    alert('Error updating status.');
+                    select.hide().prop('disabled', false);
+                    cell.find('.status-badge-click').show();
+                });
+            });
+
+            $(document).on('blur', '.single-status-select', function() {
+                let select = $(this);
+                let cell = select.parent();
+                setTimeout(function() {
+                    if (select.is(':visible')) {
+                        select.hide();
+                        cell.find('.status-badge-click').show();
+                    }
+                }, 200);
+            });
+
+            // History Log Modal Trigger
+            $(document).on('click', '.show-history-btn', function () {
+                let orderId = $(this).data('id');
+                $('#orderHistoryModal').modal('show');
+                $('#order-history-content').html(`
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Loading history logs...</p>
+                    </div>
+                `);
+
+                $.ajax({
+                    url: "{{ url('orders') }}/" + orderId + "/history",
+                    type: "GET",
+                    success: function (data) {
+                        $('#order-history-content').html(data);
+                    },
+                    error: function () {
+                        $('#order-history-content').html('<p class="text-danger text-center p-4">Failed to load order history.</p>');
+                    }
+                });
+            });
+
+            // Toggle changes view inside history modal
+            $(document).on('click', '.toggle-modal-changes', function (e) {
+                e.preventDefault();
+                let target = $(this).data('target');
+                $(target).toggleClass('d-none');
+                $(this).text($(target).hasClass('d-none') ? 'Show Changes' : 'Hide Changes');
             });
         });
     </script>

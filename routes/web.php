@@ -84,6 +84,10 @@ Route::get('/cc', function () {
     return 'Cleared!';
 });
 
+
+
+
+
 $controller = config("theme.getTheme.controller");
 Route::controller($controller)->group(function () {
     Route::get('/', 'index')->name('home');
@@ -262,6 +266,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/edit/{order}', [OrderController::class, 'edit'])->name('orders.edit');
     Route::put('/orders/update/{order}', [OrderController::class, 'update'])->name('orders.update');
     Route::delete('/orders/{order}/delete', [OrderController::class, 'destroy'])->name('orders.destroy');
+    Route::post('/orders/single-status-ajax', [OrderController::class, 'updateSingleStatusAjax'])->name('orders.single-status-ajax');
+    Route::get('/orders/{id}/history', [OrderController::class, 'historyAjax'])->name('orders.history.ajax');
+
 
     // Sale Requisition
     Route::get('/sale-requisitions', [SaleRequisitionController::class, 'index'])->name('sale-requisitions.index');
@@ -370,9 +377,12 @@ Route::get('/get-damage-data', [DamageController::class, 'getDamageData'])->name
 
 //return receive
 Route::get('/return_receive', [ReturnReceivedController::class, 'returnReceive'])->name('return.receive');
+Route::get('/return_receive/add', [ReturnReceivedController::class, 'addTemp'])->name('return.receive.add.temp');
 Route::get('/return_receive/clear', [ReturnReceivedController::class, 'clearTemp'])->name('return.receive.clear.temp');
 Route::post('/return_receive/print', [ReturnReceivedController::class, 'print'])->name('return.receive.print');
+Route::post('/return_receive/print2', [ReturnReceivedController::class, 'print2'])->name('return.receive.print2');
 Route::get('/return_receive/csv_export', [ReturnReceivedController::class, 'csvExport'])->name('return.receive.csv.export');
+Route::post('/return_receive/send-row', [ReturnReceivedController::class, 'finalReturn'])->name('return.receive.send.row');
 
 
 Route::middleware('auth')->group(function () {

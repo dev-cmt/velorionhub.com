@@ -12,9 +12,11 @@ use App\Models\ProductVariant;
 use App\Models\Courier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Traits\SyncsVariantStock;
 
 class HandoverController extends Controller
 {
+    use SyncsVariantStock;
     public function index(Request $request)
     {
         $courier_id = $request->input('courier');
@@ -52,7 +54,7 @@ class HandoverController extends Controller
         }
 
         $order = Order::where('invoice_no', $request->input('scaning'))
-            ->select('id', 'status', 'courier_id')
+            ->select('id', 'invoice_no', 'status', 'courier_id')
             ->first();
 
         if (!$order) {
@@ -69,6 +71,7 @@ class HandoverController extends Controller
 
             $courier = DB::table('couriers')->where('id', $order->courier_id)->value('name');
             return response()->json([
+                'status'       => true,
                 'message'      => 'Added Successfully',
                 'order_id'     => $order->id,
                 'invoice_no'   => $order->invoice_no ?? '',
@@ -139,6 +142,7 @@ class HandoverController extends Controller
 
                                     if ($variant) {
                                         $variant->decrement('variant_stock', $qty);
+                                        $this->syncVariantTotalStock($parentProduct);
                                     }
                                 } else {
                                     $parentProduct->decrement('total_stock', $qty);
@@ -158,6 +162,7 @@ class HandoverController extends Controller
 
                                 if ($variant) {
                                     $variant->decrement('variant_stock', $qty);
+                                    $this->syncVariantTotalStock($comboProduct);
                                 }
                             } else {
                                 $comboProduct->decrement('total_stock', $qty);
@@ -182,6 +187,7 @@ class HandoverController extends Controller
 
                             if ($variant) {
                                 $variant->decrement('variant_stock', $qty);
+                                $this->syncVariantTotalStock($parentProduct);
                             }
                         } else {
                             $parentProduct->decrement('total_stock', $qty);
@@ -203,6 +209,7 @@ class HandoverController extends Controller
 
                         if ($variant) {
                             $variant->decrement('variant_stock', $qty);
+                            $this->syncVariantTotalStock($product);
                         }
                     } else {
                         $product->decrement('total_stock', $qty);

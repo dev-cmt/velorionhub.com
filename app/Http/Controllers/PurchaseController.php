@@ -11,9 +11,11 @@ use App\Models\Product;
 use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Http\Controllers\Traits\SyncsVariantStock;
 
 class PurchaseController extends Controller
 {
+    use SyncsVariantStock;
     public function index()
     {
         $purchases = Purchase::with(['supplier', 'items'])->orderBy('id', 'desc')->paginate(50);
@@ -90,6 +92,7 @@ class PurchaseController extends Controller
                                         ]);
                                         if ($request->status == 1) {
                                             $variant->increment('variant_stock', $qty);
+                                            $this->syncVariantTotalStock($product);
                                         }
                                     }
                                 } else {
@@ -181,6 +184,7 @@ class PurchaseController extends Controller
                             $variant = $product->variants()->where('variant_sku', $item->sku)->first();
                             if ($variant) {
                                 $variant->decrement('variant_stock', $item->received_qty);
+                                $this->syncVariantTotalStock($product);
                             }
                         } else {
                             $product->decrement('total_stock', $item->received_qty);
@@ -237,6 +241,7 @@ class PurchaseController extends Controller
                                         ]);
                                         if ($request->status == 1) {
                                             $variant->increment('variant_stock', $qty);
+                                            $this->syncVariantTotalStock($product);
                                         }
                                     }
                                 } else {
@@ -301,6 +306,7 @@ class PurchaseController extends Controller
                             $variant = $product->variants()->where('variant_sku', $item->sku)->first();
                             if ($variant) {
                                 $variant->decrement('variant_stock', $item->received_qty);
+                                $this->syncVariantTotalStock($product);
                             }
                         } else {
                             $product->decrement('total_stock', $item->received_qty);
@@ -378,6 +384,7 @@ class PurchaseController extends Controller
                     $variant = $product->variants()->where('variant_sku', $item->sku)->first();
                     if ($variant) {
                         $variant->increment('variant_stock', $qtyToReceive);
+                        $this->syncVariantTotalStock($product);
                     }
                 } else {
                     $product->increment('total_stock', $qtyToReceive);

@@ -13,9 +13,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Courier;
+use App\Http\Controllers\Traits\SyncsVariantStock;
 
 class ReturnReceivedController extends Controller
 {
+    use SyncsVariantStock;
     /*public function index(Request $request)
     {
         $data = SaleReturn::with('get_sale.sale_items')->orderBy('id', 'desc')->get();
@@ -29,157 +31,225 @@ class ReturnReceivedController extends Controller
     }
     public function returnReceive(Request $request)
     {
-        if ($request->input('query')) {
-            $sale = Order::where('invoice_no', $request->input('query'))->first();
-            if ($sale) {
-                if ($sale->status == 8 || $sale->status == 11) {
-                    $already_exist = DB::table('return_receiveds')->where('sale_id', $sale->id)->first();
-                    if ($already_exist) {
-                        return back()->with('already_exist_error', 'Already Exist In Return Received!');
-                    } else {
-                        ReturnReceived::create([
-                            'sale_id' => $sale->id
-                        ]);
+        $courier_id = $request->input('courier');
 
-                        $sale->update([
-                            'status' => 12
-                        ]);
+        // Parcels with is_temp = 1 (finalised return received)
+        $parcelsQuery = ReturnReceived::with(['get_sale', 'get_sale.get_courier'])
+            ->join('orders as o', 'return_receiveds.sale_id', '=', 'o.id')
+            ->select('return_receiveds.*')
+            ->where('return_receiveds.is_temp', 1);
 
-                        /**-----------------------------------------
-                         * Start - Update stock for each sale item
-                         * -----------------------------------------
-                         */
-                        foreach ($sale->sale_items as $item) {
-                            $product = Product::find($item->product_id);
-                            if (!$product) continue;
+        if ($courier_id) {
+            $parcelsQuery->where('o.courier_id', $courier_id);
+        }
+        $parcels = $parcelsQuery->orderBy('return_receiveds.created_at', 'desc')->get();
 
-                            $qty = ($item->quantity ?? 0) * ($item->item_out ?? 0);
+        // Processing returns with is_temp = 3 (scanned but not finalised)
+        $processing = ReturnReceived::with(['get_sale', 'get_sale.get_courier'])
+            ->join('orders as o', 'return_receiveds.sale_id', '=', 'o.id')
+            ->select('return_receiveds.*')
+            ->where('return_receiveds.is_temp', 3)
+            ->orderBy('return_receiveds.created_at', 'desc')
+            ->get();
 
-                            $itemAttributes = is_array($item->attributes) ? $item->attributes : json_decode($item->attributes ?? '[]', true);
-                            if (!is_array($itemAttributes)) {
-                                $itemAttributes = [];
+        $couriers = DB::table('couriers')->pluck('name', 'id');
+
+        return view('backend.return_received.index', compact('parcels', 'couriers', 'processing'));
+    }
+
+    public function addTemp(Request $request)
+    {
+        if (!$request->input('scaning')) {
+            return response()->json(['message' => 'No barcode scanned'], 400);
+        }
+
+        $order = Order::where('invoice_no', $request->input('scaning'))
+            ->select('id', 'invoice_no', 'status', 'courier_id')
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Invalid Invoice Number'], 400);
+        }
+
+        $already_exist = DB::table('return_receiveds')->where('sale_id', $order->id)->first();
+
+        if (($order->status == 8 || $order->status == 11) && !$already_exist) {
+            ReturnReceived::create([
+                'sale_id' => $order->id,
+                'order_id' => $order->id,
+                'is_temp'  => 3
+            ]);
+
+            $courier = DB::table('couriers')->where('id', $order->courier_id)->value('name');
+            return response()->json([
+                'status'       => true,
+                'message'      => 'Added Successfully',
+                'order_id'     => $order->id,
+                'invoice_no'   => $order->invoice_no ?? '',
+                'courier_name' => $courier ?? '---',
+                'created_at'   => now()->format('d-m-Y h:i A'),
+            ], 200);
+        }
+
+        return response()->json(['message' => 'Already Exists or Not Eligible'], 400);
+    }
+
+    public function finalReturn(Request $request)
+    {
+        try {
+            $orderId = $request->input('order_id');
+            if (!$orderId) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Missing order ID'
+                ]);
+            }
+
+            $order = Order::with('sale_items')->find($orderId);
+            if (!$order) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Order not found'
+                ]);
+            }
+
+            // ✅ Update order status to 12 (return received)
+            $order->update(['status' => 12]);
+
+            /**-----------------------------------------
+             * Start - Update stock for each sale item (Increment stock)
+             * -----------------------------------------
+             */
+            foreach ($order->sale_items as $item) {
+                $product = Product::find($item->product_id);
+                if (!$product) continue;
+
+                $qty = ($item->quantity ?? 0) * ($item->item_out ?? 0);
+
+                $itemAttributes = is_array($item->attributes) ? $item->attributes : json_decode($item->attributes ?? '[]', true);
+                if (!is_array($itemAttributes)) {
+                    $itemAttributes = [];
+                }
+
+                // Combo products
+                if ($product->get_combo_products && $product->combo_products) {
+                    foreach ($product->get_combo_products as $combo) {
+                        $comboProduct = Product::find($combo->product_id);
+                        if (!$comboProduct) continue;
+
+                        if ($comboProduct->parent_id) {
+                            $parentProduct = Product::find($comboProduct->parent_id);
+                            if ($parentProduct) {
+                                if ($parentProduct->has_variant) {
+                                    $variant = ProductVariant::where('product_id', $parentProduct->id)
+                                        ->where('variant_sku', $item->sku)
+                                        ->first();
+
+                                    if (!$variant && !empty($itemAttributes)) {
+                                        $variant = ProductVariant::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                            json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                        ])->first();
+                                    }
+
+                                    if ($variant) {
+                                        $variant->increment('variant_stock', $qty);
+                                        $this->syncVariantTotalStock($parentProduct);
+                                    }
+                                } else {
+                                    $parentProduct->increment('total_stock', $qty);
+                                }
+                            }
+                        } else {
+                            if ($comboProduct->has_variant) {
+                                $variant = ProductVariant::where('product_id', $comboProduct->id)
+                                    ->where('variant_sku', $item->sku)
+                                    ->first();
+
+                                if (!$variant && !empty($itemAttributes)) {
+                                    $variant = ProductVariant::where('product_id', $comboProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                        json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                    ])->first();
+                                }
+
+                                if ($variant) {
+                                    $variant->increment('variant_stock', $qty);
+                                    $this->syncVariantTotalStock($comboProduct);
+                                }
+                            } else {
+                                $comboProduct->increment('total_stock', $qty);
+                            }
+                        }
+                    }
+                }
+                // Variant products / Similar products
+                elseif ($product->parent_id) {
+                    $parentProduct = Product::find($product->parent_id);
+                    if ($parentProduct) {
+                        if ($parentProduct->has_variant) {
+                            $variant = ProductVariant::where('product_id', $parentProduct->id)
+                                ->where('variant_sku', $item->sku)
+                                ->first();
+
+                            if (!$variant && !empty($itemAttributes)) {
+                                $variant = ProductVariant::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                    json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                                ])->first();
                             }
 
-                             // Combo products
-                             if ($product->get_combo_products && $product->combo_products) {
-                                 foreach ($product->get_combo_products as $combo) {
-                                     $comboProduct = Product::find($combo->product_id);
-                                     if (!$comboProduct) continue;
-
-                                     if ($comboProduct->parent_id) {
-                                         $parentProduct = Product::find($comboProduct->parent_id);
-                                         if ($parentProduct) {
-                                             if ($parentProduct->has_variant) {
-                                                 $variant = ProductVariant::where('product_id', $parentProduct->id)
-                                                     ->where('variant_sku', $item->sku)
-                                                     ->first();
-
-                                                 if (!$variant && !empty($itemAttributes)) {
-                                                     $variant = ProductVariant::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                                         json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                                     ])->first();
-                                                 }
-
-                                                 if ($variant) {
-                                                     $variant->increment('variant_stock', $qty);
-                                                 }
-                                             } else {
-                                                 $parentProduct->increment('total_stock', $qty);
-                                             }
-                                         }
-                                     }else{
-                                         if ($comboProduct->has_variant) {
-                                             $variant = ProductVariant::where('product_id', $comboProduct->id)
-                                                 ->where('variant_sku', $item->sku)
-                                                 ->first();
-
-                                             if (!$variant && !empty($itemAttributes)) {
-                                                 $variant = ProductVariant::where('product_id', $comboProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                                     json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                                 ])->first();
-                                             }
-
-                                             if ($variant) {
-                                                 $variant->increment('variant_stock', $qty);
-                                             }
-                                         } else {
-                                             $comboProduct->increment('total_stock', $qty);
-                                         }
-                                     }
-                                 }
-                             }
-                             // Similar products
-                             elseif ($product->parent_id) {
-                                 $parentProduct = Product::find($product->parent_id);
-                                 if ($parentProduct) {
-                                     if ($parentProduct->has_variant) {
-                                         $variant = ProductVariant::where('product_id', $parentProduct->id)
-                                             ->where('variant_sku', $item->sku)
-                                             ->first();
-
-                                         if (!$variant && !empty($itemAttributes)) {
-                                             $variant = ProductVariant::where('product_id', $parentProduct->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                                 json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                             ])->first();
-                                         }
-
-                                         if ($variant) {
-                                             $variant->increment('variant_stock', $qty);
-                                         }
-                                     } else {
-                                         $parentProduct->increment('total_stock', $qty);
-                                     }
-                                 }
-                             }
-                             // Normal product
-                             else {
-                                 if ($product->has_variant) {
-                                     $variant = ProductVariant::where('product_id', $product->id)
-                                         ->where('variant_sku', $item->sku)
-                                         ->first();
-
-                                     if (!$variant && !empty($itemAttributes)) {
-                                         $variant = ProductVariant::where('product_id', $product->id)->whereRaw('BINARY attribute_item_ids = ?', [
-                                             json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
-                                         ])->first();
-                                     }
-
-                                     if ($variant) {
-                                         $variant->increment('variant_stock', $qty);
-                                     }
-                                 } else {
-                                     $product->increment('total_stock', $qty);
-                                 }
-                             }
+                            if ($variant) {
+                                $variant->increment('variant_stock', $qty);
+                                $this->syncVariantTotalStock($parentProduct);
+                            }
+                        } else {
+                            $parentProduct->increment('total_stock', $qty);
                         }
-                        /**------------------------------------------
-                         * END - Update stock for each sale item
-                         * ------------------------------------------
-                         */
-
-                        // // Api for update data into particular store
-                        // $store = DB::table('stores')->where('id', $sale->store_id)->first();
-                        // if ($store) {
-                        //     $url = $store->base_url . $store->ep_order_status . '?status=12' . '&invoice_no=' . $sale->invoice_no;
-                        //     $response = api_call($url, 'GET', null);
-                        // }
-                        return back()->with('received_success_msg', 'Received Successfully');
                     }
-                } else {
-                    return back()->with('already_exist_error', 'Not Eligible Return Received!');
                 }
-            } else {
-                return back()->with('already_exist_error', 'Parcel Not Found!');
+                // Simple product
+                else {
+                    if ($product->has_variant) {
+                        $variant = ProductVariant::where('product_id', $product->id)
+                            ->where('variant_sku', $item->sku)
+                            ->first();
+
+                        if (!$variant && !empty($itemAttributes)) {
+                            $variant = ProductVariant::where('product_id', $product->id)->whereRaw('BINARY attribute_item_ids = ?', [
+                                json_encode(array_map('strval', tap((array) $itemAttributes, fn(&$arr) => sort($arr))), JSON_UNESCAPED_SLASHES)
+                            ])->first();
+                        }
+
+                        if ($variant) {
+                            $variant->increment('variant_stock', $qty);
+                            $this->syncVariantTotalStock($product);
+                        }
+                    } else {
+                        $product->increment('total_stock', $qty);
+                    }
+                }
             }
+
+            // ✅ Mark return received as finalised (is_temp 3 → 1)
+            ReturnReceived::where('sale_id', $orderId)->update(['is_temp' => 1]);
+
+            return response()->json([
+                'status'         => true,
+                'message'        => 'Return received successfully.',
+                'courier'        => optional($order->get_courier)->name ?? null,
+                'consignment_id' => $order->invoice_no ?? null,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
         }
-        $parcels = ReturnReceived::with('get_sale')->where('is_temp', 1)->latest()->get();
-        //dd($parcels);
-        return view('backend.return_received.index', compact('parcels'));
     }
 
     public function clearTemp(Request $request)
     {
-        ReturnReceived::where('is_temp', 1)->update([
+        // Clear both finalised (is_temp=1) and pending scan (is_temp=3) records
+        ReturnReceived::whereIn('is_temp', [1, 3])->update([
             'is_temp' => 0
         ]);
         return back()->with('success', 'Cleared Successfully');

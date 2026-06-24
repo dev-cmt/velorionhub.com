@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('regular_price', 10, 2)->nullable();
             $table->decimal('purchase_price', 10, 2)->nullable();
             $table->string('main_image')->nullable();
+            $table->string('hover_image')->nullable();
             $table->enum('stock_status', ['quantity', 'in_stock', 'out_of_stock', 'upcoming'])->default('quantity');
             $table->integer('total_stock')->default(0);
             $table->integer('stock_out')->default(1);

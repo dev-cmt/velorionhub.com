@@ -8,6 +8,8 @@ use App\Services\SearchTermService;
 use App\Models\Setting;
 use App\Models\Category;
 use App\Models\Page;
+use App\Models\Order;
+use App\Observers\OrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -50,5 +52,8 @@ class AppServiceProvider extends ServiceProvider
         View::share('pages', $pages);
 
         View::share('popularSearches', SearchTermService::popular());
+
+        // Register Order Observer
+        Order::observe(OrderObserver::class);
     }
 }

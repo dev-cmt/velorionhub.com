@@ -202,12 +202,14 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Assigned To</label>
-                                        <select class="form-select" name="assigned_to">
+                                        {{-- <select class="form-select" name="assigned_to" readonly>
                                             <option value="">Select Employee</option>
                                             @foreach($employees as $user)
-                                                <option value="{{ $user->id }}" {{ old('assigned_to') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                                <option value="{{ $user->id }}" {{  Auth::id() == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                                             @endforeach
-                                        </select>
+                                        </select> --}}
+                                        <input type="text" class="form-control" value="{{ Auth::user()->name }}" readonly>
+                                        <input type="hidden" class="form-control" name="assigned_to" value="{{ Auth::user()->id }}">
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Remarks</label>
